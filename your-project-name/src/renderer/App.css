@@ -1,0 +1,246 @@
+/*
+ * @NOTE: Prepend a `~` to css file paths that are in your node_modules
+ *        See https://github.com/webpack-contrib/sass-loader#imports
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background: #f8fafc;
+  color: #1e293b;
+}
+
+/* Layout Selector Styles */
+.layout-selector {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 40px 20px;
+}
+
+.selector-container {
+  max-width: 1400px;
+  width: 100%;
+  text-align: center;
+  color: white;
+}
+
+.selector-container h1 {
+  font-size: 48px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.selector-container p {
+  font-size: 20px;
+  margin: 0 0 60px 0;
+  opacity: 0.9;
+}
+
+.layout-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 32px;
+  margin-top: 40px;
+}
+
+.layout-option {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  text-align: center;
+}
+
+.layout-option:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+  background: white;
+}
+
+.option-preview {
+  width: 100%;
+  height: 180px;
+  border-radius: 12px;
+  margin-bottom: 24px;
+  display: flex;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.preview-sidebar {
+  width: 60px;
+  background: #1a1d29;
+  border-radius: 12px 0 0 12px;
+
+  &.dark {
+    background: #0f172a;
+  }
+}
+
+.preview-content {
+  flex: 1;
+  background: #f8fafc;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &.dark {
+    background: #1e293b;
+  }
+}
+
+.preview-header {
+  height: 16px;
+  background: white;
+  border-radius: 4px;
+}
+
+.preview-metrics {
+  display: flex;
+  gap: 6px;
+}
+
+.preview-metric {
+  flex: 1;
+  height: 32px;
+  background: white;
+  border-radius: 6px;
+
+  &.small {
+    height: 24px;
+  }
+}
+
+.preview-chart {
+  flex: 1;
+  background: white;
+  border-radius: 6px;
+
+  &.large {
+    flex: 2;
+  }
+}
+
+.preview-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  flex: 1;
+}
+
+.preview-card {
+  background: white;
+  border-radius: 6px;
+}
+
+.preview-hero {
+  height: 48px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 6px;
+}
+
+.preview-stats {
+  height: 24px;
+  background: white;
+  border-radius: 6px;
+}
+
+.preview-recent {
+  flex: 1;
+  background: white;
+  border-radius: 6px;
+}
+
+.preview-analytics-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 6px;
+  flex: 1;
+}
+
+.preview-metrics-small {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.preview-terminal {
+  height: 40px;
+  background: #334155;
+  border-radius: 6px;
+  border: 1px solid #475569;
+}
+
+.preview-command-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  flex: 1;
+}
+
+.preview-status,
+.preview-actions {
+  background: #334155;
+  border-radius: 6px;
+  border: 1px solid #475569;
+}
+
+.layout-option h3 {
+  font-size: 22px;
+  font-weight: 600;
+  color: #1e293b;
+  margin: 0 0 12px 0;
+}
+
+.layout-option p {
+  font-size: 15px;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+@media (max-width: 1024px) {
+  .layout-options {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+  }
+}
+
+@media (max-width: 768px) {
+  .selector-container h1 {
+    font-size: 32px;
+  }
+  
+  .selector-container p {
+    font-size: 16px;
+  }
+  
+  .layout-options {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .layout-option {
+    padding: 20px;
+  }
+
+  .option-preview {
+    height: 150px;
+  }
+}

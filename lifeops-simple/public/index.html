@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeOps - AI Email Summarizer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+
+        .analyze-btn {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 1.1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .analyze-btn:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .analyze-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .loading {
+            text-align: center;
+            color: white;
+            font-size: 1.1rem;
+            margin: 20px 0;
+        }
+
+        .email-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .email-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .email-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .email-header {
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 15px;
+        }
+
+        .email-subject {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .email-from {
+            color: #7f8c8d;
+            font-size: 0.95rem;
+        }
+
+        .email-summary {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #3498db;
+        }
+
+        .priority {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+
+        .priority.high {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .priority.medium {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+
+        .priority.low {
+            background: #e8f5e8;
+            color: #2e7d32;
+        }
+
+        .action-needed {
+            margin: 10px 0;
+            font-weight: 600;
+        }
+
+        .action-needed.yes {
+            color: #e74c3c;
+        }
+
+        .action-needed.no {
+            color: #27ae60;
+        }
+
+        .key-points {
+            margin-top: 15px;
+        }
+
+        .key-points h4 {
+            margin-bottom: 8px;
+            color: #34495e;
+        }
+
+        .key-points ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .key-points li {
+            background: #ecf0f1;
+            padding: 8px 12px;
+            margin: 5px 0;
+            border-radius: 6px;
+            border-left: 3px solid #9b59b6;
+        }
+
+        .status {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            margin: 20px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .email-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+            
+            .email-card {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧐 LifeOps</h1>
+            <p>Your AI-powered email summarizer</p>
+        </div>
+
+        <div class="controls">
+            <button class="analyze-btn" onclick="analyzeEmails()">
+                📧 Analyze Recent Emails
+            </button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            🤖 AI is analyzing your emails...
+        </div>
+
+        <div id="status" class="status" style="display: none;"></div>
+
+        <div id="email-grid" class="email-grid"></div>
+    </div>
+
+    <script>
+        async function analyzeEmails() {
+            const btn = document.querySelector('.analyze-btn');
+            const loading = document.getElementById('loading');
+            const emailGrid = document.getElementById('email-grid');
+            const status = document.getElementById('status');
+
+            // Show loading state
+            btn.disabled = true;
+            btn.textContent = 'Analyzing...';
+            loading.style.display = 'block';
+            emailGrid.innerHTML = '';
+            status.style.display = 'none';
+
+            try {
+                const response = await fetch('/api/emails');
+                const data = await response.json();
+
+                if (data.emails && data.emails.length > 0) {
+                    displayEmails(data.emails);
+                } else {
+                    status.innerHTML = 'No emails found to analyze';
+                    status.style.display = 'block';
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                status.innerHTML = '❌ Error analyzing emails. Please try again.';
+                status.style.display = 'block';
+            } finally {
+                // Reset loading state
+                btn.disabled = false;
+                btn.textContent = '📧 Analyze Recent Emails';
+                loading.style.display = 'none';
+            }
+        }
+
+        function displayEmails(emails) {
+            const emailGrid = document.getElementById('email-grid');
+            
+            emails.forEach(email => {
+                const card = document.createElement('div');
+                card.className = 'email-card';
+                
+                card.innerHTML = `
+                    <div class="email-header">
+                        <div class="email-subject">${email.subject}</div>
+                        <div class="email-from">From: ${email.from}</div>
+                    </div>
+                    
+                    <div class="email-summary">
+                        <strong>🤖 AI Summary:</strong><br>
+                        ${email.summary}
+                    </div>
+                    
+                    <div>
+                        <span class="priority ${email.priority.toLowerCase()}">
+                            ⚡ ${email.priority} Priority
+                        </span>
+                    </div>
+                    
+                    <div class="action-needed ${email.actionNeeded.toLowerCase()}">
+                        🎯 Action Needed: ${email.actionNeeded}
+                    </div>
+                    
+                    ${email.keyPoints && email.keyPoints.length > 0 ? `
+                        <div class="key-points">
+                            <h4>🔑 Key Points:</h4>
+                            <ul>
+                                ${email.keyPoints.map(point => `<li>${point}</li>`).join('')}
+                            </ul>
+                        </div>
+                    ` : ''}
+                `;
+                
+                emailGrid.appendChild(card);
+            });
+        }
+
+        // Auto-analyze on page load
+        window.addEventListener('DOMContentLoaded', () => {
+            setTimeout(analyzeEmails, 1000);
+        });
+    </script>
+</body>
+</html>
