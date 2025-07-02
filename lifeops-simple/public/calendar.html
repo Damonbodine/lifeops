@@ -18,6 +18,50 @@
             color: #333;
         }
 
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 280px;
+            height: 100vh;
+            background: rgba(0,0,0,0.9);
+            color: white;
+            padding: 20px;
+            z-index: 1000;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+        }
+
+        .nav-item span {
+            margin-left: 10px;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -75,11 +119,11 @@
         .controls {
             display: flex;
             justify-content: center;
+            gap: 15px;
             margin-bottom: 30px;
         }
 
-        .refresh-btn {
-            background: #4CAF50;
+        .refresh-btn, .birthday-toggle-btn {
             color: white;
             border: none;
             padding: 15px 30px;
@@ -87,6 +131,10 @@
             border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+        }
+
+        .refresh-btn {
+            background: #4CAF50;
         }
 
         .refresh-btn:hover {
@@ -99,6 +147,26 @@
             background: #ccc;
             cursor: not-allowed;
             transform: none;
+        }
+
+        .birthday-toggle-btn {
+            background: rgba(255,255,255,0.2);
+            border: 2px solid rgba(255,255,255,0.3);
+        }
+
+        .birthday-toggle-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        .birthday-toggle-btn.active {
+            background: #e91e63;
+            border-color: #e91e63;
+        }
+
+        .birthday-toggle-btn.active:hover {
+            background: #c2185b;
         }
 
         .loading {
@@ -146,6 +214,15 @@
 
         .event-card.personal {
             border-left-color: #f39c12;
+        }
+
+        .event-card.birthday {
+            border-left-color: #e91e63;
+            background: linear-gradient(135deg, #fff 0%, #fce4ec 100%);
+        }
+
+        .event-card.birthday .event-title {
+            color: #ad1457;
         }
 
         .event-header {
@@ -232,6 +309,252 @@
             border: 2px solid rgba(231, 76, 60, 0.5);
         }
 
+        /* AI Chat Styles */
+        .ai-chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 400px;
+            height: 500px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .chat-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .message.user .message-avatar {
+            background: #3498db;
+        }
+
+        .message.ai .message-avatar {
+            background: #9b59b6;
+        }
+
+        .message-content {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .message.user .message-content {
+            background: #3498db;
+            color: white;
+        }
+
+        .message.ai .message-content {
+            background: #e8f5e8;
+            color: #2c3e50;
+        }
+
+        .event-confirmation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .event-confirmation h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+
+        .event-details {
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .confirm-btn, .cancel-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s;
+        }
+
+        .confirm-btn {
+            background: #28a745;
+            color: white;
+        }
+
+        .confirm-btn:hover {
+            background: #218838;
+        }
+
+        .cancel-btn {
+            background: #6c757d;
+            color: white;
+        }
+
+        .cancel-btn:hover {
+            background: #5a6268;
+        }
+
+        .chat-input-container {
+            padding: 15px 20px;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .chat-input {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            outline: none;
+            resize: none;
+            min-height: 20px;
+            max-height: 80px;
+        }
+
+        .chat-input:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102, 126, 234, 0.2);
+        }
+
+        .chat-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .chat-fab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 5px;
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dots span {
+            width: 4px;
+            height: 4px;
+            background: #7f8c8d;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
         @media (max-width: 768px) {
             .header h1 {
                 font-size: 2rem;
@@ -254,7 +577,40 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div class="sidebar">
+        <div class="logo">🧐 LifeOps</div>
+        <div class="nav-item" onclick="window.location.href='/dashboard.html'">
+            <span>📊</span>
+            <span>Dashboard</span>
+        </div>
+        <div class="nav-item" onclick="showSection('pomodoro')">
+            <span>🍅</span>
+            <span>Smart Pomodoro</span>
+        </div>
+        <div class="nav-item" onclick="showSection('tasks')">
+            <span>📋</span>
+            <span>1-3-5 Tasks</span>
+        </div>
+        <div class="nav-item" onclick="showSection('emails')">
+            <span>📧</span>
+            <span>Email Analysis</span>
+        </div>
+        <div class="nav-item active" onclick="window.location.href='/calendar.html'">
+            <span>📅</span>
+            <span>Calendar View</span>
+        </div>
+        <div class="nav-item" onclick="showSection('ai-score')">
+            <span>🤖</span>
+            <span>AI Daily Score</span>
+        </div>
+        <div class="nav-item" onclick="showSection('check-ins')">
+            <span>💌</span>
+            <span>Check In</span>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="container">
         <div class="header">
             <h1>📅 LifeOps Calendar</h1>
             <p>Your smart schedule overview</p>
@@ -269,6 +625,9 @@
         <div class="controls">
             <button class="refresh-btn" onclick="loadCalendarData()">
                 🔄 Refresh Calendar
+            </button>
+            <button class="birthday-toggle-btn" onclick="toggleBirthdays()" id="birthday-toggle">
+                🎂 Show Birthdays
             </button>
         </div>
 
@@ -287,9 +646,61 @@
             <h2 class="section-title">Upcoming Events</h2>
             <div id="upcoming-events" class="events-grid"></div>
         </div>
+        </div>
+    </div>
+
+    <!-- AI Chat Floating Action Button -->
+    <button class="chat-fab" onclick="toggleChat()" title="Ask AI to schedule events">
+        🤖
+    </button>
+
+    <!-- AI Chat Interface -->
+    <div id="ai-chat" class="ai-chat-container">
+        <div class="chat-header">
+            <h3>🤖 AI Calendar Assistant</h3>
+            <button class="chat-close" onclick="toggleChat()">×</button>
+        </div>
+        
+        <div class="chat-messages" id="chat-messages">
+            <div class="message ai">
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    Hi! I'm your AI calendar assistant. I can help you schedule events using natural language. Try saying something like:
+                    <br><br>
+                    • "Schedule a team meeting tomorrow at 2pm"
+                    • "Block 2 hours for deep work on Friday"
+                    • "Set up lunch with John next Tuesday"
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="typing-indicator">
+            <div class="message-avatar">🤖</div>
+            <div>
+                AI is thinking
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <textarea 
+                id="chat-input" 
+                class="chat-input" 
+                placeholder="Describe the event you want to create..."
+                onkeypress="handleChatKeyPress(event)"
+                rows="1"
+            ></textarea>
+        </div>
     </div>
 
     <script>
+        // Birthday toggle state
+        let showBirthdays = false;
+
         async function loadCalendarData() {
             const btn = document.querySelector('.refresh-btn');
             const loading = document.getElementById('loading');
@@ -306,31 +717,71 @@
             upcomingEvents.innerHTML = '';
 
             try {
-                // Load today's events
-                const todayResponse = await fetch('/api/calendar/today');
-                const todayData = await todayResponse.json();
+                // Always load calendar events
+                const [todayResponse, upcomingResponse] = await Promise.all([
+                    fetch('/api/calendar/today'),
+                    fetch('/api/calendar/upcoming')
+                ]);
 
-                // Load upcoming events
-                const upcomingResponse = await fetch('/api/calendar/upcoming');
+                const todayData = await todayResponse.json();
                 const upcomingData = await upcomingResponse.json();
 
-                if (todayData.events) {
-                    displayEvents(todayData.events, 'today-events', true);
+                let todayAllEvents = [...(todayData.events || [])];
+                let upcomingAllEvents = [...(upcomingData.events || [])];
+
+                // Only load birthdays if toggle is enabled
+                if (showBirthdays) {
+                    const [birthdaysTodayResponse, birthdaysUpcomingResponse] = await Promise.all([
+                        fetch('/api/birthdays/today'),
+                        fetch('/api/birthdays/upcoming?days=30')
+                    ]);
+
+                    const birthdaysTodayData = await birthdaysTodayResponse.json();
+                    const birthdaysUpcomingData = await birthdaysUpcomingResponse.json();
+
+                    // Add birthday events to the arrays
+                    todayAllEvents = [
+                        ...todayAllEvents,
+                        ...(birthdaysTodayData.events || [])
+                    ];
+
+                    upcomingAllEvents = [
+                        ...upcomingAllEvents,
+                        ...(birthdaysUpcomingData.events || [])
+                    ];
+
+                    // Show birthday summary
+                    const birthdayCount = (birthdaysTodayData.events || []).length + (birthdaysUpcomingData.events || []).length;
+                    if (birthdayCount > 0) {
+                        console.log(`🎂 Loaded ${birthdayCount} birthday events`);
+                    }
                 }
 
-                if (upcomingData.events) {
-                    displayEvents(upcomingData.events, 'upcoming-events', false);
+                // Sort upcoming events by date
+                upcomingAllEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
+
+                if (todayAllEvents.length > 0) {
+                    displayEvents(todayAllEvents, 'today-events', true);
                 }
 
-                if ((!todayData.events || todayData.events.length === 0) && 
-                    (!upcomingData.events || upcomingData.events.length === 0)) {
-                    status.innerHTML = '📅 No events found. Your calendar is clear!';
+                if (upcomingAllEvents.length > 0) {
+                    displayEvents(upcomingAllEvents, 'upcoming-events', false);
+                }
+
+                if (todayAllEvents.length === 0 && upcomingAllEvents.length === 0) {
+                    const message = showBirthdays ? 
+                        '📅 No events or birthdays found. Your calendar is clear!' :
+                        '📅 No events found. Your calendar is clear!';
+                    status.innerHTML = message;
                     status.style.display = 'block';
                 }
 
             } catch (error) {
                 console.error('Error:', error);
-                status.innerHTML = '❌ Error loading calendar. Please try again.';
+                const message = showBirthdays ? 
+                    '❌ Error loading calendar and birthdays. Please try again.' :
+                    '❌ Error loading calendar. Please try again.';
+                status.innerHTML = message;
                 status.className = 'status error';
                 status.style.display = 'block';
             } finally {
@@ -338,6 +789,57 @@
                 btn.disabled = false;
                 btn.textContent = '🔄 Refresh Calendar';
                 loading.style.display = 'none';
+            }
+        }
+
+        async function toggleBirthdays() {
+            showBirthdays = !showBirthdays;
+            const toggleBtn = document.getElementById('birthday-toggle');
+            
+            if (showBirthdays) {
+                toggleBtn.textContent = '🎂 Hide Birthdays';
+                toggleBtn.classList.add('active');
+            } else {
+                // Load birthday count for the button
+                try {
+                    const response = await fetch('/api/birthdays/stats');
+                    const stats = await response.json();
+                    const todayCount = stats.today || 0;
+                    const weekCount = stats.thisWeek || 0;
+                    
+                    if (todayCount > 0) {
+                        toggleBtn.textContent = `🎂 Show Birthdays (${todayCount} today)`;
+                    } else if (weekCount > 0) {
+                        toggleBtn.textContent = `🎂 Show Birthdays (${weekCount} this week)`;
+                    } else {
+                        toggleBtn.textContent = '🎂 Show Birthdays';
+                    }
+                } catch (error) {
+                    toggleBtn.textContent = '🎂 Show Birthdays';
+                }
+                toggleBtn.classList.remove('active');
+            }
+            
+            // Reload calendar data with new birthday state
+            loadCalendarData();
+        }
+
+        // Load birthday stats on page load to show count in button
+        async function loadBirthdayStats() {
+            try {
+                const response = await fetch('/api/birthdays/stats');
+                const stats = await response.json();
+                const toggleBtn = document.getElementById('birthday-toggle');
+                const todayCount = stats.today || 0;
+                const weekCount = stats.thisWeek || 0;
+                
+                if (todayCount > 0) {
+                    toggleBtn.textContent = `🎂 Show Birthdays (${todayCount} today)`;
+                } else if (weekCount > 0) {
+                    toggleBtn.textContent = `🎂 Show Birthdays (${weekCount} this week)`;
+                }
+            } catch (error) {
+                console.log('Could not load birthday stats');
             }
         }
 
@@ -357,12 +859,12 @@
 
             events.forEach(event => {
                 const card = document.createElement('div');
-                const eventType = getEventType(event.summary);
+                const eventType = getEventType(event);
                 card.className = `event-card ${eventType}`;
                 
                 const startTime = new Date(event.start);
                 const endTime = new Date(event.end);
-                const timeStr = formatTime(startTime, endTime);
+                const timeStr = event.allDay ? 'All Day' : formatTime(startTime, endTime);
                 const dateStr = isToday ? 'Today' : formatDate(startTime);
                 
                 card.innerHTML = `
@@ -383,7 +885,13 @@
             });
         }
 
-        function getEventType(title) {
+        function getEventType(event) {
+            // Check if it's a birthday event
+            if (event.type === 'birthday' || (event.summary && event.summary.includes('🎂'))) {
+                return 'birthday';
+            }
+            
+            const title = event.summary || event.title || '';
             const lower = title.toLowerCase();
             if (lower.includes('meeting') || lower.includes('standup') || lower.includes('demo')) {
                 return 'meeting';
@@ -408,9 +916,191 @@
             return date.toLocaleDateString([], options);
         }
 
+        // AI Chat Functions
+        let chatVisible = false;
+        let pendingConfirmation = null;
+
+        function toggleChat() {
+            const chatContainer = document.getElementById('ai-chat');
+            const chatFab = document.querySelector('.chat-fab');
+            
+            chatVisible = !chatVisible;
+            
+            if (chatVisible) {
+                chatContainer.style.display = 'flex';
+                chatFab.style.display = 'none';
+                document.getElementById('chat-input').focus();
+            } else {
+                chatContainer.style.display = 'none';
+                chatFab.style.display = 'block';
+            }
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendChatMessage();
+            }
+        }
+
+        async function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Clear input and add user message
+            input.value = '';
+            addMessage('user', message);
+            
+            // Show typing indicator
+            showTypingIndicator();
+            
+            try {
+                const response = await fetch('/api/ai-calendar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message })
+                });
+                
+                const data = await response.json();
+                hideTypingIndicator();
+                
+                // Add AI response
+                addMessage('ai', data.response);
+                
+                // Handle different actions
+                if (data.action === 'confirm' && data.formatted_event) {
+                    showEventConfirmation(data.formatted_event);
+                } else if (data.action === 'authentication_required') {
+                    addMessage('ai', 'Please authenticate with Google Calendar in the main dashboard first.');
+                }
+                
+            } catch (error) {
+                console.error('Chat error:', error);
+                hideTypingIndicator();
+                addMessage('ai', "I'm having trouble processing your request. Please try again.");
+            }
+        }
+
+        function addMessage(sender, content) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = sender === 'user' ? '👤' : '🤖';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'flex';
+            const messagesContainer = document.getElementById('chat-messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typing-indicator').style.display = 'none';
+        }
+
+        function showEventConfirmation(eventData) {
+            const messagesContainer = document.getElementById('chat-messages');
+            const confirmationDiv = document.createElement('div');
+            confirmationDiv.className = 'message ai';
+            
+            const startDate = new Date(eventData.start);
+            const endDate = new Date(eventData.end);
+            
+            confirmationDiv.innerHTML = `
+                <div class="message-avatar">🤖</div>
+                <div class="message-content">
+                    <div class="event-confirmation">
+                        <h4>📅 Ready to create this event?</h4>
+                        <div class="event-details">
+                            <strong>Title:</strong> ${eventData.summary}<br>
+                            <strong>When:</strong> ${startDate.toLocaleDateString()} ${startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}<br>
+                            ${eventData.location ? `<strong>Location:</strong> ${eventData.location}<br>` : ''}
+                            ${eventData.description ? `<strong>Description:</strong> ${eventData.description}<br>` : ''}
+                        </div>
+                        <div class="event-actions">
+                            <button class="confirm-btn" onclick="confirmEvent()">✅ Create Event</button>
+                            <button class="cancel-btn" onclick="cancelEvent()">❌ Cancel</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            messagesContainer.appendChild(confirmationDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+            
+            // Store event data for confirmation
+            pendingConfirmation = eventData;
+        }
+
+        async function confirmEvent() {
+            if (!pendingConfirmation) return;
+            
+            try {
+                const response = await fetch('/api/ai-calendar/confirm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ eventData: pendingConfirmation })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addMessage('ai', data.response);
+                    // Refresh the calendar to show the new event
+                    setTimeout(loadCalendarData, 1000);
+                } else {
+                    addMessage('ai', data.response || 'Sorry, I had trouble creating that event.');
+                }
+                
+            } catch (error) {
+                console.error('Error confirming event:', error);
+                addMessage('ai', 'Sorry, there was an error creating the event. Please try again.');
+            }
+            
+            pendingConfirmation = null;
+        }
+
+        function cancelEvent() {
+            addMessage('ai', 'No problem! The event was not created. Is there anything else I can help you schedule?');
+            pendingConfirmation = null;
+        }
+
+        // Auto-resize chat input
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatInput = document.getElementById('chat-input');
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+            });
+        });
+
+        // Navigation functions
+        function showSection(section) {
+            // For calendar page, redirect to dashboard with section
+            window.location.href = `/dashboard.html#${section}`;
+        }
+
         // Auto-load calendar on page load
         window.addEventListener('DOMContentLoaded', () => {
-            setTimeout(loadCalendarData, 1000);
+            setTimeout(() => {
+                loadCalendarData();
+                loadBirthdayStats();
+            }, 1000);
         });
     </script>
 </body>

@@ -518,6 +518,409 @@
             padding-bottom: 10px;
             margin-bottom: 10px;
         }
+
+        /* AI Chat Quick Widget for Dashboard */
+        .chat-widget {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-align: center;
+        }
+
+        .chat-widget:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+        }
+
+        .chat-widget h3 {
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .chat-widget p {
+            margin-bottom: 20px;
+            opacity: 0.9;
+            line-height: 1.5;
+        }
+
+        .chat-widget-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            padding: 12px 25px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .chat-widget-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: translateY(-2px);
+        }
+
+        /* AI Schedule Preview Modal */
+        .schedule-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+
+        .schedule-modal-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            max-width: 800px;
+            max-height: 80vh;
+            overflow-y: auto;
+            margin: 20px;
+            box-shadow: 0 25px 50px rgba(0,0,0,0.3);
+        }
+
+        .schedule-header {
+            text-align: center;
+            margin-bottom: 25px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .schedule-header h2 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+
+        .schedule-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        .schedule-timeline {
+            margin: 20px 0;
+        }
+
+        .schedule-item {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+
+        .schedule-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .schedule-item.big {
+            border-left-color: #e74c3c;
+            background: #ffebee;
+        }
+
+        .schedule-item.medium {
+            border-left-color: #f39c12;
+            background: #fff8e1;
+        }
+
+        .schedule-item.small {
+            border-left-color: #27ae60;
+            background: #e8f5e8;
+        }
+
+        .schedule-time {
+            font-weight: bold;
+            color: #2c3e50;
+            min-width: 120px;
+            font-size: 0.9rem;
+        }
+
+        .schedule-details {
+            flex: 1;
+            margin-left: 15px;
+        }
+
+        .schedule-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .schedule-task {
+            color: #7f8c8d;
+            font-size: 0.85rem;
+            margin-bottom: 3px;
+        }
+
+        .schedule-reasoning {
+            color: #9b59b6;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .energy-badge {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .energy-badge.high {
+            background: #ff6b6b;
+            color: white;
+        }
+
+        .energy-badge.medium {
+            background: #ffd93d;
+            color: #333;
+        }
+
+        .energy-badge.low {
+            background: #6bcf7f;
+            color: white;
+        }
+
+        .schedule-tips {
+            background: #e8f5e8;
+            border: 1px solid #c8e6c9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+        }
+
+        .schedule-tips h4 {
+            color: #2e7d32;
+            margin-bottom: 10px;
+        }
+
+        .schedule-tips ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .schedule-tips li {
+            color: #2e7d32;
+            margin: 5px 0;
+        }
+
+        .schedule-actions {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #ecf0f1;
+        }
+
+        .schedule-confirm-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .schedule-confirm-btn:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .schedule-cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .schedule-cancel-btn:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+
+        .loading-schedule {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .loading-schedule .spinner {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Schedule Editing Controls */
+        .schedule-item.editable {
+            position: relative;
+            cursor: move;
+        }
+
+        .schedule-controls {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .schedule-item:hover .schedule-controls {
+            opacity: 1;
+        }
+
+        .control-btn {
+            background: rgba(255,255,255,0.9);
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s;
+        }
+
+        .control-btn:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .control-btn.remove {
+            color: #e74c3c;
+        }
+
+        .control-btn.edit {
+            color: #3498db;
+        }
+
+        .time-editor {
+            display: none;
+            background: white;
+            border: 2px solid #3498db;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .time-editor.active {
+            display: block;
+        }
+
+        .time-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .time-input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .time-input-group label {
+            font-size: 0.8rem;
+            color: #666;
+            margin-bottom: 5px;
+        }
+
+        .time-input-group input, .time-input-group select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .time-editor-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .time-save-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .time-cancel-btn {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .schedule-regenerate {
+            text-align: center;
+            margin: 20px 0;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .regenerate-btn {
+            background: #9b59b6;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            margin: 0 5px;
+        }
+
+        .removed-item {
+            opacity: 0.5;
+            background: #f8f8f8 !important;
+            border-left-color: #ccc !important;
+        }
+
+        .removed-item .schedule-details {
+            text-decoration: line-through;
+        }
     </style>
 </head>
 <body>
@@ -538,6 +941,10 @@
         <div class="nav-item" onclick="showSection('emails')">
             <span>📧</span>
             <span>Email Analysis</span>
+        </div>
+        <div class="nav-item" onclick="showSection('email-relationships')">
+            <span>🧠</span>
+            <span>Relationship Intelligence</span>
         </div>
         <div class="nav-item" onclick="window.location.href='/calendar.html'">
             <span>📅</span>
@@ -596,6 +1003,12 @@
                         <button class="btn" onclick="showSection('emails')" style="background: #9b59b6; color: white;">Check Emails</button>
                     </div>
                 </div>
+
+                <div class="chat-widget" onclick="window.location.href='/calendar.html'">
+                    <h3>🤖 AI Calendar Assistant</h3>
+                    <p>Schedule events using natural language! Just describe what you want to schedule and I'll handle the rest.</p>
+                    <button class="chat-widget-btn">Try AI Scheduling →</button>
+                </div>
             </div>
         </div>
 
@@ -617,14 +1030,15 @@
                     <button class="btn btn-success" id="startBtn" onclick="startTimer()">Start Session</button>
                     <button class="btn btn-danger" id="pauseBtn" onclick="pauseTimer()" style="display: none;">Pause</button>
                     <button class="btn" id="resetBtn" onclick="resetTimer()">Reset</button>
+                    <button class="btn" id="testSoundBtn" onclick="playNotificationSound()" style="background: #9b59b6; color: white;">🔊 Test Sound</button>
                 </div>
 
                 <div style="margin-top: 20px; text-align: center;">
                     <p>Work Duration: <span id="sessionDurationLabel">25 minutes</span></p>
-                    <input type="range" id="sessionDuration" min="5" max="90" value="25" oninput="updateDuration()" 
+                    <input type="range" id="sessionDuration" min="1" max="90" value="25" oninput="updateDuration()" 
                            style="width: 100%; margin: 10px 0;">
                     <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #7f8c8d; margin-bottom: 20px;">
-                        <span>5 min</span>
+                        <span>1 min</span>
                         <span>25 min</span>
                         <span>45 min</span>
                         <span>90 min</span>
@@ -715,6 +1129,13 @@
                         <div class="stat-number" id="overallProgress">0%</div>
                         <div class="stat-label">Overall Completion</div>
                     </div>
+
+                    <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #ecf0f1;">
+                        <button class="btn btn-primary" onclick="scheduleTasksWithAI()" id="scheduleBtn" style="width: 100%; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; font-size: 1rem; padding: 15px;">
+                            🤖 Schedule All Tasks with AI
+                        </button>
+                        <p style="color: #7f8c8d; font-size: 0.85rem; text-align: center; margin: 10px 0 0 0;">AI will create optimal calendar blocks for your tasks</p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -739,6 +1160,46 @@
             </div>
             
             <div id="email-grid" class="email-grid"></div>
+        </div>
+
+        <!-- Email Relationship Intelligence Section -->
+        <div id="email-relationships" class="section" style="display: none;">
+            <h2 class="section-title">🧠 Email Relationship Intelligence</h2>
+            
+            <div class="feature-card" style="margin-bottom: 20px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3>📊 Analysis Status</h3>
+                    <button class="btn btn-primary" onclick="startRelationshipAnalysis()" id="analysisBtn">
+                        🚀 Start 5-Year Analysis
+                    </button>
+                </div>
+                
+                <div id="relationship-status" style="padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; color: white; margin: 15px 0;">
+                    <div id="status-content">Loading relationship analysis status...</div>
+                </div>
+            </div>
+
+            <div class="feature-grid">
+                <div class="feature-card">
+                    <h3>💤 Dormant Relationships</h3>
+                    <div id="dormant-relationships" style="min-height: 200px;">
+                        <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">🔍</div>
+                            <p>Run analysis to discover relationships that need attention</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="feature-card">
+                    <h3>📈 Relationship Insights</h3>
+                    <div id="relationship-insights" style="min-height: 200px;">
+                        <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
+                            <p>Analysis will provide insights into your communication patterns</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- AI Score Section -->
@@ -797,6 +1258,77 @@
 
                 <div class="feature-card">
                     <h3>👥 Priority Check-ins</h3>
+                    
+                    <!-- Configuration Panel -->
+                    <div id="configPanel" style="margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3498db;">
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="margin: 0; color: #2c3e50; font-size: 16px;">🎯 Analysis Settings</h4>
+                            <button id="toggleConfig" class="btn" style="font-size: 12px; padding: 4px 8px; margin-left: auto;" onclick="toggleConfigPanel()">⚙️ Configure</button>
+                        </div>
+                        
+                        <!-- Quick Presets -->
+                        <div id="presetButtons" style="margin-bottom: 15px;">
+                            <div style="margin-bottom: 8px; font-size: 14px; color: #7f8c8d;">Quick Presets:</div>
+                            <div id="presetContainer" style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                <button class="preset-btn" onclick="loadPreset('recent-activity')" style="background: #FF6B6B; color: white; border: none; padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer;">🔥 Recent</button>
+                                <button class="preset-btn" onclick="loadPreset('catch-up-mode')" style="background: #4ECDC4; color: white; border: none; padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer;">📞 Catch-Up</button>
+                                <button class="preset-btn" onclick="loadPreset('reconnect-deep')" style="background: #45B7D1; color: white; border: none; padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer;">🌊 Deep</button>
+                                <button class="preset-btn" onclick="loadPreset('high-frequency')" style="background: #96CEB4; color: white; border: none; padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer;">⚡ High Freq</button>
+                                <button class="preset-btn" onclick="loadPreset('random-surprise')" style="background: #FECA57; color: white; border: none; padding: 6px 12px; border-radius: 16px; font-size: 12px; cursor: pointer;">🎲 Random</button>
+                            </div>
+                        </div>
+                        
+                        <!-- Detailed Controls -->
+                        <div id="detailedControls" style="display: none; grid: auto / 1fr 1fr; gap: 15px; margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px;">Days Since Last Contact:</label>
+                                <select id="daysThreshold" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                                    <option value="1">1+ days (Very Recent)</option>
+                                    <option value="7">7+ days (This Week)</option>
+                                    <option value="14">14+ days (Two Weeks)</option>
+                                    <option value="30" selected>30+ days (This Month)</option>
+                                    <option value="60">60+ days (Two Months)</option>
+                                    <option value="90">90+ days (Three Months)</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px;">Lookback Period:</label>
+                                <select id="lookbackDays" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                                    <option value="30">Last 30 Days</option>
+                                    <option value="90">Last 3 Months</option>
+                                    <option value="180">Last 6 Months</option>
+                                    <option value="365" selected>Last Year</option>
+                                    <option value="730">Last 2 Years</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px;">Sort By:</label>
+                                <select id="sortBy" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                                    <option value="daysSince" selected>Days Since Contact</option>
+                                    <option value="messageCount">Message Frequency</option>
+                                    <option value="random">Random Order</option>
+                                </select>
+                            </div>
+                            
+                            <div>
+                                <label style="display: block; font-size: 12px; font-weight: bold; color: #555; margin-bottom: 5px;">Contact Type:</label>
+                                <select id="filterType" style="width: 100%; padding: 6px; border: 1px solid #ddd; border-radius: 4px; font-size: 12px;">
+                                    <option value="all" selected>All Contacts</option>
+                                    <option value="resolved">Named Contacts Only</option>
+                                    <option value="unresolved">Phone Numbers Only</option>
+                                </select>
+                            </div>
+                            
+                            <div style="grid-column: span 2;">
+                                <button onclick="applyCustomConfig()" class="btn" style="width: 100%; background: #3498db; color: white; margin-top: 10px;">🔍 Apply Custom Settings</button>
+                            </div>
+                        </div>
+                        
+                        <div id="currentConfig" style="margin-top: 10px; font-size: 12px; color: #7f8c8d; font-style: italic;"></div>
+                    </div>
+                    
                     <div id="contactsStats" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; display: none;">
                         <span id="contactsCount" style="font-weight: bold; color: #2c3e50;"></span>
                         <span id="contactsInsight" style="color: #7f8c8d; margin-left: 10px;"></span>
@@ -837,6 +1369,53 @@
         </div>
     </div>
 
+    <!-- AI Schedule Preview Modal -->
+    <div id="schedule-modal" class="schedule-modal">
+        <div class="schedule-modal-content">
+            <div id="schedule-loading" class="loading-schedule" style="display: none;">
+                <div class="spinner"></div>
+                <p>🤖 AI is analyzing your tasks and creating the optimal schedule...</p>
+            </div>
+            
+            <div id="schedule-preview" style="display: none;">
+                <div class="schedule-header">
+                    <h2>🗓️ Your Optimized Task Schedule</h2>
+                    <p style="color: #7f8c8d;">AI has created the perfect calendar layout for your productivity</p>
+                </div>
+
+                <div class="schedule-summary" id="schedule-summary-content">
+                    <!-- Summary will be inserted here -->
+                </div>
+
+                <div class="schedule-regenerate">
+                    <p style="color: #7f8c8d; margin: 0 0 10px 0;">Not happy with the schedule? Make adjustments or regenerate:</p>
+                    <button class="regenerate-btn" onclick="regenerateSchedule()">🔄 Generate New Schedule</button>
+                    <button class="regenerate-btn" onclick="regenerateScheduleWithConstraints()">⚙️ Regenerate with Preferences</button>
+                </div>
+
+                <div class="schedule-timeline" id="schedule-timeline">
+                    <!-- Schedule items will be inserted here -->
+                </div>
+
+                <div class="schedule-tips" id="schedule-tips" style="display: none;">
+                    <h4>💡 AI Productivity Tips</h4>
+                    <ul id="schedule-tips-list">
+                        <!-- Tips will be inserted here -->
+                    </ul>
+                </div>
+
+                <div class="schedule-actions">
+                    <button class="schedule-confirm-btn" onclick="confirmSchedule()">
+                        ✅ Schedule All Tasks
+                    </button>
+                    <button class="schedule-cancel-btn" onclick="closeScheduleModal()">
+                        ❌ Cancel
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // Global state
         let currentSection = 'dashboard';
@@ -872,6 +1451,28 @@
             // Auto-load data for specific sections
             if (section === 'check-ins') {
                 loadCheckIns();
+            } else if (section === 'email-relationships') {
+                loadRelationshipStatus();
+            }
+
+            // Show/hide email chat FAB based on section
+            const emailChatFab = document.querySelector('.email-chat-fab');
+            const emailChatContainer = document.getElementById('ai-email-chat');
+
+            if (section === 'emails') {
+                // Show FAB when in emails section
+                if (emailChatFab) {
+                    emailChatFab.style.display = 'block';
+                }
+            } else {
+                // Hide FAB and close chat when not in emails section
+                if (emailChatFab) {
+                    emailChatFab.style.display = 'none';
+                }
+                if (emailChatContainer) {
+                    emailChatContainer.style.display = 'none';
+                    emailChatVisible = false; // Reset chat state
+                }
             }
         }
 
@@ -925,9 +1526,107 @@
             document.getElementById('sessionIntent').value = '';
         }
 
+        // Sound notification function
+        function playNotificationSound() {
+            console.log('🔊 Attempting to play notification sound...');
+            
+            try {
+                // Create audio context if it doesn't exist
+                if (!window.audioContext) {
+                    window.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    console.log('🎵 Created new AudioContext');
+                }
+                
+                // Resume audio context if suspended (required by modern browsers)
+                if (window.audioContext.state === 'suspended') {
+                    window.audioContext.resume().then(() => {
+                        console.log('🎵 AudioContext resumed');
+                        playActualSound();
+                    });
+                } else {
+                    playActualSound();
+                }
+                
+                function playActualSound() {
+                    console.log('🎵 Playing synthesized ding...');
+                    
+                    // Create a simple ding sound using Web Audio API
+                    const oscillator = window.audioContext.createOscillator();
+                    const gainNode = window.audioContext.createGain();
+                    
+                    // Connect oscillator to gain to output
+                    oscillator.connect(gainNode);
+                    gainNode.connect(window.audioContext.destination);
+                    
+                    // Configure the ding sound
+                    oscillator.frequency.setValueAtTime(800, window.audioContext.currentTime); // High pitch
+                    oscillator.frequency.exponentialRampToValueAtTime(200, window.audioContext.currentTime + 0.1); // Drop to lower pitch
+                    
+                    // Configure volume envelope (fade in/out)
+                    gainNode.gain.setValueAtTime(0, window.audioContext.currentTime);
+                    gainNode.gain.linearRampToValueAtTime(0.3, window.audioContext.currentTime + 0.01);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, window.audioContext.currentTime + 0.5);
+                    
+                    // Play the sound
+                    oscillator.start(window.audioContext.currentTime);
+                    oscillator.stop(window.audioContext.currentTime + 0.5);
+                    
+                    console.log('✅ Sound should be playing now');
+                }
+                
+            } catch (error) {
+                console.error('❌ Web Audio API failed:', error);
+                
+                // Fallback 1: Simple HTML5 audio with a beep
+                try {
+                    console.log('🔄 Trying HTML5 audio fallback...');
+                    const audio = new Audio();
+                    audio.src = 'data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwgBTuV2++9diMFl1n19tOKOwgWNK/l7qRTFAy6lpGv7J1WEwx';
+                    audio.volume = 0.5;
+                    audio.play().then(() => {
+                        console.log('✅ HTML5 audio played successfully');
+                    }).catch(audioError => {
+                        console.error('❌ HTML5 audio failed:', audioError);
+                        
+                        // Fallback 2: Browser notification with sound
+                        if ('Notification' in window) {
+                            console.log('🔔 Trying browser notification...');
+                            if (Notification.permission === 'granted') {
+                                new Notification('🍅 Pomodoro Complete!', {
+                                    body: 'Your focus session has finished.',
+                                    icon: '🍅',
+                                    requireInteraction: true
+                                });
+                            } else if (Notification.permission !== 'denied') {
+                                Notification.requestPermission().then(permission => {
+                                    if (permission === 'granted') {
+                                        new Notification('🍅 Pomodoro Complete!', {
+                                            body: 'Your focus session has finished.',
+                                            icon: '🍅',
+                                            requireInteraction: true
+                                        });
+                                    }
+                                });
+                            }
+                        }
+                    });
+                } catch (fallbackError) {
+                    console.error('❌ All sound methods failed:', fallbackError);
+                    // Visual feedback as last resort
+                    document.body.style.backgroundColor = '#ff6b6b';
+                    setTimeout(() => {
+                        document.body.style.backgroundColor = '';
+                    }, 500);
+                }
+            }
+        }
+
         function completeSession() {
             clearInterval(timerInterval);
             isRunning = false;
+            
+            // Play notification sound
+            playNotificationSound();
             
             if (currentCycle === 'work') {
                 // Work session completed, start break
@@ -1090,12 +1789,27 @@
         }
 
         // Check-in Functions
-        async function loadCheckIns() {
+        // Global configuration state
+        let currentConfig = {
+            daysThreshold: 30,
+            lookbackDays: 365,
+            maxContacts: 15,
+            sortBy: 'daysSince',
+            filterType: 'all',
+            minMessages: 2
+        };
+
+        async function loadCheckIns(customConfig = null) {
             try {
                 document.getElementById('weeklyGoal').textContent = 'Loading...';
                 document.getElementById('priorityContacts').innerHTML = '<div style="text-align: center; color: #7f8c8d; padding: 20px;"><p>Analyzing your relationships...</p></div>';
                 
-                const response = await fetch('/api/check-ins');
+                // Use custom config if provided, otherwise use current global config
+                const config = customConfig || currentConfig;
+                
+                // Build query string
+                const params = new URLSearchParams(config);
+                const response = await fetch(`/api/check-ins?${params}`);
                 const data = await response.json();
                 
                 // Update weekly goal
@@ -1108,8 +1822,8 @@
                 
                 if (data.totalContacts && data.totalContacts > 0) {
                     statsElement.style.display = 'block';
-                    const filterText = data.totalUnfiltered ? 
-                        `${data.priorityContacts.length} of ${data.totalContacts} named contacts shown (${data.totalUnfiltered} total need check-ins)` :
+                    const filterText = data.resolvedContacts !== undefined ? 
+                        `${data.priorityContacts.length} of ${data.totalContacts} contacts shown (${data.resolvedContacts} with resolved names)` :
                         `${data.priorityContacts.length} of ${data.totalContacts} contacts shown`;
                     countElement.textContent = filterText;
                     insightElement.textContent = data.insight || '';
@@ -1122,31 +1836,56 @@
                         <div class="contacts-header" style="margin-bottom: 15px;">
                             <small style="color: #7f8c8d;">Scroll to see more contacts ↓</small>
                         </div>
-                    ` + data.priorityContacts.map((contact, index) => `
-                        <div class="contact-item task-item" style="margin: 0; padding: 15px;">
+                    ` + data.priorityContacts.map((contact, index) => {
+                        const isBirthday = contact.birthdayContact;
+                        const borderStyle = isBirthday ? 'border: 3px solid #FFD700; background: linear-gradient(135deg, #FFF9E6 0%, #FFFBF0 100%);' : '';
+                        const priorityBadge = isBirthday ? 
+                            '<span style="background: #FFD700; color: #B8860B; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; margin-left: 5px; font-weight: bold;">🎂 BIRTHDAY</span>' :
+                            `<span style="background: #f0f0f0; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem; margin-left: 8px;">#${index + 1}</span>`;
+                        
+                        const daysSinceText = isBirthday ? 
+                            (contact.birthdayInfo && contact.birthdayInfo.daysUntilBirthday === 0 ? 
+                                '🎉 Birthday is TODAY!' : 
+                                `🎂 Birthday in ${contact.birthdayInfo?.daysUntilBirthday || 0} days`) :
+                            `📅 ${contact.daysSince} days since last contact`;
+                            
+                        const daysSinceColor = isBirthday ? '#D4AF37' : '#e74c3c';
+                        
+                        return `
+                        <div class="contact-item task-item" style="margin: 0; padding: 15px; ${borderStyle}">
                             <div style="flex: 1;">
                                 <div style="font-weight: bold; margin-bottom: 5px;">
-                                    👤 ${contact.name}
-                                    <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem; margin-left: 8px;">
-                                        #${index + 1}
-                                    </span>
+                                    ${contact.isResolved ? '👤' : '📱'} ${contact.name}
+                                    ${priorityBadge}
+                                    ${contact.isResolved ? 
+                                        '<span style="background: #e8f5e8; color: #2e7d32; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; margin-left: 5px;">✓ Named</span>' : 
+                                        '<span style="background: #fff3e0; color: #ef6c00; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem; margin-left: 5px;">📞 Number</span>'
+                                    }
+                                    ${isBirthday && contact.birthdayInfo?.facebookUrl ? 
+                                        `<a href="${contact.birthdayInfo.facebookUrl}" target="_blank" style="margin-left: 5px; text-decoration: none;">
+                                            <span style="background: #1877F2; color: white; padding: 2px 6px; border-radius: 10px; font-size: 0.7rem;">📘 FB</span>
+                                        </a>` : ''
+                                    }
                                 </div>
-                                <div style="color: #e74c3c; font-size: 0.9rem; margin-bottom: 5px;">
-                                    📅 ${contact.daysSince} days since last contact
+                                <div style="color: ${daysSinceColor}; font-size: 0.9rem; margin-bottom: 5px; font-weight: ${isBirthday ? 'bold' : 'normal'};">
+                                    ${daysSinceText}
                                 </div>
                                 <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
                                     ${contact.reason}
                                     ${contact.messageCount ? `• ${contact.messageCount} messages total` : ''}
                                 </div>
-                                <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; font-style: italic;">
+                                <div style="background: ${isBirthday ? '#FFF9E6' : '#f8f9fa'}; padding: 10px; border-radius: 6px; font-style: italic; border-left: ${isBirthday ? '4px solid #FFD700' : '4px solid #e9ecef'};">
                                     💬 "${contact.suggestedMessage}"
                                 </div>
                             </div>
-                            <button class="btn btn-success" onclick="sendMessage('${contact.rawContact || contact.name}')" style="margin-left: 15px; white-space: nowrap;">
+                            <button class="btn btn-success" onclick="sendMessage('${contact.name}', '${contact.rawContact}', '${contact.isResolved}')" style="margin-left: 15px; white-space: nowrap;">
                                 💌 Message
                             </button>
-                        </div>
-                    `).join('');
+                            <button class="btn" onclick="getSmartMessage('${contact.name}', '${contact.rawContact}', '${contact.isResolved}')" style="margin-left: 10px; white-space: nowrap; background: #9b59b6; color: white;">
+                                🤖 Smart Message
+                            </button>
+                        </div>`
+                    }).join('');
                 } else {
                     contactsContainer.innerHTML = `
                         <div style="text-align: center; color: #27ae60; padding: 20px;">
@@ -1166,36 +1905,252 @@
             }
         }
 
-        async function sendMessage(contactName) {
+        async function sendMessage(contactName, rawContact, isResolved) {
             try {
+                console.log(`📱 Opening Messages for: ${contactName} (${rawContact})`);
+                
                 const response = await fetch('/api/open-messages', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ contact: contactName })
+                    body: JSON.stringify({ 
+                        contact: contactName,
+                        rawContact: rawContact,
+                        name: contactName,
+                        isResolved: isResolved === 'true'
+                    })
                 });
                 
                 const result = await response.json();
                 
                 if (result.success) {
-                    // Show a brief success message
+                    // Show detailed success message
                     const button = event.target;
                     const originalText = button.textContent;
+                    
+                    // Update button with success state
                     button.textContent = '✓ Opened!';
                     button.style.background = '#27ae60';
                     
+                    // Show detailed feedback
+                    console.log(`✅ Messages opened successfully:`, result);
+                    
+                    // Create floating success message
+                    const successMsg = document.createElement('div');
+                    successMsg.style.cssText = `
+                        position: fixed;
+                        top: 20px;
+                        right: 20px;
+                        background: #27ae60;
+                        color: white;
+                        padding: 15px 20px;
+                        border-radius: 8px;
+                        z-index: 1000;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                        max-width: 300px;
+                        font-size: 14px;
+                    `;
+                    
+                    const methodText = {
+                        'applescript': '🍎 via AppleScript',
+                        'sms_url': '🔗 via SMS URL',
+                        'app_only': '📱 opened Messages app'
+                    };
+                    
+                    successMsg.innerHTML = `
+                        <div style="font-weight: bold; margin-bottom: 5px;">💌 Messages Opened!</div>
+                        <div style="font-size: 12px; opacity: 0.9;">
+                            Contact: ${contactName}<br>
+                            Method: ${methodText[result.method] || result.method}<br>
+                            ${result.target ? `Target: ${result.target}` : ''}
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(successMsg);
+                    
+                    // Auto-remove success message
+                    setTimeout(() => {
+                        if (successMsg.parentNode) {
+                            successMsg.parentNode.removeChild(successMsg);
+                        }
+                    }, 4000);
+                    
+                    // Reset button
                     setTimeout(() => {
                         button.textContent = originalText;
                         button.style.background = '#27ae60';
                     }, 2000);
+                    
                 } else {
-                    alert('Could not open Messages app. Please try manually.');
+                    console.error('❌ Failed to open Messages:', result);
+                    alert(`Could not open Messages app for ${contactName}. Please try manually.\n\nError: ${result.error || 'Unknown error'}`);
                 }
             } catch (error) {
                 console.error('Error opening Messages:', error);
                 alert('Error opening Messages app. Please try manually.');
             }
+        }
+
+        async function getSmartMessage(contactName, rawContact, isResolved) {
+            try {
+                console.log(`🤖 Getting smart message for: ${contactName} (${rawContact})`);
+                
+                // Show loading state
+                const button = event.target;
+                const originalText = button.textContent;
+                button.textContent = '🤖 Analyzing...';
+                button.disabled = true;
+                
+                const response = await fetch('/api/smart-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        phoneNumber: rawContact,
+                        contactName: contactName,
+                        daysBack: 30,
+                        birthdayContact: event.target.closest('.contact-item').querySelector('[style*="BIRTHDAY"]') !== null,
+                        specialOccasion: event.target.closest('.contact-item').querySelector('[style*="BIRTHDAY"]') ? 'birthday' : null
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    // Create modal to show smart message suggestions
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0,0,0,0.7);
+                        z-index: 10000;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                    `;
+                    
+                    const modalContent = document.createElement('div');
+                    modalContent.style.cssText = `
+                        background: white;
+                        border-radius: 12px;
+                        padding: 30px;
+                        max-width: 600px;
+                        width: 90%;
+                        max-height: 80vh;
+                        overflow-y: auto;
+                        box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+                    `;
+                    
+                    const analysis = result.analysis;
+                    modalContent.innerHTML = `
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                            <h2 style="margin: 0; color: #9b59b6;">🤖 Smart Message for ${contactName}</h2>
+                            <button onclick="this.closest('.modal').remove(); event.stopPropagation();" style="background: none; border: none; font-size: 24px; cursor: pointer; margin-left: auto;">×</button>
+                        </div>
+                        
+                        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 10px 0; color: #666;">📊 Relationship Context</h4>
+                            ${analysis.relationship ? `
+                                <p style="margin: 5px 0;"><strong>Known each other:</strong> ${analysis.relationship.years_known} years</p>
+                                <p style="margin: 5px 0;"><strong>Total messages:</strong> ${analysis.relationship.total_messages}</p>
+                                <p style="margin: 5px 0;"><strong>Last contact:</strong> ${analysis.relationship.days_since_last} days ago</p>
+                                <p style="margin: 5px 0;"><strong>Balance:</strong> ${analysis.relationship.conversation_balance}</p>
+                                <p style="margin: 5px 0;"><strong>Relationship type:</strong> ${analysis.relationshipType || analysis.relationship.analysis_type}</p>
+                            ` : `
+                                <p style="margin: 5px 0;"><strong>Messages Found:</strong> ${analysis.messageCount || 0} messages</p>
+                                <p style="margin: 5px 0;"><strong>Balance:</strong> ${analysis.conversationBalance || 'No data'}</p>
+                            `}
+                            <p style="margin: 5px 0;"><strong>Topics:</strong> ${analysis.topics || 'General conversation'}</p>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 15px 0; color: #333;">💬 Suggested Messages</h4>
+                            ${analysis.suggestions.map((suggestion, index) => `
+                                <div style="background: #e8f5e8; padding: 15px; border-radius: 8px; margin-bottom: 10px; cursor: pointer; border: 2px solid transparent;" 
+                                     onclick="copyToClipboard('${suggestion.replace(/'/g, "\\'")}', this)" 
+                                     onmouseover="this.style.borderColor='#27ae60'" 
+                                     onmouseout="this.style.borderColor='transparent'">
+                                    <div style="font-weight: 500; margin-bottom: 5px;">Option ${index + 1}</div>
+                                    <div>"${suggestion}"</div>
+                                    <div style="font-size: 0.8rem; color: #666; margin-top: 8px;">Click to copy</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #eee;">
+                            <button onclick="sendMessage('${contactName}', '${rawContact}', '${isResolved}'); this.closest('.modal').remove();" 
+                                    style="background: #27ae60; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer; margin-right: 10px;">
+                                💌 Open Messages
+                            </button>
+                            <button onclick="this.closest('.modal').remove();" 
+                                    style="background: #6c757d; color: white; border: none; padding: 12px 24px; border-radius: 6px; cursor: pointer;">
+                                Close
+                            </button>
+                        </div>
+                    `;
+                    
+                    modal.appendChild(modalContent);
+                    modal.className = 'modal';
+                    document.body.appendChild(modal);
+                    
+                    // Close modal when clicking outside
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) {
+                            modal.remove();
+                        }
+                    });
+                    
+                } else {
+                    console.error('❌ Failed to get smart message:', result);
+                    alert(`Could not analyze conversation for ${contactName}.\n\nError: ${result.error || 'Unknown error'}`);
+                }
+                
+                // Reset button
+                button.textContent = originalText;
+                button.disabled = false;
+                
+            } catch (error) {
+                console.error('Error getting smart message:', error);
+                alert('Error analyzing conversation. Please try manually.');
+                
+                // Reset button
+                const button = event.target;
+                button.textContent = '🤖 Smart Message';
+                button.disabled = false;
+            }
+        }
+
+        // Helper function to copy text to clipboard
+        function copyToClipboard(text, element) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalBg = element.style.background;
+                element.style.background = '#d4edda';
+                element.innerHTML = element.innerHTML.replace('Click to copy', '✅ Copied!');
+                
+                setTimeout(() => {
+                    element.style.background = originalBg;
+                    element.innerHTML = element.innerHTML.replace('✅ Copied!', 'Click to copy');
+                }, 2000);
+            }).catch(err => {
+                console.error('Failed to copy text: ', err);
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                element.innerHTML = element.innerHTML.replace('Click to copy', '✅ Copied!');
+                setTimeout(() => {
+                    element.innerHTML = element.innerHTML.replace('✅ Copied!', 'Click to copy');
+                }, 2000);
+            });
         }
 
         async function openMessages() {
@@ -1252,6 +2207,370 @@
                 URL.revokeObjectURL(url);
             });
         }
+
+        // AI Task Scheduler Functions
+        let pendingSchedule = null;
+        let currentScheduleData = null;
+        let editingItemIndex = null;
+
+        async function scheduleTasksWithAI() {
+            // Check if there are any tasks to schedule
+            const totalTasks = Object.values(tasks).flat().length;
+            if (totalTasks === 0) {
+                alert('Please add some tasks first before scheduling!');
+                return;
+            }
+
+            // Show modal and loading state
+            document.getElementById('schedule-modal').style.display = 'flex';
+            document.getElementById('schedule-loading').style.display = 'block';
+            document.getElementById('schedule-preview').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/ai-schedule-tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        tasks: tasks,
+                        preferences: {
+                            workingHours: '9 AM - 6 PM',
+                            energyPreference: 'High energy tasks in morning, lighter tasks in afternoon'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentScheduleData = data;
+                    displaySchedulePreview(data);
+                    pendingSchedule = data.formatted_events;
+                } else {
+                    throw new Error(data.message || 'Failed to create schedule');
+                }
+                
+            } catch (error) {
+                console.error('Error creating schedule:', error);
+                alert('Sorry, I had trouble creating your schedule. Please try again.');
+                closeScheduleModal();
+            } finally {
+                document.getElementById('schedule-loading').style.display = 'none';
+            }
+        }
+
+        function displaySchedulePreview(scheduleData) {
+            document.getElementById('schedule-preview').style.display = 'block';
+            
+            // Update summary
+            const summaryContent = document.getElementById('schedule-summary-content');
+            summaryContent.innerHTML = `
+                <h3 style="margin: 0 0 10px 0;">📊 Schedule Overview</h3>
+                <p style="margin: 5px 0;"><strong>Total Time:</strong> ${scheduleData.total_time}</p>
+                <p style="margin: 5px 0;"><strong>Events:</strong> ${scheduleData.events_count} calendar blocks</p>
+                <p style="margin: 10px 0 0 0;">${scheduleData.summary}</p>
+            `;
+            
+            // Update timeline with editing controls
+            const timeline = document.getElementById('schedule-timeline');
+            timeline.innerHTML = scheduleData.schedule.map((item, index) => {
+                const startDate = new Date(`${item.start_date}T${item.start_time}`);
+                const endDate = new Date(`${item.end_date}T${item.end_time}`);
+                const timeStr = `${startDate.toLocaleDateString()} ${startDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} - ${endDate.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}`;
+                
+                return `
+                    <div class="schedule-item editable ${item.task_type}" data-index="${index}" ${item.removed ? 'style="display: none;"' : ''}>
+                        <div class="schedule-controls">
+                            <div class="control-btn edit" onclick="editScheduleItem(${index})" title="Edit time">⏰</div>
+                            <div class="control-btn remove" onclick="removeScheduleItem(${index})" title="Remove task">×</div>
+                        </div>
+                        <div class="schedule-time">${timeStr}</div>
+                        <div class="schedule-details">
+                            <div class="schedule-title">${item.title}</div>
+                            <div class="schedule-task">📋 ${item.task_text}</div>
+                            <div class="schedule-reasoning">💡 ${item.reasoning}</div>
+                        </div>
+                        <div class="energy-badge ${item.energy_level}">${item.energy_level.toUpperCase()}</div>
+                        
+                        <div class="time-editor" id="editor-${index}">
+                            <div class="time-inputs">
+                                <div class="time-input-group">
+                                    <label>Start Date</label>
+                                    <input type="date" id="start-date-${index}" value="${item.start_date}">
+                                </div>
+                                <div class="time-input-group">
+                                    <label>Start Time</label>
+                                    <input type="time" id="start-time-${index}" value="${item.start_time}">
+                                </div>
+                                <div class="time-input-group">
+                                    <label>Duration</label>
+                                    <select id="duration-${index}">
+                                        <option value="15" ${item.duration_minutes === 15 ? 'selected' : ''}>15 min</option>
+                                        <option value="30" ${item.duration_minutes === 30 ? 'selected' : ''}>30 min</option>
+                                        <option value="45" ${item.duration_minutes === 45 ? 'selected' : ''}>45 min</option>
+                                        <option value="60" ${item.duration_minutes === 60 ? 'selected' : ''}>1 hour</option>
+                                        <option value="90" ${item.duration_minutes === 90 ? 'selected' : ''}>1.5 hours</option>
+                                        <option value="120" ${item.duration_minutes === 120 ? 'selected' : ''}>2 hours</option>
+                                        <option value="180" ${item.duration_minutes === 180 ? 'selected' : ''}>3 hours</option>
+                                        <option value="240" ${item.duration_minutes === 240 ? 'selected' : ''}>4 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="time-editor-actions">
+                                <button class="time-save-btn" onclick="saveScheduleEdit(${index})">Save</button>
+                                <button class="time-cancel-btn" onclick="cancelScheduleEdit(${index})">Cancel</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+            
+            // Update tips
+            if (scheduleData.tips && scheduleData.tips.length > 0) {
+                document.getElementById('schedule-tips').style.display = 'block';
+                document.getElementById('schedule-tips-list').innerHTML = 
+                    scheduleData.tips.map(tip => `<li>${tip}</li>`).join('');
+            }
+        }
+
+        async function confirmSchedule() {
+            if (!pendingSchedule) return;
+            
+            try {
+                const confirmBtn = document.querySelector('.schedule-confirm-btn');
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = 'Creating Events...';
+                
+                const response = await fetch('/api/ai-schedule-tasks/confirm', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ events: pendingSchedule })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Show success message
+                    alert(`🎉 ${data.summary}\n\nYour calendar has been updated with optimized task blocks!`);
+                    
+                    // Close modal
+                    closeScheduleModal();
+                    
+                    // Optionally clear completed tasks or mark them as scheduled
+                    // markTasksAsScheduled();
+                    
+                } else {
+                    throw new Error(data.message || 'Failed to create calendar events');
+                }
+                
+            } catch (error) {
+                console.error('Error confirming schedule:', error);
+                alert('Sorry, there was an error creating your calendar events. Please try again.');
+            } finally {
+                const confirmBtn = document.querySelector('.schedule-confirm-btn');
+                confirmBtn.disabled = false;
+                confirmBtn.textContent = '✅ Schedule All Tasks';
+            }
+        }
+
+        function closeScheduleModal() {
+            document.getElementById('schedule-modal').style.display = 'none';
+            pendingSchedule = null;
+            currentScheduleData = null;
+            editingItemIndex = null;
+        }
+
+        // Schedule Editing Functions
+        function editScheduleItem(index) {
+            // Close any other open editors
+            document.querySelectorAll('.time-editor').forEach(editor => {
+                editor.classList.remove('active');
+            });
+            
+            // Open this editor
+            const editor = document.getElementById(`editor-${index}`);
+            editor.classList.add('active');
+            editingItemIndex = index;
+        }
+
+        function cancelScheduleEdit(index) {
+            const editor = document.getElementById(`editor-${index}`);
+            editor.classList.remove('active');
+            editingItemIndex = null;
+        }
+
+        function saveScheduleEdit(index) {
+            const startDate = document.getElementById(`start-date-${index}`).value;
+            const startTime = document.getElementById(`start-time-${index}`).value;
+            const duration = parseInt(document.getElementById(`duration-${index}`).value);
+            
+            // Update the schedule data
+            const item = currentScheduleData.schedule[index];
+            item.start_date = startDate;
+            item.start_time = startTime;
+            item.duration_minutes = duration;
+            
+            // Calculate new end time
+            const startDateTime = new Date(`${startDate}T${startTime}`);
+            const endDateTime = new Date(startDateTime.getTime() + duration * 60000);
+            item.end_date = endDateTime.toISOString().split('T')[0];
+            item.end_time = endDateTime.toTimeString().slice(0, 5);
+            
+            // Update the formatted events for calendar creation
+            updateFormattedEvents();
+            
+            // Refresh the display
+            displaySchedulePreview(currentScheduleData);
+            
+            // Close editor
+            cancelScheduleEdit(index);
+        }
+
+        function removeScheduleItem(index) {
+            if (confirm('Remove this task from the schedule?')) {
+                // Mark as removed
+                currentScheduleData.schedule[index].removed = true;
+                
+                // Update formatted events
+                updateFormattedEvents();
+                
+                // Update the display
+                const item = document.querySelector(`[data-index="${index}"]`);
+                item.classList.add('removed-item');
+                item.style.display = 'none';
+                
+                // Update summary
+                updateScheduleSummary();
+            }
+        }
+
+        function updateFormattedEvents() {
+            // Regenerate formatted events from current schedule data
+            pendingSchedule = currentScheduleData.schedule
+                .filter(item => !item.removed)
+                .map(item => ({
+                    summary: item.title,
+                    description: `📋 Task: ${item.task_text}\n\n🧠 Energy Level: ${item.energy_level}\n💡 Reasoning: ${item.reasoning}`,
+                    start: new Date(`${item.start_date}T${item.start_time}`).toISOString(),
+                    end: new Date(`${item.end_date}T${item.end_time}`).toISOString(),
+                    colorId: item.task_type === 'big' ? '11' : item.task_type === 'medium' ? '9' : '2',
+                    extendedProperties: {
+                        private: {
+                            lifeops_task_id: item.task_id,
+                            lifeops_task_type: item.task_type,
+                            lifeops_energy_level: item.energy_level
+                        }
+                    }
+                }));
+        }
+
+        function updateScheduleSummary() {
+            const activeItems = currentScheduleData.schedule.filter(item => !item.removed);
+            const totalMinutes = activeItems.reduce((sum, item) => sum + item.duration_minutes, 0);
+            const hours = Math.floor(totalMinutes / 60);
+            const minutes = totalMinutes % 60;
+            const totalTime = hours > 0 ? `${hours} hours ${minutes} minutes` : `${minutes} minutes`;
+            
+            currentScheduleData.total_time = totalTime;
+            currentScheduleData.events_count = activeItems.length;
+            
+            // Update summary display
+            const summaryContent = document.getElementById('schedule-summary-content');
+            summaryContent.innerHTML = `
+                <h3 style="margin: 0 0 10px 0;">📊 Schedule Overview</h3>
+                <p style="margin: 5px 0;"><strong>Total Time:</strong> ${totalTime}</p>
+                <p style="margin: 5px 0;"><strong>Events:</strong> ${activeItems.length} calendar blocks</p>
+                <p style="margin: 10px 0 0 0;">${currentScheduleData.summary}</p>
+            `;
+        }
+
+        async function regenerateSchedule() {
+            // Just call the original scheduling function again
+            document.getElementById('schedule-loading').style.display = 'block';
+            document.getElementById('schedule-preview').style.display = 'none';
+            
+            try {
+                const response = await fetch('/api/ai-schedule-tasks', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        tasks: tasks,
+                        preferences: {
+                            workingHours: '9 AM - 6 PM',
+                            energyPreference: 'High energy tasks in morning, lighter tasks in afternoon'
+                        }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    currentScheduleData = data;
+                    displaySchedulePreview(data);
+                    pendingSchedule = data.formatted_events;
+                }
+                
+            } catch (error) {
+                console.error('Error regenerating schedule:', error);
+                alert('Sorry, I had trouble regenerating your schedule.');
+            } finally {
+                document.getElementById('schedule-loading').style.display = 'none';
+            }
+        }
+
+        async function regenerateScheduleWithConstraints() {
+            // This could open a preferences dialog in the future
+            const workingHours = prompt('Preferred working hours (e.g., "8 AM - 5 PM"):', '9 AM - 6 PM');
+            const energyPreference = prompt('Energy preference:', 'High energy tasks in morning, lighter tasks in afternoon');
+            
+            if (workingHours) {
+                document.getElementById('schedule-loading').style.display = 'block';
+                document.getElementById('schedule-preview').style.display = 'none';
+                
+                try {
+                    const response = await fetch('/api/ai-schedule-tasks', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ 
+                            tasks: tasks,
+                            preferences: {
+                                workingHours: workingHours,
+                                energyPreference: energyPreference
+                            }
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        currentScheduleData = data;
+                        displaySchedulePreview(data);
+                        pendingSchedule = data.formatted_events;
+                    }
+                    
+                } catch (error) {
+                    console.error('Error regenerating schedule:', error);
+                    alert('Sorry, I had trouble regenerating your schedule.');
+                } finally {
+                    document.getElementById('schedule-loading').style.display = 'none';
+                }
+            }
+        }
+
+        // Close modal when clicking outside
+        document.addEventListener('click', function(event) {
+            const modal = document.getElementById('schedule-modal');
+            if (event.target === modal) {
+                closeScheduleModal();
+            }
+        });
 
         // Email Analysis Functions
         async function analyzeEmails() {
@@ -1356,6 +2675,376 @@
             });
         }
 
+        // Email AI Chat Functions
+        let emailChatVisible = false;
+        let conversationHistory = [];
+
+        function toggleEmailChat() {
+            const chatContainer = document.getElementById('ai-email-chat');
+            const chatFab = document.querySelector('.email-chat-fab');
+            
+            emailChatVisible = !emailChatVisible;
+            
+            if (emailChatVisible) {
+                chatContainer.style.display = 'flex';
+                chatFab.style.display = 'none';
+                document.getElementById('email-chat-input').focus();
+            } else {
+                chatContainer.style.display = 'none';
+                chatFab.style.display = 'block';
+            }
+        }
+
+        function handleEmailChatKeyPress(event) {
+            if (event.key === 'Enter' && !event.shiftKey) {
+                event.preventDefault();
+                sendEmailChatMessage();
+            }
+        }
+
+        async function sendEmailChatMessage() {
+            const input = document.getElementById('email-chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Clear input and add user message
+            input.value = '';
+            addEmailMessage('user', message);
+            
+            // Add to conversation history
+            conversationHistory.push({ role: 'user', content: message });
+            
+            // Show typing indicator
+            showEmailTypingIndicator();
+            
+            try {
+                const response = await fetch('/api/ai-email', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        conversationHistory: conversationHistory 
+                    })
+                });
+                
+                const data = await response.json();
+                hideEmailTypingIndicator();
+                
+                // Add to conversation history
+                conversationHistory.push({ role: 'assistant', content: data.response });
+                
+                // Add AI response
+                addEmailMessage('ai', data.response);
+                
+                // Handle different actions
+                if (data.action === 'draft' && data.email_details) {
+                    showEmailDraftConfirmation(data.email_details);
+                } else if (data.action === 'confirm') {
+                    // This could trigger actual email sending
+                    addEmailMessage('ai', 'Email functionality ready for implementation!');
+                } else if (data.serviceStatus && !data.serviceStatus.serviceReady) {
+                    addEmailMessage('ai', 'Please ensure OpenAI API key and Gmail authentication are properly configured.');
+                }
+                
+            } catch (error) {
+                console.error('Email chat error:', error);
+                hideEmailTypingIndicator();
+                addEmailMessage('ai', "I'm having trouble processing your request. Please try again.");
+            }
+        }
+
+        function addEmailMessage(sender, content) {
+            const messagesContainer = document.getElementById('email-chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${sender}`;
+            
+            const avatar = sender === 'user' ? '👤' : '📧';
+            
+            messageDiv.innerHTML = `
+                <div class="message-avatar">${avatar}</div>
+                <div class="message-content">${content}</div>
+            `;
+            
+            messagesContainer.appendChild(messageDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showEmailDraftConfirmation(emailDetails) {
+            const confirmationDiv = document.createElement('div');
+            confirmationDiv.className = 'email-draft-confirmation';
+            confirmationDiv.innerHTML = `
+                <div class="draft-preview">
+                    <h4>📝 Email Draft Preview</h4>
+                    <div class="draft-details">
+                        <p><strong>To:</strong> ${emailDetails.recipient || 'Not specified'}</p>
+                        <p><strong>Subject:</strong> ${emailDetails.subject || 'No subject'}</p>
+                        <div class="draft-body">
+                            <strong>Body:</strong>
+                            <div class="body-preview">${emailDetails.body || 'No content'}</div>
+                        </div>
+                        <p><strong>Tone:</strong> ${emailDetails.tone || 'professional'}</p>
+                        <p><strong>Priority:</strong> ${emailDetails.priority || 'medium'}</p>
+                    </div>
+                    <div class="draft-actions">
+                        <button onclick="sendEmailDraft()" class="draft-btn send">Send Email</button>
+                        <button onclick="editEmailDraft()" class="draft-btn edit">Edit Draft</button>
+                        <button onclick="cancelEmailDraft()" class="draft-btn cancel">Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            const messagesContainer = document.getElementById('email-chat-messages');
+            messagesContainer.appendChild(confirmationDiv);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function sendEmailDraft() {
+            addEmailMessage('ai', 'Email sending functionality will be implemented soon! Your draft looks great.');
+        }
+
+        function editEmailDraft() {
+            addEmailMessage('ai', 'What changes would you like me to make to the email?');
+        }
+
+        function cancelEmailDraft() {
+            addEmailMessage('ai', 'Draft cancelled. How else can I help with your emails?');
+        }
+
+        function showEmailTypingIndicator() {
+            document.getElementById('email-typing-indicator').style.display = 'flex';
+            const messagesContainer = document.getElementById('email-chat-messages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideEmailTypingIndicator() {
+            document.getElementById('email-typing-indicator').style.display = 'none';
+        }
+
+        // Email Relationship Intelligence Functions
+        async function loadRelationshipStatus() {
+            try {
+                const response = await fetch('/api/email-relationships/status');
+                const status = await response.json();
+                
+                const statusContent = document.getElementById('status-content');
+                const analysisBtn = document.getElementById('analysisBtn');
+                
+                if (status.processing) {
+                    const proc = status.processing;
+                    if (proc.status === 'running') {
+                        statusContent.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                <div>
+                                    <strong>Analysis in Progress</strong><br>
+                                    📧 Processed: ${proc.emails_processed || 0} emails<br>
+                                    ⏱️ Started: ${new Date(proc.start_date).toLocaleString()}
+                                </div>
+                            </div>
+                        `;
+                        analysisBtn.disabled = true;
+                        analysisBtn.textContent = '⏳ Processing...';
+                    } else if (proc.status === 'completed') {
+                        statusContent.innerHTML = `
+                            <div>
+                                <strong>✅ Analysis Complete!</strong><br>
+                                📧 Processed: ${proc.emails_processed || 0} emails<br>
+                                🏁 Completed: ${new Date(proc.end_date).toLocaleString()}
+                            </div>
+                        `;
+                        analysisBtn.textContent = '🔄 Re-analyze';
+                        analysisBtn.disabled = false;
+                        
+                        // Load dormant relationships
+                        loadDormantRelationships();
+                        loadRelationshipInsights();
+                    }
+                } else {
+                    statusContent.innerHTML = `
+                        <div>
+                            <strong>🚀 Ready to Start</strong><br>
+                            Click "Start 5-Year Analysis" to begin processing your email history and discover relationship insights.
+                        </div>
+                    `;
+                    analysisBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error loading relationship status:', error);
+                document.getElementById('status-content').innerHTML = `
+                    <div style="color: #ff6b6b;">
+                        ❌ Error loading status. Please try again.
+                    </div>
+                `;
+            }
+        }
+
+        async function startRelationshipAnalysis() {
+            const btn = document.getElementById('analysisBtn');
+            const statusContent = document.getElementById('status-content');
+            
+            try {
+                btn.disabled = true;
+                btn.textContent = '🚀 Starting...';
+                
+                statusContent.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <div style="width: 20px; height: 20px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <div>Starting analysis of your email history...</div>
+                    </div>
+                `;
+                
+                const response = await fetch('/api/email-relationships/analyze', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ yearsBack: 5 })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    statusContent.innerHTML = `
+                        <div>
+                            <strong>✅ Analysis Started!</strong><br>
+                            Processing ${result.yearsBack} years of email history. This may take several minutes.
+                        </div>
+                    `;
+                    
+                    btn.textContent = '⏳ Processing...';
+                    
+                    // Poll for status updates
+                    pollRelationshipStatus();
+                } else {
+                    throw new Error(result.message || 'Failed to start analysis');
+                }
+            } catch (error) {
+                console.error('Error starting relationship analysis:', error);
+                statusContent.innerHTML = `
+                    <div style="color: #ff6b6b;">
+                        ❌ Error: ${error.message}
+                    </div>
+                `;
+                btn.disabled = false;
+                btn.textContent = '🚀 Start 5-Year Analysis';
+            }
+        }
+
+        async function loadDormantRelationships() {
+            try {
+                const response = await fetch('/api/email-relationships/dormant?days=30&minInteractions=5');
+                const relationships = await response.json();
+                
+                const container = document.getElementById('dormant-relationships');
+                
+                if (relationships.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #7f8c8d;">
+                            <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
+                            <p>Great! No dormant relationships found.<br>You're staying connected well.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                container.innerHTML = relationships.map(rel => `
+                    <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #e74c3c;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <strong>${rel.display_name || rel.email_address}</strong><br>
+                                <small style="color: #7f8c8d;">${rel.email_address}</small>
+                            </div>
+                            <div style="text-align: right; font-size: 0.9rem; color: #7f8c8d;">
+                                ${Math.round(rel.days_since_last_contact)} days ago<br>
+                                ${rel.total_interactions} interactions
+                            </div>
+                        </div>
+                        <div style="margin-top: 10px;">
+                            <button onclick="suggestMessage('${rel.email_address}')" style="background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                                💡 Suggest Message
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading dormant relationships:', error);
+                document.getElementById('dormant-relationships').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ff6b6b;">
+                        ❌ Error loading dormant relationships
+                    </div>
+                `;
+            }
+        }
+
+        async function loadRelationshipInsights() {
+            try {
+                const response = await fetch('/api/email-relationships/insights');
+                const insights = await response.json();
+                
+                const container = document.getElementById('relationship-insights');
+                
+                container.innerHTML = `
+                    <div style="padding: 20px;">
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2c3e50;">📊 Communication Overview</h4>
+                            <div style="font-size: 0.9rem; line-height: 1.5;">
+                                • <strong>${insights.totalRelationships || 0}</strong> relationships tracked<br>
+                                • <strong>${insights.totalEmails || 0}</strong> emails analyzed<br>
+                                • <strong>${insights.avgHealthScore || 0}</strong> average relationship health
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <h4 style="margin: 0 0 10px 0; color: #2c3e50;">🎯 Quick Actions</h4>
+                            <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                                <button onclick="loadDormantRelationships()" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    🔍 Find Dormant
+                                </button>
+                                <button onclick="loadRelationshipStatus()" style="background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
+                                    🔄 Refresh
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+            } catch (error) {
+                console.error('Error loading relationship insights:', error);
+                document.getElementById('relationship-insights').innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ff6b6b;">
+                        ❌ Error loading insights
+                    </div>
+                `;
+            }
+        }
+
+        async function suggestMessage(emailAddress) {
+            try {
+                const response = await fetch('/api/email-relationships/suggest-message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ emailAddress })
+                });
+                
+                const result = await response.json();
+                
+                if (result.suggestion) {
+                    alert(`Suggested message for ${emailAddress}:\n\n"${result.suggestion}"\n\nWould you like to compose this email?`);
+                } else {
+                    alert('Unable to generate message suggestion at this time.');
+                }
+            } catch (error) {
+                console.error('Error getting message suggestion:', error);
+                alert('Error generating message suggestion. Please try again.');
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             updateTimerDisplay();
@@ -1366,7 +3055,473 @@
             if (currentSection === 'check-ins') {
                 loadCheckIns();
             }
+
+            // Auto-resize email chat input
+            const emailChatInput = document.getElementById('email-chat-input');
+            if (emailChatInput) {
+                emailChatInput.addEventListener('input', function() {
+                    this.style.height = 'auto';
+                    this.style.height = Math.min(this.scrollHeight, 80) + 'px';
+                });
+            }
         });
+
+        // Configuration Management Functions
+        let presets = {};
+
+        async function loadPresets() {
+            try {
+                const response = await fetch('/api/check-ins/presets');
+                const data = await response.json();
+                if (data.success) {
+                    presets = data.presets;
+                }
+            } catch (error) {
+                console.error('Error loading presets:', error);
+            }
+        }
+
+        function toggleConfigPanel() {
+            const detailedControls = document.getElementById('detailedControls');
+            const toggleBtn = document.getElementById('toggleConfig');
+            
+            if (detailedControls.style.display === 'none') {
+                detailedControls.style.display = 'grid';
+                toggleBtn.textContent = '⬆️ Hide';
+                
+                // Populate current values
+                document.getElementById('daysThreshold').value = currentConfig.daysThreshold;
+                document.getElementById('lookbackDays').value = currentConfig.lookbackDays;
+                document.getElementById('sortBy').value = currentConfig.sortBy;
+                document.getElementById('filterType').value = currentConfig.filterType;
+            } else {
+                detailedControls.style.display = 'none';
+                toggleBtn.textContent = '⚙️ Configure';
+            }
+        }
+
+        async function loadPreset(presetKey) {
+            try {
+                console.log(`📋 Loading preset: ${presetKey}`);
+                
+                if (!presets[presetKey]) {
+                    await loadPresets();
+                }
+                
+                const preset = presets[presetKey];
+                if (!preset) {
+                    console.error('Preset not found:', presetKey);
+                    return;
+                }
+                
+                // Update current config
+                currentConfig = { ...preset.config };
+                
+                // Update UI to show what's happening
+                updateConfigDisplay(preset.name, preset.description);
+                
+                // Apply the preset
+                await loadCheckIns(currentConfig);
+                
+                // Highlight the active preset button
+                document.querySelectorAll('.preset-btn').forEach(btn => {
+                    btn.style.opacity = '0.7';
+                    btn.style.transform = 'scale(1)';
+                });
+                
+                const activeBtn = document.querySelector(`[onclick="loadPreset('${presetKey}')"]`);
+                if (activeBtn) {
+                    activeBtn.style.opacity = '1';
+                    activeBtn.style.transform = 'scale(1.05)';
+                    activeBtn.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+                }
+                
+            } catch (error) {
+                console.error('Error loading preset:', error);
+            }
+        }
+
+        function applyCustomConfig() {
+            // Get values from form
+            const newConfig = {
+                daysThreshold: parseInt(document.getElementById('daysThreshold').value),
+                lookbackDays: parseInt(document.getElementById('lookbackDays').value),
+                maxContacts: 15, // Keep this fixed for now
+                sortBy: document.getElementById('sortBy').value,
+                filterType: document.getElementById('filterType').value,
+                minMessages: 2 // Keep this fixed for now
+            };
+            
+            // Update global config
+            currentConfig = newConfig;
+            
+            // Update display
+            updateConfigDisplay('Custom Configuration', getConfigDescription(newConfig));
+            
+            // Apply changes
+            loadCheckIns(currentConfig);
+            
+            // Reset preset button highlights
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.style.opacity = '0.7';
+                btn.style.transform = 'scale(1)';
+                btn.style.boxShadow = 'none';
+            });
+        }
+
+        function updateConfigDisplay(title, description) {
+            const currentConfigDiv = document.getElementById('currentConfig');
+            currentConfigDiv.innerHTML = `<strong>${title}:</strong> ${description}`;
+        }
+
+        function getConfigDescription(config) {
+            const parts = [];
+            
+            if (config.daysThreshold === 1) {
+                parts.push('showing very recent contacts');
+            } else if (config.daysThreshold <= 7) {
+                parts.push('showing recent contacts');
+            } else if (config.daysThreshold <= 30) {
+                parts.push('showing contacts from past month');
+            } else {
+                parts.push(`showing contacts not contacted in ${config.daysThreshold}+ days`);
+            }
+            
+            if (config.sortBy === 'messageCount') {
+                parts.push('sorted by message frequency');
+            } else if (config.sortBy === 'random') {
+                parts.push('in random order');
+            } else {
+                parts.push('sorted by time since last contact');
+            }
+            
+            if (config.filterType === 'resolved') {
+                parts.push('(named contacts only)');
+            } else if (config.filterType === 'unresolved') {
+                parts.push('(phone numbers only)');
+            }
+            
+            return parts.join(', ');
+        }
+
+        // Load presets when page loads
+        loadPresets();
+
     </script>
+
+    <!-- Email AI Chat FAB - Only show on emails section -->
+    <button class="email-chat-fab" id="email-chat-fab" onclick="toggleEmailChat()" title="Ask AI to help with emails" style="display: none;">
+        📧
+    </button>
+
+    <!-- Email AI Chat Container -->
+    <div id="ai-email-chat" class="ai-chat-container">
+        <div class="chat-header">
+            <h3>📧 AI Email Assistant</h3>
+            <button class="chat-close" onclick="toggleEmailChat()">×</button>
+        </div>
+        
+        <div class="chat-messages" id="email-chat-messages">
+            <!-- Initial AI greeting message -->
+            <div class="message ai">
+                <div class="message-avatar">📧</div>
+                <div class="message-content">
+                    Hi! I'm your AI email assistant. I can help you compose emails, reply to messages, and manage your inbox using natural language. Try saying:
+                    <br><br>
+                    • "Draft an email to John about the project update"
+                    • "Help me reply to Sarah's message about the meeting"
+                    • "Compose a professional follow-up email"
+                    • "Write a thank you email to the team"
+                </div>
+            </div>
+        </div>
+
+        <div class="typing-indicator" id="email-typing-indicator">
+            <div class="message-avatar">📧</div>
+            <div>
+                AI is thinking
+                <div class="typing-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="chat-input-container">
+            <textarea 
+                id="email-chat-input" 
+                class="chat-input" 
+                placeholder="Tell me what email you'd like to create..."
+                onkeypress="handleEmailChatKeyPress(event)"
+                rows="1"
+            ></textarea>
+        </div>
+    </div>
+
+    <style>
+        /* Email Chat FAB Styles */
+        .email-chat-fab {
+            position: fixed;
+            bottom: 20px;
+            right: 20px; /* Bottom-right position like calendar */
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            border: none;
+            border-radius: 50%;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+            z-index: 999;
+        }
+
+        .email-chat-fab:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.4);
+        }
+
+        /* Email Chat Container */
+        .ai-chat-container {
+            position: fixed;
+            bottom: 20px;
+            right: 20px; /* Bottom-right position like calendar */
+            width: 400px;
+            height: 500px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+            overflow: hidden;
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chat-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+        }
+
+        .chat-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+
+        .chat-close:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .chat-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            display: flex;
+            gap: 10px;
+            max-width: 80%;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+        }
+
+        .message-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+            background: #28a745;
+            color: white;
+        }
+
+        .message.user .message-avatar {
+            background: #007bff;
+        }
+
+        .message-content {
+            background: #f8f9fa;
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .message.user .message-content {
+            background: #007bff;
+            color: white;
+        }
+
+        .message.ai .message-content {
+            background: #e8f5e8;
+            color: #2c3e50;
+        }
+
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 10px;
+            color: #7f8c8d;
+            font-style: italic;
+            font-size: 0.85rem;
+            padding: 0 20px;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 3px;
+        }
+
+        .typing-dots span {
+            width: 4px;
+            height: 4px;
+            background: #7f8c8d;
+            border-radius: 50%;
+            animation: typing 1.4s infinite;
+        }
+
+        .typing-dots span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dots span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+
+        .chat-input-container {
+            padding: 15px 20px;
+            border-top: 1px solid #e9ecef;
+            background: #f8f9fa;
+        }
+
+        .chat-input {
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            padding: 10px 15px;
+            font-size: 0.9rem;
+            outline: none;
+            resize: none;
+            min-height: 20px;
+            max-height: 80px;
+        }
+
+        .chat-input:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.2);
+        }
+
+        /* Email Draft Preview Styles */
+        .email-draft-confirmation {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .draft-preview h4 {
+            margin: 0 0 10px 0;
+            color: #856404;
+        }
+
+        .draft-details {
+            margin: 10px 0;
+            font-size: 0.9rem;
+        }
+
+        .draft-details p {
+            margin: 5px 0;
+        }
+
+        .body-preview {
+            background: white;
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+            margin-top: 5px;
+            max-height: 100px;
+            overflow-y: auto;
+        }
+
+        .draft-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .draft-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.3s;
+        }
+
+        .draft-btn.send {
+            background: #28a745;
+            color: white;
+        }
+
+        .draft-btn.edit {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .draft-btn.cancel {
+            background: #6c757d;
+            color: white;
+        }
+
+        .draft-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+    </style>
 </body>
 </html>

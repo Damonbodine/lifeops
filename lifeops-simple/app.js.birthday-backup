@@ -2792,8 +2792,10 @@ async function analyzeConversationAndSuggestMessage(phoneNumber, contactName, da
     const lastMessage = messages[0]; // Most recent message (messages are ordered DESC)
     const daysSinceLastMessage = relationship.days_since_last;
     
-    // Check if this is a birthday message request (passed as parameter)
-    const isBirthdayMessage = false; // Will be fixed to accept as parameter
+    // Check if this is a birthday message request
+    const isBirthdayMessage = req.body.birthdayContact || 
+      (req.body.reason && req.body.reason.includes('birthday')) ||
+      (contactName && daysSinceLastMessage <= 1 && req.body.specialOccasion === 'birthday');
     
     // Create relationship-aware GPT prompt
     const isDormantRelationship = daysSinceLastMessage > 30;
