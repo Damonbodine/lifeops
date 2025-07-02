@@ -283,241 +283,6 @@
             margin-bottom: 20px;
             text-align: center;
         }
-
-        /* Email Analysis Styles */
-        .email-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-
-        .email-card {
-            background: white;
-            border-radius: 12px;
-            padding: 25px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .email-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .email-header {
-            margin-bottom: 15px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 15px;
-        }
-
-        .email-subject {
-            font-size: 1.3rem;
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-
-        .email-from {
-            color: #7f8c8d;
-            font-size: 0.95rem;
-        }
-
-        .email-summary {
-            background: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            margin: 15px 0;
-            border-left: 4px solid #3498db;
-        }
-
-        .priority {
-            display: inline-block;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            margin: 10px 0;
-        }
-
-        .priority.critical {
-            background: #ffcdd2;
-            color: #c62828;
-            animation: pulse 1s infinite;
-        }
-
-        .priority.high {
-            background: #ffebee;
-            color: #c62828;
-        }
-
-        .priority.medium {
-            background: #fff3e0;
-            color: #ef6c00;
-        }
-
-        .priority.low {
-            background: #e8f5e8;
-            color: #2e7d32;
-        }
-
-        .category-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin: 5px 0;
-            text-transform: capitalize;
-        }
-
-        .category-badge.work {
-            background: #3498db;
-            color: white;
-        }
-
-        .category-badge.personal {
-            background: #9b59b6;
-            color: white;
-        }
-
-        .category-badge.promotional {
-            background: #e67e22;
-            color: white;
-        }
-
-        .category-badge.social {
-            background: #1abc9c;
-            color: white;
-        }
-
-        .category-badge.other {
-            background: #95a5a6;
-            color: white;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-
-        .action-needed {
-            margin: 10px 0;
-            font-weight: 600;
-        }
-
-        .action-needed.yes {
-            color: #e74c3c;
-        }
-
-        .action-needed.no {
-            color: #27ae60;
-        }
-
-        .key-points {
-            margin-top: 15px;
-        }
-
-        .key-points h4 {
-            margin-bottom: 8px;
-            color: #34495e;
-        }
-
-        .key-points ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .key-points li {
-            background: #ecf0f1;
-            padding: 8px 12px;
-            margin: 5px 0;
-            border-radius: 6px;
-            border-left: 3px solid #9b59b6;
-        }
-
-        .action-items {
-            margin: 15px 0;
-        }
-
-        .action-items h4 {
-            color: #27ae60;
-            margin: 0 0 10px 0;
-            font-size: 0.9rem;
-        }
-
-        .action-items ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .action-items li {
-            background: #e8f8f5;
-            padding: 8px 12px;
-            margin: 5px 0;
-            border-radius: 6px;
-            border-left: 3px solid #27ae60;
-        }
-
-        .suggested-response {
-            margin: 15px 0;
-            background: #f0f8ff;
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid #3498db;
-        }
-
-        .suggested-response h4 {
-            color: #3498db;
-            margin: 0 0 8px 0;
-            font-size: 0.9rem;
-        }
-
-        .suggested-response p {
-            margin: 0;
-            font-style: italic;
-            color: #555;
-        }
-
-        /* Scrollable contacts styles */
-        #priorityContacts::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #priorityContacts::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 4px;
-        }
-
-        #priorityContacts::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 4px;
-        }
-
-        #priorityContacts::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
-
-        .contact-item {
-            border-bottom: 1px solid #f0f0f0;
-            padding-bottom: 15px;
-            margin-bottom: 15px;
-        }
-
-        .contact-item:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-
-        .contacts-header {
-            position: sticky;
-            top: 0;
-            background: white;
-            z-index: 10;
-            padding-bottom: 10px;
-            margin-bottom: 10px;
-        }
     </style>
 </head>
 <body>
@@ -620,16 +385,13 @@
                 </div>
 
                 <div style="margin-top: 20px; text-align: center;">
-                    <p>Work Duration: <span id="sessionDurationLabel">25 minutes</span></p>
-                    <input type="range" id="sessionDuration" min="5" max="90" value="25" oninput="updateDuration()" 
-                           style="width: 100%; margin: 10px 0;">
-                    <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #7f8c8d; margin-bottom: 20px;">
-                        <span>5 min</span>
-                        <span>25 min</span>
-                        <span>45 min</span>
-                        <span>90 min</span>
-                    </div>
-                    
+                    <p>Work Duration: 
+                        <select id="sessionDuration" onchange="updateDuration()">
+                            <option value="25">25 minutes</option>
+                            <option value="45">45 minutes</option>
+                            <option value="90">90 minutes</option>
+                        </select>
+                    </p>
                     <p>Break Duration: 
                         <select id="breakDuration">
                             <option value="5">5 minutes</option>
@@ -721,24 +483,7 @@
 
         <!-- Emails Section -->
         <div id="emails" class="section" style="display: none;">
-            <h2 class="section-title">📧 Email Analysis</h2>
-            
-            <div class="feature-card" style="margin-bottom: 20px;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3>🤖 AI Email Insights</h3>
-                    <button class="btn btn-primary" onclick="analyzeEmails()">
-                        📧 Analyze Recent Emails
-                    </button>
-                </div>
-                
-                <div id="email-loading" class="loading" style="display: none;">
-                    🤖 AI is analyzing your emails...
-                </div>
-                
-                <div id="email-status" style="display: none; padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; color: white; margin: 15px 0;"></div>
-            </div>
-            
-            <div id="email-grid" class="email-grid"></div>
+            <iframe src="/" width="100%" height="600px" style="border: none; border-radius: 12px;"></iframe>
         </div>
 
         <!-- AI Score Section -->
@@ -797,11 +542,7 @@
 
                 <div class="feature-card">
                     <h3>👥 Priority Check-ins</h3>
-                    <div id="contactsStats" style="margin-bottom: 15px; padding: 10px; background: #f8f9fa; border-radius: 6px; display: none;">
-                        <span id="contactsCount" style="font-weight: bold; color: #2c3e50;"></span>
-                        <span id="contactsInsight" style="color: #7f8c8d; margin-left: 10px;"></span>
-                    </div>
-                    <div id="priorityContacts" style="max-height: 400px; overflow-y: auto; padding-right: 5px;">
+                    <div id="priorityContacts">
                         <div style="text-align: center; color: #7f8c8d; padding: 20px;">
                             <p>Analyzing your message history...</p>
                             <p>Finding friends you should reconnect with</p>
@@ -996,7 +737,6 @@
         function updateDuration() {
             if (!isRunning) {
                 const duration = parseInt(document.getElementById('sessionDuration').value);
-                document.getElementById('sessionDurationLabel').textContent = `${duration} minutes`;
                 timeRemaining = duration * 60;
                 updateTimerDisplay();
             }
@@ -1101,48 +841,24 @@
                 // Update weekly goal
                 document.getElementById('weeklyGoal').textContent = data.weeklyGoal;
                 
-                // Update contacts stats
-                const statsElement = document.getElementById('contactsStats');
-                const countElement = document.getElementById('contactsCount');
-                const insightElement = document.getElementById('contactsInsight');
-                
-                if (data.totalContacts && data.totalContacts > 0) {
-                    statsElement.style.display = 'block';
-                    const filterText = data.totalUnfiltered ? 
-                        `${data.priorityContacts.length} of ${data.totalContacts} named contacts shown (${data.totalUnfiltered} total need check-ins)` :
-                        `${data.priorityContacts.length} of ${data.totalContacts} contacts shown`;
-                    countElement.textContent = filterText;
-                    insightElement.textContent = data.insight || '';
-                }
-                
-                // Update priority contacts with scrollable display
+                // Update priority contacts
                 const contactsContainer = document.getElementById('priorityContacts');
                 if (data.priorityContacts && data.priorityContacts.length > 0) {
-                    contactsContainer.innerHTML = `
-                        <div class="contacts-header" style="margin-bottom: 15px;">
-                            <small style="color: #7f8c8d;">Scroll to see more contacts ↓</small>
-                        </div>
-                    ` + data.priorityContacts.map((contact, index) => `
-                        <div class="contact-item task-item" style="margin: 0; padding: 15px;">
+                    contactsContainer.innerHTML = data.priorityContacts.map(contact => `
+                        <div class="task-item" style="margin: 10px 0; padding: 15px;">
                             <div style="flex: 1;">
-                                <div style="font-weight: bold; margin-bottom: 5px;">
-                                    👤 ${contact.name}
-                                    <span style="background: #f0f0f0; padding: 2px 6px; border-radius: 10px; font-size: 0.8rem; margin-left: 8px;">
-                                        #${index + 1}
-                                    </span>
-                                </div>
+                                <div style="font-weight: bold; margin-bottom: 5px;">👤 ${contact.name}</div>
                                 <div style="color: #e74c3c; font-size: 0.9rem; margin-bottom: 5px;">
                                     📅 ${contact.daysSince} days since last contact
                                 </div>
                                 <div style="color: #7f8c8d; font-size: 0.9rem; margin-bottom: 10px;">
                                     ${contact.reason}
-                                    ${contact.messageCount ? `• ${contact.messageCount} messages total` : ''}
                                 </div>
                                 <div style="background: #f8f9fa; padding: 10px; border-radius: 6px; font-style: italic;">
                                     💬 "${contact.suggestedMessage}"
                                 </div>
                             </div>
-                            <button class="btn btn-success" onclick="sendMessage('${contact.rawContact || contact.name}')" style="margin-left: 15px; white-space: nowrap;">
+                            <button class="btn btn-success" onclick="sendMessage('${contact.name}')" style="margin-left: 15px; white-space: nowrap;">
                                 💌 Message
                             </button>
                         </div>
@@ -1250,109 +966,6 @@
                 a.download = 'lifeops-checkins.txt';
                 a.click();
                 URL.revokeObjectURL(url);
-            });
-        }
-
-        // Email Analysis Functions
-        async function analyzeEmails() {
-            const loading = document.getElementById('email-loading');
-            const emailGrid = document.getElementById('email-grid');
-            const status = document.getElementById('email-status');
-            const btn = event.target;
-
-            // Show loading state
-            btn.disabled = true;
-            btn.textContent = 'Analyzing...';
-            loading.style.display = 'block';
-            emailGrid.innerHTML = '';
-            status.style.display = 'none';
-
-            try {
-                const response = await fetch('/api/emails');
-                const data = await response.json();
-
-                if (data.error) {
-                    status.innerHTML = `Gmail Error: ${data.error}`;
-                    status.style.display = 'block';
-                }
-
-                if (data.emails && data.emails.length > 0) {
-                    displayEmails(data.emails);
-                } else {
-                    status.innerHTML = 'No emails found to analyze';
-                    status.style.display = 'block';
-                }
-            } catch (error) {
-                console.error('Error:', error);
-                status.innerHTML = '❌ Error analyzing emails. Please try again.';
-                status.style.display = 'block';
-            } finally {
-                // Reset loading state
-                btn.disabled = false;
-                btn.textContent = '📧 Analyze Recent Emails';
-                loading.style.display = 'none';
-            }
-        }
-
-        function displayEmails(emails) {
-            const emailGrid = document.getElementById('email-grid');
-            
-            emails.forEach(email => {
-                const card = document.createElement('div');
-                card.className = 'email-card';
-                
-                card.innerHTML = `
-                    <div class="email-header">
-                        <div class="email-subject">${email.subject}</div>
-                        <div class="email-from">From: ${email.from}</div>
-                    </div>
-                    
-                    <div class="email-summary">
-                        <strong>🤖 AI Summary:</strong><br>
-                        ${email.summary}
-                    </div>
-                    
-                    <div>
-                        <span class="priority ${email.urgency ? email.urgency.toLowerCase() : 'medium'}">
-                            ⚡ ${email.urgency || 'Medium'} Priority
-                        </span>
-                    </div>
-                    
-                    <div class="category-badge ${email.category ? email.category.toLowerCase() : 'other'}">
-                        📂 ${email.category || 'Other'}
-                    </div>
-                    
-                    <div class="action-needed ${email.requiresResponse ? 'yes' : 'no'}">
-                        🎯 Response Needed: ${email.requiresResponse ? 'Yes' : 'No'}
-                    </div>
-                    
-                    ${email.keyPoints && email.keyPoints.length > 0 ? `
-                        <div class="key-points">
-                            <h4>🔑 Key Points:</h4>
-                            <ul>
-                                ${email.keyPoints.map(point => `<li>${point}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    
-                    ${email.actionItems && email.actionItems.length > 0 ? `
-                        <div class="action-items">
-                            <h4>✅ Action Items:</h4>
-                            <ul>
-                                ${email.actionItems.map(action => `<li>${action}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    
-                    ${email.suggestedResponse ? `
-                        <div class="suggested-response">
-                            <h4>💬 Suggested Response:</h4>
-                            <p>${email.suggestedResponse}</p>
-                        </div>
-                    ` : ''}
-                `;
-                
-                emailGrid.appendChild(card);
             });
         }
 

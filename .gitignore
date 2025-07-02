@@ -11,6 +11,11 @@ yarn-error.log*
 .env.test.local
 .env.production.local
 
+# Authentication tokens
+token.json
+tokens.json
+credentials.json
+
 # Build outputs
 dist/
 build/

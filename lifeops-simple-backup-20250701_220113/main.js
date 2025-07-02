@@ -1,8 +1,5 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
-
-// Clear module cache to ensure fresh reload of app.js
-delete require.cache[require.resolve('./app')];
 const server = require('./app'); // Import the Express app
 
 let mainWindow;
@@ -27,8 +24,8 @@ function createWindow() {
     console.log(`✅ Server started on http://localhost:${port}`);
   });
 
-  // Load the app - start with dashboard
-  mainWindow.loadURL(`http://localhost:${port}/dashboard.html`);
+  // Load the app
+  mainWindow.loadURL(`http://localhost:${port}/index.html`);
 
   // Show window when ready
   mainWindow.once('ready-to-show', () => {

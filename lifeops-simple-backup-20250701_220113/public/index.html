@@ -155,12 +155,6 @@
             margin: 10px 0;
         }
 
-        .priority.critical {
-            background: #ffcdd2;
-            color: #c62828;
-            animation: pulse 1s infinite;
-        }
-
         .priority.high {
             background: #ffebee;
             color: #c62828;
@@ -174,47 +168,6 @@
         .priority.low {
             background: #e8f5e8;
             color: #2e7d32;
-        }
-
-        .category-badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 12px;
-            font-size: 0.8rem;
-            font-weight: bold;
-            margin: 5px 0;
-            text-transform: capitalize;
-        }
-
-        .category-badge.work {
-            background: #3498db;
-            color: white;
-        }
-
-        .category-badge.personal {
-            background: #9b59b6;
-            color: white;
-        }
-
-        .category-badge.promotional {
-            background: #e67e22;
-            color: white;
-        }
-
-        .category-badge.social {
-            background: #1abc9c;
-            color: white;
-        }
-
-        .category-badge.other {
-            background: #95a5a6;
-            color: white;
-        }
-
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
         }
 
         .action-needed {
@@ -250,49 +203,6 @@
             margin: 5px 0;
             border-radius: 6px;
             border-left: 3px solid #9b59b6;
-        }
-
-        .action-items {
-            margin: 15px 0;
-        }
-
-        .action-items h4 {
-            color: #27ae60;
-            margin: 0 0 10px 0;
-            font-size: 0.9rem;
-        }
-
-        .action-items ul {
-            list-style: none;
-            padding: 0;
-        }
-
-        .action-items li {
-            background: #e8f8f5;
-            padding: 8px 12px;
-            margin: 5px 0;
-            border-radius: 6px;
-            border-left: 3px solid #27ae60;
-        }
-
-        .suggested-response {
-            margin: 15px 0;
-            background: #f0f8ff;
-            padding: 10px;
-            border-radius: 6px;
-            border-left: 3px solid #3498db;
-        }
-
-        .suggested-response h4 {
-            color: #3498db;
-            margin: 0 0 8px 0;
-            font-size: 0.9rem;
-        }
-
-        .suggested-response p {
-            margin: 0;
-            font-style: italic;
-            color: #555;
         }
 
         .status {
@@ -408,17 +318,13 @@
                     </div>
                     
                     <div>
-                        <span class="priority ${email.urgency ? email.urgency.toLowerCase() : 'medium'}">
-                            ⚡ ${email.urgency || 'Medium'} Priority
+                        <span class="priority ${email.priority.toLowerCase()}">
+                            ⚡ ${email.priority} Priority
                         </span>
                     </div>
                     
-                    <div class="category-badge ${email.category ? email.category.toLowerCase() : 'other'}">
-                        📂 ${email.category || 'Other'}
-                    </div>
-                    
-                    <div class="action-needed ${email.requiresResponse ? 'yes' : 'no'}">
-                        🎯 Response Needed: ${email.requiresResponse ? 'Yes' : 'No'}
+                    <div class="action-needed ${email.actionNeeded.toLowerCase()}">
+                        🎯 Action Needed: ${email.actionNeeded}
                     </div>
                     
                     ${email.keyPoints && email.keyPoints.length > 0 ? `
@@ -427,22 +333,6 @@
                             <ul>
                                 ${email.keyPoints.map(point => `<li>${point}</li>`).join('')}
                             </ul>
-                        </div>
-                    ` : ''}
-                    
-                    ${email.actionItems && email.actionItems.length > 0 ? `
-                        <div class="action-items">
-                            <h4>✅ Action Items:</h4>
-                            <ul>
-                                ${email.actionItems.map(action => `<li>${action}</li>`).join('')}
-                            </ul>
-                        </div>
-                    ` : ''}
-                    
-                    ${email.suggestedResponse ? `
-                        <div class="suggested-response">
-                            <h4>💬 Suggested Response:</h4>
-                            <p>${email.suggestedResponse}</p>
                         </div>
                     ` : ''}
                 `;
