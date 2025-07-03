@@ -91,10 +91,37 @@
                     </div>
                 </div>
 
-                <div class="chat-widget" onclick="window.location.href='/calendar.html'">
-                    <h3>🤖 AI Calendar Assistant</h3>
-                    <p>Schedule events using natural language! Just describe what you want to schedule and I'll handle the rest.</p>
-                    <button class="chat-widget-btn">Try AI Scheduling →</button>
+                <div class="chat-widget" id="productivity-orchestrator">
+                    <h3>🧠 AI Productivity Orchestrator</h3>
+                    <p>Let AI build your perfect day! Get personalized interviews, data analysis, and automated scheduling with Pomodoro integration.</p>
+                    <div class="orchestrator-controls">
+                        <button class="orchestrator-btn primary" onclick="startDailyOrchestration()">🚀 Start My Day</button>
+                        <button class="orchestrator-btn secondary" onclick="showOrchestrationStatus()">📊 View Status</button>
+                    </div>
+                    <div id="orchestration-status" class="orchestration-status" style="display: none;">
+                        <div class="status-grid">
+                            <div class="status-item">
+                                <span class="status-icon">🗣️</span>
+                                <span class="status-label">Interview</span>
+                                <span class="status-value" id="interview-status">Ready</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-icon">📊</span>
+                                <span class="status-label">Data Collection</span>
+                                <span class="status-value" id="data-status">Ready</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-icon">🧠</span>
+                                <span class="status-label">Analysis</span>
+                                <span class="status-value" id="analysis-status">Ready</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-icon">🏗️</span>
+                                <span class="status-label">Schedule</span>
+                                <span class="status-value" id="schedule-status">Ready</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2043,6 +2070,924 @@ ${suggestion.body}
 
         // Load presets when page loads
         loadPresets();
+
+        // ==========================================
+        // PRODUCTIVITY ORCHESTRATOR FUNCTIONS
+        // ==========================================
+
+        // Start daily productivity orchestration
+        async function startDailyOrchestration() {
+            const btn = document.querySelector('.orchestrator-btn.primary');
+            const originalText = btn.textContent;
+            
+            try {
+                btn.textContent = '🔄 Starting...';
+                btn.disabled = true;
+                
+                // Show status panel
+                showOrchestrationStatus();
+                updateOrchestrationStatus('interview', '🔄 Starting...');
+                
+                // Start the orchestration workflow with timeout
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 300000); // 5 minute timeout
+                
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        userInput: 'Start my daily productivity orchestration',
+                        preferences: {
+                            workStartTime: '09:00',
+                            workEndTime: '17:00',
+                            breakDuration: 15,
+                            pomodoroLength: 25
+                        }
+                    }),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    if (data.phase === 'interview') {
+                        // Show interview questions
+                        updateOrchestrationStatus('interview', '🔄 Active');
+                        updateOrchestrationStatus('data', '⏳ Pending');
+                        updateOrchestrationStatus('analysis', '⏳ Pending');
+                        updateOrchestrationStatus('schedule', '⏳ Pending');
+                        
+                        showInterviewQuestions(data.interview);
+                        btn.textContent = '🗣️ Interview Active';
+                    } else {
+                        // Complete workflow
+                        updateOrchestrationStatus('interview', '✅ Complete');
+                        updateOrchestrationStatus('data', '✅ Complete');
+                        updateOrchestrationStatus('analysis', '✅ Complete');
+                        updateOrchestrationStatus('schedule', '✅ Complete');
+                        
+                        // Show success message
+                        showNotification('🎉 Your perfect day is ready! Check your calendar for the optimized schedule.', 'success');
+                        
+                        btn.textContent = '✅ Day Started';
+                        setTimeout(() => {
+                            btn.textContent = originalText;
+                            btn.disabled = false;
+                        }, 3000);
+                    }
+                } else {
+                    throw new Error(data.message || 'Orchestration failed');
+                }
+                
+            } catch (error) {
+                console.error('Orchestration error:', error);
+                
+                let errorMessage = 'Failed to start orchestration';
+                if (error.name === 'AbortError') {
+                    errorMessage = 'Orchestration timed out (taking longer than 60s). Please try again.';
+                } else if (error.message) {
+                    errorMessage = error.message;
+                }
+                
+                showNotification('❌ ' + errorMessage, 'error');
+                
+                btn.textContent = originalText;
+                btn.disabled = false;
+                
+                updateOrchestrationStatus('interview', '❌ Error');
+                updateOrchestrationStatus('data', '❌ Error');
+                updateOrchestrationStatus('analysis', '❌ Error');
+                updateOrchestrationStatus('schedule', '❌ Error');
+            }
+        }
+
+        // Show/hide orchestration status
+        function showOrchestrationStatus() {
+            const statusDiv = document.getElementById('orchestration-status');
+            if (statusDiv.style.display === 'none') {
+                statusDiv.style.display = 'block';
+                
+                // Load current status
+                loadOrchestrationStatus();
+            } else {
+                statusDiv.style.display = 'none';
+            }
+        }
+
+        // Update individual status item
+        function updateOrchestrationStatus(component, status) {
+            const statusElement = document.getElementById(component + '-status');
+            if (statusElement) {
+                statusElement.textContent = status;
+            }
+        }
+
+        // Show interview questions in UI
+        function showInterviewQuestions(interview) {
+            const schedulingSection = interview.structured_sections?.scheduling;
+            const prioritiesSection = interview.structured_sections?.priorities;
+            
+            const interviewHTML = `
+                <div class="interview-container" id="interview-container">
+                    <h3>🗣️ Daily Planning Interview</h3>
+                    <p class="interview-greeting">${interview.greeting}</p>
+
+                    ${schedulingSection ? `
+                        <div class="scheduling-section">
+                            <h4 class="section-title">📅 ${schedulingSection.title}</h4>
+                            <p class="section-description">${schedulingSection.description}</p>
+                            
+                            <div class="scheduling-controls">
+                                <div class="day-selection">
+                                    <label class="control-label">Which day?</label>
+                                    <div class="day-options">
+                                        ${schedulingSection.day_options.map(option => `
+                                            <label class="day-option">
+                                                <input type="radio" name="target_day" value="${option.value}" ${option.default ? 'checked' : ''}>
+                                                <span class="option-label">${option.label}</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                    <div class="custom-date-picker" id="custom-date-picker" style="display: none;">
+                                        <input type="date" id="custom-date" class="custom-date-input">
+                                    </div>
+                                </div>
+
+                                <div class="time-block-selection">
+                                    <label class="control-label">What time period?</label>
+                                    <div class="time-block-options">
+                                        ${schedulingSection.time_block_options.map(option => `
+                                            <label class="time-block-option">
+                                                <input type="radio" name="time_block" value="${option.value}" ${option.default ? 'checked' : ''}>
+                                                <span class="option-label">${option.label}</span>
+                                            </label>
+                                        `).join('')}
+                                    </div>
+                                    <div class="custom-time-picker" id="custom-time-picker" style="display: none;">
+                                        <div class="time-range">
+                                            <input type="time" id="custom-start-time" class="custom-time-input" value="09:00">
+                                            <span>to</span>
+                                            <input type="time" id="custom-end-time" class="custom-time-input" value="17:00">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="interview-questions">
+                        ${interview.questions.map((question, index) => `
+                            <div class="question-group">
+                                <label class="question-label">${index + 1}. ${question}</label>
+                                <textarea class="question-input" id="question-${index}" placeholder="Your answer..."></textarea>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    ${prioritiesSection ? `
+                        <div class="priorities-section">
+                            <h4 class="priorities-title">🎯 ${prioritiesSection.title}</h4>
+                            <p class="priorities-description">${prioritiesSection.description}</p>
+                            
+                            <div class="priority-task-group">
+                                <div class="task-icon">🔥</div>
+                                <div class="task-header">Priority 1 (Most Important)</div>
+                                <div class="task-input-row">
+                                    <input type="text" class="priority-task-input" id="priority-1" placeholder="${prioritiesSection.placeholder_tasks[0]}">
+                                    <select class="priority-time-select" id="time-1">
+                                        <option value="15min">15 min</option>
+                                        <option value="30min">30 min</option>
+                                        <option value="1hour" selected>1 hour</option>
+                                        <option value="2hours">2 hours</option>
+                                        <option value="3hours">3 hours</option>
+                                        <option value="4hours">4 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="priority-task-group">
+                                <div class="task-icon">⚡</div>
+                                <div class="task-header">Priority 2 (Important)</div>
+                                <div class="task-input-row">
+                                    <input type="text" class="priority-task-input" id="priority-2" placeholder="${prioritiesSection.placeholder_tasks[1]}">
+                                    <select class="priority-time-select" id="time-2">
+                                        <option value="15min">15 min</option>
+                                        <option value="30min" selected>30 min</option>
+                                        <option value="1hour">1 hour</option>
+                                        <option value="2hours">2 hours</option>
+                                        <option value="3hours">3 hours</option>
+                                        <option value="4hours">4 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="priority-task-group">
+                                <div class="task-icon">✅</div>
+                                <div class="task-header">Priority 3 (Manageable)</div>
+                                <div class="task-input-row">
+                                    <input type="text" class="priority-task-input" id="priority-3" placeholder="${prioritiesSection.placeholder_tasks[2]}">
+                                    <select class="priority-time-select" id="time-3">
+                                        <option value="15min" selected>15 min</option>
+                                        <option value="30min">30 min</option>
+                                        <option value="1hour">1 hour</option>
+                                        <option value="2hours">2 hours</option>
+                                        <option value="3hours">3 hours</option>
+                                        <option value="4hours">4 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="interview-actions">
+                        <button class="btn primary" onclick="submitInterviewResponses()">Submit Responses</button>
+                        <button class="btn secondary" onclick="hideInterview()">Skip Interview</button>
+                    </div>
+                </div>
+            `;
+            
+            // Show interview in orchestration status area
+            const statusDiv = document.getElementById('orchestration-status');
+            statusDiv.innerHTML = interviewHTML;
+            statusDiv.style.display = 'block';
+            
+            // Add event listeners for custom options
+            setupSchedulingEventListeners();
+        }
+
+        // Setup event listeners for scheduling controls
+        function setupSchedulingEventListeners() {
+            // Day selection listeners
+            const dayRadios = document.querySelectorAll('input[name="target_day"]');
+            dayRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const customDatePicker = document.getElementById('custom-date-picker');
+                    if (this.value === 'custom') {
+                        customDatePicker.style.display = 'block';
+                        // Set default to tomorrow
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        document.getElementById('custom-date').value = tomorrow.toISOString().split('T')[0];
+                    } else {
+                        customDatePicker.style.display = 'none';
+                    }
+                });
+            });
+
+            // Time block selection listeners
+            const timeBlockRadios = document.querySelectorAll('input[name="time_block"]');
+            timeBlockRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const customTimePicker = document.getElementById('custom-time-picker');
+                    if (this.value === 'custom') {
+                        customTimePicker.style.display = 'block';
+                    } else {
+                        customTimePicker.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        // Hide interview
+        function hideInterview() {
+            const container = document.getElementById('interview-container');
+            if (container) {
+                container.remove();
+            }
+        }
+
+        // Submit interview responses
+        async function submitInterviewResponses() {
+            const responses = {};
+            const questions = document.querySelectorAll('.question-input');
+            
+            // Collect regular question responses
+            questions.forEach((input, index) => {
+                responses[`question_${index}`] = input.value;
+            });
+            
+            // Collect scheduling preferences
+            const targetDay = document.querySelector('input[name="target_day"]:checked')?.value;
+            const timeBlock = document.querySelector('input[name="time_block"]:checked')?.value;
+            
+            responses.scheduling = {
+                targetDay: targetDay,
+                timeBlock: timeBlock
+            };
+            
+            // Add custom date if selected
+            if (targetDay === 'custom') {
+                const customDate = document.getElementById('custom-date')?.value;
+                if (customDate) {
+                    responses.scheduling.customDate = customDate;
+                }
+            }
+            
+            // Add custom time range if selected
+            if (timeBlock === 'custom') {
+                const startTime = document.getElementById('custom-start-time')?.value;
+                const endTime = document.getElementById('custom-end-time')?.value;
+                if (startTime && endTime) {
+                    responses.scheduling.customTimeRange = {
+                        start: startTime,
+                        end: endTime
+                    };
+                }
+            }
+            
+            // Collect structured priorities with time estimates
+            const priorities = [];
+            for (let i = 1; i <= 3; i++) {
+                const taskInput = document.getElementById(`priority-${i}`);
+                const timeSelect = document.getElementById(`time-${i}`);
+                
+                if (taskInput && taskInput.value.trim()) {
+                    priorities.push({
+                        task: taskInput.value.trim(),
+                        timeEstimate: timeSelect.value,
+                        priority: i
+                    });
+                }
+            }
+            
+            responses.priorities = priorities;
+            
+            try {
+                showNotification('Processing your responses...', 'info');
+                updateOrchestrationStatus('interview', '✅ Complete');
+                updateOrchestrationStatus('data', '🔄 Analyzing...');
+                
+                // Send responses to continue orchestration
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        responses: responses,
+                        phase: 'analysis'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateOrchestrationStatus('data', '✅ Complete');
+                    updateOrchestrationStatus('analysis', '✅ Complete');
+                    updateOrchestrationStatus('schedule', '🔄 Building...');
+                    
+                    // Show analysis summary and continue to schedule building
+                    showAnalysisSummary(data);
+                    
+                } else {
+                    throw new Error(data.message || 'Analysis failed');
+                }
+                
+            } catch (error) {
+                console.error('Error submitting responses:', error);
+                showNotification('Error processing responses. Please try again.', 'error');
+            }
+            
+            hideInterview();
+        }
+
+        // Show analysis summary and continue to schedule
+        async function showAnalysisSummary(analysisData) {
+            console.log('📊 Analysis data received:', analysisData);
+            
+            const summaryHTML = `
+                <div class="analysis-summary" id="analysis-summary">
+                    <h3>📊 Analysis Complete</h3>
+                    <p>Based on your responses, I've analyzed your optimal work patterns.</p>
+                    <div class="analysis-actions">
+                        <button class="btn primary" onclick="proceedToSchedule()">Build My Schedule</button>
+                        <button class="btn secondary" onclick="hideAnalysis()">Review Analysis</button>
+                    </div>
+                </div>
+            `;
+            
+            const statusDiv = document.getElementById('orchestration-status');
+            statusDiv.innerHTML = summaryHTML;
+            
+            // Store analysis data for next step
+            window.currentAnalysis = analysisData;
+            
+            // Auto-proceed to schedule building after brief pause
+            setTimeout(() => {
+                console.log('⏰ Auto-proceeding to schedule building...');
+                proceedToSchedule();
+            }, 2000);
+        }
+
+        // Proceed to schedule building
+        async function proceedToSchedule() {
+            try {
+                updateOrchestrationStatus('schedule', '🔄 Building...');
+                showNotification('Building your personalized schedule...', 'info');
+                
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'schedule',
+                        analysis: window.currentAnalysis.analysis,
+                        userResponses: window.currentAnalysis.userResponses
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('🏗️ Schedule building response:', data);
+                
+                if (data.success) {
+                    updateOrchestrationStatus('schedule', '✅ Ready for Approval');
+                    console.log('✅ Schedule built successfully, showing approval');
+                    showScheduleApproval(data.schedule);
+                } else {
+                    console.error('❌ Schedule building failed:', data);
+                    throw new Error(data.message || 'Schedule building failed');
+                }
+                
+            } catch (error) {
+                console.error('Error building schedule:', error);
+                showNotification('Error building schedule. Please try again.', 'error');
+            }
+        }
+
+        // Show schedule for approval
+        function showScheduleApproval(schedule) {
+            console.log('📋 Showing schedule approval with data:', schedule);
+            
+            const scheduleHTML = `
+                <div class="schedule-approval" id="schedule-approval">
+                    <h3>🗓️ Your Personalized Schedule</h3>
+                    <div class="schedule-preview">
+                        ${formatScheduleForDisplay(schedule)}
+                    </div>
+                    <div class="schedule-actions">
+                        <button class="btn primary" onclick="approveSchedule()">✅ Approve & Start My Day</button>
+                        <button class="btn secondary" onclick="requestModifications()">✏️ Request Changes</button>
+                        <button class="btn tertiary" onclick="rejectSchedule()">❌ Start Over</button>
+                    </div>
+                </div>
+            `;
+            
+            const statusDiv = document.getElementById('orchestration-status');
+            statusDiv.innerHTML = scheduleHTML;
+            
+            // Store schedule data
+            window.currentSchedule = schedule;
+        }
+
+        // Format schedule for display
+        function formatScheduleForDisplay(schedule) {
+            console.log('🗓️ Formatting schedule:', schedule);
+            console.log('🔍 Schedule type:', typeof schedule);
+            console.log('🔍 Schedule keys:', Object.keys(schedule || {}));
+            
+            if (!schedule) {
+                console.log('❌ No schedule data received');
+                return '<p>No schedule data received</p>';
+            }
+            
+            // Check different possible structure formats
+            let blocks = schedule.scheduleBlocks || schedule.schedule?.scheduleBlocks || schedule.blocks || schedule.timeBlocks || [];
+            console.log('🔍 Found blocks:', blocks);
+            console.log('🔍 Blocks length:', blocks?.length);
+            
+            if (!blocks || blocks.length === 0) {
+                console.log('❌ No schedule blocks found in structure');
+                return '<p>No schedule blocks found. Raw data: ' + JSON.stringify(schedule).substring(0, 200) + '...</p>';
+            }
+            
+            return blocks.map(block => `
+                <div class="schedule-block" style="margin: 10px 0; padding: 10px; border-left: 4px solid #4CAF50; background: rgba(255,255,255,0.1);">
+                    <div style="font-weight: bold; color: #4CAF50;">${block.startTime} - ${block.endTime}</div>
+                    <div style="font-size: 16px; margin: 5px 0;">${block.task || block.title}</div>
+                    <div style="font-size: 14px; opacity: 0.8;">${block.description}</div>
+                </div>
+            `).join('');
+        }
+
+        // Approve schedule
+        async function approveSchedule() {
+            try {
+                console.log('🚀 Approving schedule with data:', window.currentSchedule);
+                console.log('📋 Schedule blocks count:', window.currentSchedule?.scheduleBlocks?.length);
+                
+                showNotification('Activating your schedule...', 'info');
+                
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'approve',
+                        schedule: window.currentSchedule
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    updateOrchestrationStatus('schedule', '✅ Active');
+                    showNotification('🎉 Your day is optimized and ready! Schedule activated.', 'success');
+                    hideScheduleApproval();
+                } else {
+                    throw new Error(data.message || 'Schedule approval failed');
+                }
+                
+            } catch (error) {
+                console.error('Error approving schedule:', error);
+                showNotification('Error activating schedule. Please try again.', 'error');
+            }
+        }
+
+        // Hide various UI elements
+        function hideAnalysis() {
+            const container = document.getElementById('analysis-summary');
+            if (container) container.remove();
+        }
+
+        function hideScheduleApproval() {
+            const container = document.getElementById('schedule-approval');
+            if (container) container.remove();
+        }
+
+        function requestModifications() {
+            const schedule = window.currentSchedule;
+            if (!schedule || !schedule.scheduleBlocks) {
+                showNotification('No schedule to modify', 'error');
+                return;
+            }
+            
+            showScheduleEditor(schedule);
+        }
+
+        function rejectSchedule() {
+            hideScheduleApproval();
+            resetOrchestrationState();
+            showNotification('Schedule rejected. Ready to start fresh!', 'info');
+        }
+
+        // Reset the entire orchestration state to start over
+        async function resetOrchestrationState() {
+            try {
+                // Reset backend state
+                const response = await fetch('/api/productivity/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (!response.ok) {
+                    console.warn('Backend reset failed, continuing with frontend reset');
+                }
+                
+                // Reset button state
+                const startBtn = document.querySelector('.orchestrator-btn.primary');
+                if (startBtn) {
+                    startBtn.textContent = '🚀 Start My Day';
+                    startBtn.disabled = false;
+                }
+                
+                // Clear any stored data
+                window.currentSchedule = null;
+                window.currentInterview = null;
+                
+                // Hide any active UI elements
+                const interviewContainer = document.getElementById('interview-container');
+                if (interviewContainer) {
+                    interviewContainer.style.display = 'none';
+                }
+                
+                const statusDiv = document.getElementById('orchestration-status');
+                if (statusDiv) {
+                    statusDiv.style.display = 'none';
+                }
+                
+                // Reset status indicators
+                updateOrchestrationStatus('interview', '⏳ Pending');
+                updateOrchestrationStatus('data', '⏳ Pending');
+                updateOrchestrationStatus('analysis', '⏳ Pending');
+                updateOrchestrationStatus('schedule', '⏳ Pending');
+                
+                console.log('🔄 Orchestration state reset - ready for fresh start');
+            } catch (error) {
+                console.error('Reset error:', error);
+                // Continue with frontend reset even if backend fails
+            }
+        }
+
+        // Show schedule editor for modifications
+        function showScheduleEditor(schedule) {
+            const editorHTML = `
+                <div class="schedule-editor" id="schedule-editor">
+                    <h3>✏️ Edit Your Schedule</h3>
+                    <div class="editor-blocks" id="editor-blocks">
+                        ${renderEditableSchedule(schedule.scheduleBlocks)}
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn primary" onclick="saveScheduleChanges()">💾 Save Changes</button>
+                        <button class="btn secondary" onclick="addNewBlock()">➕ Add Time Block</button>
+                        <button class="btn tertiary" onclick="cancelEditing()">❌ Cancel</button>
+                    </div>
+                </div>
+            `;
+            
+            const statusDiv = document.getElementById('orchestration-status');
+            statusDiv.innerHTML = editorHTML;
+        }
+
+        // Render editable schedule blocks
+        function renderEditableSchedule(blocks) {
+            return blocks.map((block, index) => `
+                <div class="editable-block" data-index="${index}">
+                    <div class="time-inputs">
+                        <input type="time" value="${block.startTime}" id="start-${index}" class="time-input">
+                        <span>to</span>
+                        <input type="time" value="${block.endTime}" id="end-${index}" class="time-input">
+                    </div>
+                    <div class="task-inputs">
+                        <input type="text" value="${block.task || block.title || ''}" id="task-${index}" class="task-input" placeholder="Task name">
+                        <textarea id="desc-${index}" class="desc-input" placeholder="Description">${block.description || ''}</textarea>
+                    </div>
+                    <div class="block-controls">
+                        <select id="type-${index}" class="type-select">
+                            <option value="pomodoro_work" ${block.type === 'pomodoro_work' ? 'selected' : ''}>🎯 Focus Work</option>
+                            <option value="break" ${block.type === 'break' ? 'selected' : ''}>☕ Break</option>
+                            <option value="meeting" ${block.type === 'meeting' ? 'selected' : ''}>👥 Meeting</option>
+                            <option value="admin" ${block.type === 'admin' ? 'selected' : ''}>📋 Admin Tasks</option>
+                            <option value="email" ${block.type === 'email' ? 'selected' : ''}>📧 Email</option>
+                        </select>
+                        <button onclick="deleteBlock(${index})" class="delete-btn">🗑️</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Validate schedule editor state
+        function validateScheduleEditor() {
+            const editor = document.getElementById('schedule-editor');
+            if (!editor) {
+                console.error('❌ Schedule editor not found');
+                return false;
+            }
+            
+            const blocksContainer = document.getElementById('editor-blocks');
+            if (!blocksContainer) {
+                console.error('❌ Editor blocks container not found');
+                return false;
+            }
+            
+            const editableBlocks = document.querySelectorAll('.editable-block');
+            if (editableBlocks.length === 0) {
+                console.warn('⚠️ No editable blocks found');
+                return false;
+            }
+            
+            console.log(`✅ Schedule editor validation passed: ${editableBlocks.length} blocks found`);
+            return true;
+        }
+
+        // Save schedule changes
+        async function saveScheduleChanges() {
+            // Validate editor state first
+            if (!validateScheduleEditor()) {
+                showNotification('Schedule editor is not properly initialized', 'error');
+                return;
+            }
+            const blocks = [];
+            const editableBlocks = document.querySelectorAll('.editable-block');
+            
+            console.log('🔧 Found editable blocks:', editableBlocks.length);
+            
+            editableBlocks.forEach((blockEl, index) => {
+                // Get the actual index from data attribute
+                const blockIndex = blockEl.getAttribute('data-index') || index;
+                console.log(`🔧 Processing block ${blockIndex}`);
+                
+                // Get elements with null checks
+                const startTimeEl = document.getElementById(`start-${blockIndex}`);
+                const endTimeEl = document.getElementById(`end-${blockIndex}`);
+                const taskEl = document.getElementById(`task-${blockIndex}`);
+                const descEl = document.getElementById(`desc-${blockIndex}`);
+                const typeEl = document.getElementById(`type-${blockIndex}`);
+                
+                console.log('🔧 Elements found:', {
+                    startTime: !!startTimeEl,
+                    endTime: !!endTimeEl,
+                    task: !!taskEl,
+                    desc: !!descEl,
+                    type: !!typeEl
+                });
+                
+                if (!startTimeEl || !endTimeEl || !taskEl || !descEl || !typeEl) {
+                    console.error(`❌ Missing elements for block ${blockIndex}`);
+                    return;
+                }
+                
+                const startTime = startTimeEl.value;
+                const endTime = endTimeEl.value;
+                const task = taskEl.value;
+                const description = descEl.value;
+                const type = typeEl.value;
+                
+                if (startTime && endTime && task) {
+                    blocks.push({
+                        startTime,
+                        endTime,
+                        task,
+                        description,
+                        type
+                    });
+                } else {
+                    console.warn(`⚠️ Incomplete block ${blockIndex}: startTime=${startTime}, endTime=${endTime}, task=${task}`);
+                }
+            });
+            
+            if (blocks.length === 0) {
+                showNotification('Please add at least one time block', 'error');
+                return;
+            }
+            
+            // Sort blocks by start time
+            blocks.sort((a, b) => a.startTime.localeCompare(b.startTime));
+            
+            const modifiedSchedule = {
+                ...window.currentSchedule,
+                scheduleBlocks: blocks
+            };
+            
+            try {
+                showNotification('Saving schedule changes...', 'info');
+                
+                // Update the current schedule
+                window.currentSchedule = modifiedSchedule;
+                
+                // Show the updated schedule for approval
+                showScheduleApproval(modifiedSchedule);
+                showNotification('Schedule updated! Review and approve your changes.', 'success');
+                
+            } catch (error) {
+                console.error('Error saving schedule changes:', error);
+                showNotification('Error saving changes. Please try again.', 'error');
+            }
+        }
+
+        // Add new time block
+        function addNewBlock() {
+            const container = document.getElementById('editor-blocks');
+            const existingBlocks = document.querySelectorAll('.editable-block');
+            const index = existingBlocks.length;
+            
+            console.log(`➕ Adding new block with index ${index}`);
+            
+            // Calculate a reasonable start time based on existing blocks
+            let startTime = "09:00";
+            let endTime = "10:00";
+            
+            if (existingBlocks.length > 0) {
+                const lastBlock = existingBlocks[existingBlocks.length - 1];
+                const lastEndTime = lastBlock.querySelector('[id^="end-"]')?.value;
+                if (lastEndTime) {
+                    startTime = lastEndTime;
+                    // Add 1 hour to end time
+                    const [hours, minutes] = lastEndTime.split(':');
+                    const newHour = (parseInt(hours) + 1) % 24;
+                    endTime = `${newHour.toString().padStart(2, '0')}:${minutes}`;
+                }
+            }
+            
+            const newBlockHTML = `
+                <div class="editable-block" data-index="${index}">
+                    <div class="time-inputs">
+                        <input type="time" value="${startTime}" id="start-${index}" class="time-input">
+                        <span>to</span>
+                        <input type="time" value="${endTime}" id="end-${index}" class="time-input">
+                    </div>
+                    <div class="task-inputs">
+                        <input type="text" value="" id="task-${index}" class="task-input" placeholder="Task name">
+                        <textarea id="desc-${index}" class="desc-input" placeholder="Description"></textarea>
+                    </div>
+                    <div class="block-controls">
+                        <select id="type-${index}" class="type-select">
+                            <option value="pomodoro_work">🎯 Focus Work</option>
+                            <option value="break">☕ Break</option>
+                            <option value="meeting">👥 Meeting</option>
+                            <option value="admin">📋 Admin Tasks</option>
+                            <option value="email">📧 Email</option>
+                        </select>
+                        <button onclick="deleteBlock(${index})" class="delete-btn">🗑️</button>
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', newBlockHTML);
+            console.log(`✅ New block ${index} added successfully`);
+        }
+
+        // Delete a time block
+        function deleteBlock(index) {
+            console.log(`🗑️ Deleting block ${index}`);
+            const block = document.querySelector(`[data-index="${index}"]`);
+            if (block) {
+                block.remove();
+                console.log(`✅ Block ${index} deleted`);
+                
+                // Re-index remaining blocks to prevent gaps
+                const remainingBlocks = document.querySelectorAll('.editable-block');
+                remainingBlocks.forEach((blockEl, newIndex) => {
+                    const oldIndex = blockEl.getAttribute('data-index');
+                    blockEl.setAttribute('data-index', newIndex);
+                    
+                    // Update all IDs within this block
+                    const startInput = blockEl.querySelector(`#start-${oldIndex}`);
+                    const endInput = blockEl.querySelector(`#end-${oldIndex}`);
+                    const taskInput = blockEl.querySelector(`#task-${oldIndex}`);
+                    const descInput = blockEl.querySelector(`#desc-${oldIndex}`);
+                    const typeSelect = blockEl.querySelector(`#type-${oldIndex}`);
+                    const deleteBtn = blockEl.querySelector(`button[onclick*="${oldIndex}"]`);
+                    
+                    if (startInput) startInput.id = `start-${newIndex}`;
+                    if (endInput) endInput.id = `end-${newIndex}`;
+                    if (taskInput) taskInput.id = `task-${newIndex}`;
+                    if (descInput) descInput.id = `desc-${newIndex}`;
+                    if (typeSelect) typeSelect.id = `type-${newIndex}`;
+                    if (deleteBtn) deleteBtn.setAttribute('onclick', `deleteBlock(${newIndex})`);
+                });
+            } else {
+                console.error(`❌ Block ${index} not found`);
+            }
+        }
+
+        // Cancel editing
+        function cancelEditing() {
+            if (window.currentSchedule) {
+                showScheduleApproval(window.currentSchedule);
+            }
+        }
+
+        // Load current orchestration status
+        async function loadOrchestrationStatus() {
+            try {
+                const response = await fetch('/api/productivity/status');
+                const data = await response.json();
+                
+                if (data.success) {
+                    const status = data.status;
+                    
+                    // Update status display based on actual status structure
+                    updateOrchestrationStatus('interview', status.interview.active ? '🔄 Active' : '✅ Ready');
+                    updateOrchestrationStatus('data', status.dataCollection.availableSources.length > 0 ? '✅ Ready' : '⏳ Pending');
+                    updateOrchestrationStatus('analysis', status.scheduleAnalysis.llmAvailable ? '✅ Ready' : '⏳ Pending');
+                    updateOrchestrationStatus('schedule', status.scheduleBuilder.llmAvailable ? '✅ Ready' : '⏳ Pending');
+                }
+            } catch (error) {
+                console.error('Failed to load orchestration status:', error);
+                updateOrchestrationStatus('interview', '❓ Unknown');
+                updateOrchestrationStatus('data', '❓ Unknown');
+                updateOrchestrationStatus('analysis', '❓ Unknown');
+                updateOrchestrationStatus('schedule', '❓ Unknown');
+            }
+        }
+
+        // Simple notification function
+        // Utility function to safely get element by ID
+        function safeGetElement(id) {
+            const element = document.getElementById(id);
+            if (!element) {
+                console.warn(`⚠️ Element not found: ${id}`);
+            }
+            return element;
+        }
+
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification notification-${type}`;
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${type === 'success' ? '#28a745' : type === 'error' ? '#dc3545' : '#17a2b8'};
+                color: white;
+                padding: 15px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+                z-index: 10000;
+                max-width: 400px;
+                animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Remove after 5 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
 
     </script>
 

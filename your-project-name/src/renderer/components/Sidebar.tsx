@@ -14,24 +14,22 @@ interface NavItem {
 }
 
 const navigationItems: NavItem[] = [
-  { id: 'overview', label: 'Overview', icon: '🏠' },
-  { id: 'analytics', label: 'Analytics', icon: '📊' },
-  { id: 'ecommerce', label: 'E-commerce', icon: '🛒' },
-  { id: 'crypto', label: 'Crypto', icon: '₿' },
-  { id: 'customers', label: 'Customers', icon: '👥', hasSubmenu: true },
-  { id: 'products', label: 'Products', icon: '📦', hasSubmenu: true },
-  { id: 'orders', label: 'Orders', icon: '📋', hasSubmenu: true },
-  { id: 'invoices', label: 'Invoices', icon: '🧾', hasSubmenu: true },
-  { id: 'jobs', label: 'Jobs', icon: '💼', hasSubmenu: true },
-  { id: 'logistics', label: 'Logistics', icon: '🚚', hasSubmenu: true },
-  { id: 'blog', label: 'Blog', icon: '📝', hasSubmenu: true },
+  { id: 'dashboard', label: 'Dashboard', icon: '📊' },
+  { id: 'pomodoro', label: 'Smart Pomodoro', icon: '🍅' },
+  { id: 'tasks', label: '1-3-5 Tasks', icon: '📋' },
+  { id: 'email', label: 'Email Analysis', icon: '📧' },
+  { id: 'health', label: 'Health Analytics', icon: '🏃' },
+  { id: 'relationships', label: 'Relationship Intelligence', icon: '🧠' },
+  { id: 'calendar', label: 'Calendar View', icon: '📅' },
+  { id: 'daily-score', label: 'AI Daily Score', icon: '🤖' },
 ];
 
 const generalItems: NavItem[] = [
+  { id: 'checkin', label: 'Check In', icon: '❤️' },
   { id: 'settings', label: 'Settings', icon: '⚙️' },
 ];
 
-export default function Sidebar({ activeItem = 'overview', onItemClick }: SidebarProps) {
+export default function Sidebar({ activeItem = 'dashboard', onItemClick }: SidebarProps) {
   const handleItemClick = (itemId: string) => {
     if (onItemClick) {
       onItemClick(itemId);
@@ -42,14 +40,14 @@ export default function Sidebar({ activeItem = 'overview', onItemClick }: Sideba
     <div className="sidebar">
       <div className="sidebar-header">
         <div className="brand">
-          <div className="brand-icon">📱</div>
-          <span className="brand-name">DeviasKit</span>
+          <div className="brand-icon">🧐</div>
+          <span className="brand-name">LifeOps</span>
         </div>
         <div className="workspace">
-          <div className="workspace-icon">🔧</div>
+          <div className="workspace-icon">🎯</div>
           <div className="workspace-info">
-            <span className="workspace-label">Workspace</span>
-            <span className="workspace-name">Devias</span>
+            <span className="workspace-label">Personal OS</span>
+            <span className="workspace-name">v1.0</span>
           </div>
           <div className="workspace-dropdown">⌄</div>
         </div>
@@ -57,7 +55,7 @@ export default function Sidebar({ activeItem = 'overview', onItemClick }: Sideba
 
       <div className="sidebar-content">
         <div className="nav-section">
-          <div className="nav-title">Dashboards</div>
+          <div className="nav-title">Core Features</div>
           {navigationItems.map((item) => (
             <div
               key={item.id}
@@ -72,7 +70,7 @@ export default function Sidebar({ activeItem = 'overview', onItemClick }: Sideba
         </div>
 
         <div className="nav-section">
-          <div className="nav-title">General</div>
+          <div className="nav-title">System</div>
           {generalItems.map((item) => (
             <div
               key={item.id}

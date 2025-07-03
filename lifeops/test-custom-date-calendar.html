@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>📅 Custom Date Calendar Test</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: rgba(0,0,0,0.1); 
+            padding: 20px; 
+            border-radius: 12px; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .primary { background: #4CAF50; color: white; }
+        .secondary { background: #2196F3; color: white; }
+        .danger { background: #f44336; color: white; }
+        h1, h2, h3 { color: white; text-align: center; }
+        .status { margin: 15px 0; padding: 15px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; }
+        .test-step { margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+        .test-step h4 { color: #4CAF50; margin-top: 0; }
+        .logs { 
+            background: #000; 
+            color: #00ff00; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .date-picker { 
+            background: rgba(255,255,255,0.1); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 10px 0; 
+        }
+        input[type="date"] {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            margin: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>📅 Custom Date Calendar Test</h1>
+        <p style="color: white; text-align: center;">Test scheduling for future dates and verify calendar events are created on the correct day</p>
+        
+        <div class="test-step">
+            <h4>Select Future Date for Testing</h4>
+            <div class="date-picker">
+                <label style="color: white;">Choose a future date:</label><br>
+                <input type="date" id="test-date" style="margin-top: 10px;">
+                <button class="btn primary" onclick="setTestDate()">📅 Set Test Date</button>
+            </div>
+            <p style="color: white; font-size: 14px;" id="selected-date-info">No date selected</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 1: Test Interview with Custom Date</h4>
+            <button class="btn primary" onclick="testInterviewWithCustomDate()" disabled id="interview-btn">🗣️ Start Interview</button>
+            <p style="color: white; font-size: 14px;">Creates interview and verifies scheduling section appears</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 2: Submit Interview with Custom Date</h4>
+            <button class="btn secondary" onclick="submitWithCustomDate()" disabled id="submit-btn">📝 Submit with Custom Date</button>
+            <p style="color: white; font-size: 14px;">Submits interview responses with the selected future date</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 3: Build Schedule for Custom Date</h4>
+            <button class="btn secondary" onclick="buildCustomDateSchedule()" disabled id="schedule-btn">🏗️ Build Schedule</button>
+            <p style="color: white; font-size: 14px;">Creates schedule for the selected date</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 4: Approve & Check Calendar Creation</h4>
+            <button class="btn primary" onclick="approveAndCheckCalendar()" disabled id="approve-btn">✅ Approve & Create Calendar</button>
+            <p style="color: white; font-size: 14px;">Approves schedule and verifies calendar events are created on correct date</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Debug Console</h4>
+            <div id="logs" class="logs">Waiting for test actions...</div>
+            <button class="btn danger" onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        let testData = {
+            selectedDate: null,
+            interview: null,
+            responses: null,
+            analysis: null,
+            schedule: null
+        };
+        
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${timestamp}] ${message}\\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = 'Logs cleared...\\n';
+        }
+
+        function setTestDate() {
+            const dateInput = document.getElementById('test-date');
+            const selectedDate = dateInput.value;
+            
+            if (!selectedDate) {
+                log('❌ Please select a date');
+                return;
+            }
+            
+            testData.selectedDate = selectedDate;
+            const dateObj = new Date(selectedDate);
+            const dateStr = dateObj.toLocaleDateString('en-US', { 
+                weekday: 'long', 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+            
+            document.getElementById('selected-date-info').textContent = \`Selected: \${dateStr}\`;
+            document.getElementById('interview-btn').disabled = false;
+            
+            log(\`📅 Test date set: \${dateStr}\`);
+            log(\`📋 Date value: \${selectedDate}\`);
+        }
+
+        async function testInterviewWithCustomDate() {
+            if (!testData.selectedDate) {
+                log('❌ No test date selected');
+                return;
+            }
+            
+            log('🗣️ Starting interview for custom date...');
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'interview',
+                        userInput: \`Planning for \${testData.selectedDate}\`
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.interview) {
+                    testData.interview = data.interview;
+                    
+                    log('✅ Interview generated successfully');
+                    log(\`📅 Scheduling section: \${data.interview.structured_sections?.scheduling ? 'PRESENT' : 'MISSING'}\`);
+                    
+                    if (data.interview.structured_sections?.scheduling) {
+                        const schedulingSection = data.interview.structured_sections.scheduling;
+                        log(\`📋 Day options: \${schedulingSection.day_options?.length || 0}\`);
+                        log(\`⏰ Time options: \${schedulingSection.time_block_options?.length || 0}\`);
+                    }
+                    
+                    document.getElementById('submit-btn').disabled = false;
+                    showStatus('Interview ready with scheduling options', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to generate interview');
+                }
+            } catch (error) {
+                log(\`❌ Interview error: \${error.message}\`);
+                showStatus('Interview failed', 'error');
+            }
+        }
+
+        async function submitWithCustomDate() {
+            if (!testData.interview || !testData.selectedDate) {
+                log('❌ Missing interview or test date');
+                return;
+            }
+            
+            log(\`📝 Submitting interview with custom date: \${testData.selectedDate}\`);
+            
+            // Create mock responses with custom date
+            testData.responses = {
+                questions: [
+                    "My energy will be at 9/10 on the selected day",
+                    "I prefer deep focus work with minimal interruptions",
+                    "No specific constraints for the selected day",
+                    "I'm feeling excited and motivated for the planned day"
+                ],
+                priorities: [
+                    { task: "Complete project milestone", timeEstimate: "3hours", priority: 1 },
+                    { task: "Strategic planning session", timeEstimate: "2hours", priority: 2 },
+                    { task: "Team check-ins", timeEstimate: "1hour", priority: 3 }
+                ],
+                scheduling: {
+                    targetDay: "custom",
+                    timeBlock: "work_hours",
+                    customDate: testData.selectedDate,
+                    customTimeRange: null
+                }
+            };
+            
+            log(\`📋 Scheduling preferences: \${JSON.stringify(testData.responses.scheduling)}\`);
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'analysis',
+                        responses: testData.responses
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    testData.analysis = data.analysis;
+                    log('✅ Analysis completed for custom date');
+                    
+                    document.getElementById('schedule-btn').disabled = false;
+                    showStatus('Analysis complete for selected date', 'success');
+                } else {
+                    throw new Error(data.message || 'Analysis failed');
+                }
+            } catch (error) {
+                log(\`❌ Analysis error: \${error.message}\`);
+                showStatus('Analysis failed', 'error');
+            }
+        }
+
+        async function buildCustomDateSchedule() {
+            if (!testData.analysis || !testData.responses) {
+                log('❌ Missing analysis or responses');
+                return;
+            }
+            
+            log(\`🏗️ Building schedule for \${testData.selectedDate}...\`);
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'schedule',
+                        analysis: testData.analysis,
+                        userResponses: testData.responses
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.schedule) {
+                    testData.schedule = data.schedule;
+                    
+                    log('✅ Schedule built successfully');
+                    log(\`📅 Schedule blocks: \${data.schedule.scheduleBlocks?.length || 0}\`);
+                    
+                    if (data.schedule.scheduleBlocks?.length > 0) {
+                        const firstBlock = data.schedule.scheduleBlocks[0];
+                        log(\`🎯 First task: "\${firstBlock.task}" (\${firstBlock.startTime}-\${firstBlock.endTime})\`);
+                    }
+                    
+                    document.getElementById('approve-btn').disabled = false;
+                    showStatus('Schedule ready for approval', 'success');
+                } else {
+                    throw new Error(data.message || 'Schedule building failed');
+                }
+            } catch (error) {
+                log(\`❌ Schedule building error: \${error.message}\`);
+                showStatus('Schedule building failed', 'error');
+            }
+        }
+
+        async function approveAndCheckCalendar() {
+            if (!testData.schedule) {
+                log('❌ No schedule to approve');
+                return;
+            }
+            
+            log(\`✅ Approving schedule for \${testData.selectedDate}...\`);
+            log('📅 This should create calendar events on the selected date');
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'approve',
+                        schedule: testData.schedule
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('🎉 SCHEDULE APPROVED AND ACTIVATED!');
+                    log(\`📅 Target date was: \${testData.selectedDate}\`);
+                    log(\`📅 Final schedule has \${data.approval?.schedule?.scheduleBlocks?.length || 0} blocks\`);
+                    log('🔍 Check your Google Calendar for events on the selected date!');
+                    
+                    const selectedDateObj = new Date(testData.selectedDate);
+                    const dateStr = selectedDateObj.toLocaleDateString('en-US', { 
+                        weekday: 'long', 
+                        month: 'long', 
+                        day: 'numeric' 
+                    });
+                    
+                    showStatus(\`🎉 Calendar events created for \${dateStr}!\`, 'success');
+                } else {
+                    throw new Error(data.message || 'Approval failed');
+                }
+            } catch (error) {
+                log(\`❌ Approval error: \${error.message}\`);
+                showStatus('Approval failed', 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = \`<p style="color: \${type === 'success' ? '#4CAF50' : '#f44336'};">\${message}</p>\`;
+        }
+
+        // Initialize
+        log('📅 Custom Date Calendar Test Ready');
+        log('📋 Test workflow: Select Date → Interview → Submit → Build → Approve');
+        log('🎯 Goal: Verify calendar events are created on the selected future date');
+        
+        // Set default date to tomorrow
+        const tomorrow = new Date();
+        tomorrow.setDate(tomorrow.getDate() + 1);
+        document.getElementById('test-date').value = tomorrow.toISOString().split('T')[0];
+    </script>
+</body>
+</html>

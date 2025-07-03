@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔄 Edit-to-Approval Flow Test</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container { 
+            max-width: 1000px; 
+            margin: 0 auto; 
+            background: rgba(0,0,0,0.1); 
+            padding: 20px; 
+            border-radius: 12px; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .primary { background: #4CAF50; color: white; }
+        .secondary { background: #2196F3; color: white; }
+        .tertiary { background: #FF9800; color: white; }
+        .danger { background: #f44336; color: white; }
+        h1, h2, h3 { color: white; text-align: center; }
+        .status { margin: 15px 0; padding: 15px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; }
+        .test-step { margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+        .test-step h4 { color: #4CAF50; margin-top: 0; }
+        .logs { 
+            background: #000; 
+            color: #00ff00; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔄 Edit-to-Approval Flow Test</h1>
+        <p style="color: white; text-align: center;">Test the complete workflow: Schedule Generation → Editing → Save → Approval → Activation</p>
+        
+        <div class="test-step">
+            <h4>Step 1: Generate Test Schedule</h4>
+            <button class="btn primary" onclick="generateTestSchedule()">🏗️ Generate Schedule</button>
+            <p style="color: white; font-size: 14px;">Creates a test schedule to work with</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 2: Edit Schedule</h4>
+            <button class="btn secondary" onclick="openEditor()" disabled id="edit-btn">✏️ Open Editor</button>
+            <p style="color: white; font-size: 14px;">Opens the schedule editor for modifications</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 3: Save & Approve</h4>
+            <button class="btn tertiary" onclick="testApproval()" disabled id="approve-btn">✅ Test Approval</button>
+            <p style="color: white; font-size: 14px;">Tests the approval process with modifications</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Debug Console</h4>
+            <div id="logs" class="logs">Waiting for test actions...</div>
+            <button class="btn danger" onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+        
+        <div id="editor-area"></div>
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        let testSchedule = null;
+        
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${timestamp}] ${message}\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = 'Logs cleared...\n';
+        }
+
+        async function generateTestSchedule() {
+            log('🏗️ Generating test schedule...');
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'schedule',
+                        analysis: { optimalScheduling: { deepWorkBlocks: [{ start: "09:00", end: "11:00" }] } },
+                        userResponses: { priorities: [{ task: "Test Task", timeEstimate: "1hour" }] }
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.schedule) {
+                    testSchedule = data.schedule;
+                    window.currentSchedule = testSchedule;
+                    
+                    log(`✅ Schedule generated with ${testSchedule.scheduleBlocks.length} blocks`);
+                    log(`📋 First task: "${testSchedule.scheduleBlocks[0].task}"`);
+                    
+                    document.getElementById('edit-btn').disabled = false;
+                    showStatus('Schedule generated successfully!', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to generate schedule');
+                }
+            } catch (error) {
+                log(`❌ Error generating schedule: ${error.message}`);
+                showStatus('Failed to generate schedule', 'error');
+            }
+        }
+
+        function openEditor() {
+            if (!testSchedule) {
+                log('❌ No test schedule available');
+                return;
+            }
+            
+            log('✏️ Opening schedule editor...');
+            showScheduleEditor(testSchedule);
+            document.getElementById('approve-btn').disabled = false;
+        }
+
+        async function testApproval() {
+            if (!window.currentSchedule) {
+                log('❌ No current schedule available');
+                return;
+            }
+            
+            log('🚀 Testing approval process...');
+            log(`📋 Approving schedule with ${window.currentSchedule.scheduleBlocks.length} blocks`);
+            log(`🔍 First task: "${window.currentSchedule.scheduleBlocks[0].task}"`);
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'approve',
+                        schedule: window.currentSchedule
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ Schedule approved and activated successfully!');
+                    log(`📅 Final schedule has ${data.approval.schedule.scheduleBlocks.length} blocks`);
+                    showStatus('Schedule activated with your modifications!', 'success');
+                } else {
+                    throw new Error(data.message || 'Approval failed');
+                }
+            } catch (error) {
+                log(`❌ Approval error: ${error.message}`);
+                showStatus('Approval failed', 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `<p style="color: ${type === 'success' ? '#4CAF50' : '#f44336'};">${message}</p>`;
+        }
+
+        // Include editor functions (simplified versions)
+        function showScheduleEditor(schedule) {
+            const editorHTML = \`
+                <div class="schedule-editor" id="schedule-editor" style="margin-top: 20px;">
+                    <h3>✏️ Edit Test Schedule</h3>
+                    <div class="editor-blocks" id="editor-blocks">
+                        \${renderEditableSchedule(schedule.scheduleBlocks)}
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn primary" onclick="saveTestChanges()">💾 Save Changes</button>
+                        <button class="btn secondary" onclick="addTestBlock()">➕ Add Block</button>
+                    </div>
+                </div>
+            \`;
+            
+            document.getElementById('editor-area').innerHTML = editorHTML;
+            log('📝 Schedule editor opened for testing');
+        }
+
+        function renderEditableSchedule(blocks) {
+            return blocks.map((block, index) => \`
+                <div class="editable-block" data-index="\${index}" style="background: rgba(255,255,255,0.1); margin: 10px 0; padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="time" value="\${block.startTime}" id="start-\${index}" style="padding: 8px;">
+                        <span style="color: white; padding: 8px;">to</span>
+                        <input type="time" value="\${block.endTime}" id="end-\${index}" style="padding: 8px;">
+                    </div>
+                    <input type="text" value="\${block.task || ''}" id="task-\${index}" placeholder="Task name" style="width: 100%; padding: 8px; margin: 5px 0;">
+                    <textarea id="desc-\${index}" placeholder="Description" style="width: 100%; padding: 8px; margin: 5px 0; height: 60px;">\${block.description || ''}</textarea>
+                    <select id="type-\${index}" style="padding: 8px;">
+                        <option value="pomodoro_work" \${block.type === 'pomodoro_work' ? 'selected' : ''}>🎯 Focus Work</option>
+                        <option value="break" \${block.type === 'break' ? 'selected' : ''}>☕ Break</option>
+                        <option value="meeting" \${block.type === 'meeting' ? 'selected' : ''}>👥 Meeting</option>
+                        <option value="admin" \${block.type === 'admin' ? 'selected' : ''}>📋 Admin</option>
+                    </select>
+                </div>
+            \`).join('');
+        }
+
+        function saveTestChanges() {
+            log('💾 Saving test schedule changes...');
+            
+            const blocks = [];
+            const editableBlocks = document.querySelectorAll('.editable-block');
+            
+            editableBlocks.forEach((blockEl, index) => {
+                const blockIndex = blockEl.getAttribute('data-index') || index;
+                const startTime = document.getElementById(\`start-\${blockIndex}\`).value;
+                const endTime = document.getElementById(\`end-\${blockIndex}\`).value;
+                const task = document.getElementById(\`task-\${blockIndex}\`).value;
+                const description = document.getElementById(\`desc-\${blockIndex}\`).value;
+                const type = document.getElementById(\`type-\${blockIndex}\`).value;
+                
+                if (startTime && endTime && task) {
+                    blocks.push({ startTime, endTime, task, description, type });
+                    log(\`📝 Block \${blockIndex}: "\${task}" (\${startTime}-\${endTime})\`);
+                }
+            });
+            
+            if (blocks.length > 0) {
+                blocks.sort((a, b) => a.startTime.localeCompare(b.startTime));
+                window.currentSchedule = { ...window.currentSchedule, scheduleBlocks: blocks };
+                log(\`✅ Saved \${blocks.length} schedule blocks to window.currentSchedule\`);
+                showStatus(\`Changes saved! \${blocks.length} blocks ready for approval.\`, 'success');
+            } else {
+                log('❌ No valid blocks to save');
+                showStatus('No valid blocks to save', 'error');
+            }
+        }
+
+        function addTestBlock() {
+            log('➕ Adding new test block...');
+            const container = document.getElementById('editor-blocks');
+            const index = document.querySelectorAll('.editable-block').length;
+            
+            const newBlockHTML = \`
+                <div class="editable-block" data-index="\${index}" style="background: rgba(255,255,255,0.1); margin: 10px 0; padding: 15px; border-radius: 8px;">
+                    <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                        <input type="time" value="10:00" id="start-\${index}" style="padding: 8px;">
+                        <span style="color: white; padding: 8px;">to</span>
+                        <input type="time" value="11:00" id="end-\${index}" style="padding: 8px;">
+                    </div>
+                    <input type="text" value="New Test Task" id="task-\${index}" placeholder="Task name" style="width: 100%; padding: 8px; margin: 5px 0;">
+                    <textarea id="desc-\${index}" placeholder="Description" style="width: 100%; padding: 8px; margin: 5px 0; height: 60px;">New task description</textarea>
+                    <select id="type-\${index}" style="padding: 8px;">
+                        <option value="pomodoro_work">🎯 Focus Work</option>
+                        <option value="break">☕ Break</option>
+                        <option value="meeting">👥 Meeting</option>
+                        <option value="admin">📋 Admin</option>
+                    </select>
+                </div>
+            \`;
+            
+            container.insertAdjacentHTML('beforeend', newBlockHTML);
+            log(\`✅ New block \${index} added\`);
+        }
+
+        // Initialize
+        log('🧪 Edit-to-Approval Flow Test Ready');
+        log('📋 Steps: 1) Generate → 2) Edit → 3) Save → 4) Approve');
+    </script>
+</body>
+</html>

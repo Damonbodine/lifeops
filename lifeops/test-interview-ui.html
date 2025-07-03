@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>✨ Improved Interview UI Test</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: rgba(0,0,0,0.1); 
+            padding: 20px; 
+            border-radius: 12px; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .primary { 
+            background: #4CAF50; 
+            color: white; 
+        }
+        .primary:hover { 
+            background: #45a049; 
+            transform: translateY(-1px);
+        }
+        .secondary { 
+            background: #2196F3; 
+            color: white; 
+        }
+        .secondary:hover { 
+            background: #1976D2; 
+            transform: translateY(-1px);
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 8px;
+            background: rgba(255,255,255,0.1);
+        }
+        h1, h2, h3 {
+            color: white;
+            text-align: center;
+        }
+        .feature-list {
+            color: white;
+            background: rgba(255,255,255,0.1);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .feature-list li {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>✨ Improved Interview UI</h1>
+        <p style="color: white; text-align: center; font-size: 16px;">
+            Enhanced onboarding with structured priority input and time estimation
+        </p>
+        
+        <div class="feature-list">
+            <h3>🎯 New Features:</h3>
+            <ul>
+                <li><strong>Structured Priority Input:</strong> Individual fields for top 3 priorities</li>
+                <li><strong>Time Estimation:</strong> Dropdown selectors for each task (15min - 4hours)</li>
+                <li><strong>1-3-5 Style Layout:</strong> Matches existing task flow design</li>
+                <li><strong>Enhanced UI:</strong> Better spacing, hover effects, and visual hierarchy</li>
+                <li><strong>GPT-4 Integration:</strong> Smarter question generation and analysis</li>
+            </ul>
+        </div>
+        
+        <div style="text-align: center; margin: 30px 0;">
+            <button class="btn primary" onclick="startImprovedInterview()">🚀 Start Improved Interview</button>
+            <button class="btn secondary" onclick="window.location.href='/dashboard.html'">📊 Go to Dashboard</button>
+        </div>
+        
+        <div id="demo-area" style="margin-top: 30px;"></div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        async function startImprovedInterview() {
+            const statusDiv = document.getElementById('status');
+            const demoArea = document.getElementById('demo-area');
+            
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<p style="color: white;">🔄 Loading improved interview...</p>';
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userInput: 'Test the new structured interview UI' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.phase === 'interview') {
+                    statusDiv.innerHTML = `
+                        <div style="background: rgba(76, 175, 80, 0.2); padding: 15px; border-radius: 8px;">
+                            <h3 style="color: #4CAF50; margin-top: 0;">✅ Interview Generated Successfully!</h3>
+                            <p style="color: white;"><strong>Questions:</strong> ${data.interview.questions.length} structured questions</p>
+                            <p style="color: white;"><strong>Priorities Section:</strong> ${data.interview.structured_sections?.priorities ? 'Enabled' : 'Disabled'}</p>
+                            <p style="color: white;"><strong>Model:</strong> GPT-4o</p>
+                        </div>
+                    `;
+                    
+                    // Show the actual interview UI
+                    showInterviewDemo(data.interview);
+                } else {
+                    statusDiv.innerHTML = `<p style="color: #f44336;">❌ Error: ${data.message}</p>`;
+                }
+            } catch (error) {
+                statusDiv.innerHTML = `<p style="color: #f44336;">❌ Network Error: ${error.message}</p>`;
+            }
+        }
+        
+        function showInterviewDemo(interview) {
+            const demoArea = document.getElementById('demo-area');
+            const prioritiesSection = interview.structured_sections?.priorities;
+            
+            demoArea.innerHTML = `
+                <div class="interview-container">
+                    <h3>🗣️ Daily Planning Interview</h3>
+                    <p class="interview-greeting">${interview.greeting}</p>
+                    
+                    <div class="interview-questions">
+                        ${interview.questions.map((question, index) => `
+                            <div class="question-group">
+                                <label class="question-label">${index + 1}. ${question}</label>
+                                <textarea class="question-input" placeholder="Your answer..."></textarea>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    ${prioritiesSection ? `
+                        <div class="priorities-section">
+                            <h4 class="priorities-title">🎯 ${prioritiesSection.title}</h4>
+                            <p class="priorities-description">${prioritiesSection.description}</p>
+                            
+                            <div class="priority-task-group">
+                                <div class="task-icon">🔥</div>
+                                <div class="task-header">Priority 1 (Most Important)</div>
+                                <div class="task-input-row">
+                                    <input type="text" class="priority-task-input" placeholder="${prioritiesSection.placeholder_tasks[0]}">
+                                    <select class="priority-time-select">
+                                        <option value="15min">15 min</option>
+                                        <option value="30min">30 min</option>
+                                        <option value="1hour" selected>1 hour</option>
+                                        <option value="2hours">2 hours</option>
+                                        <option value="3hours">3 hours</option>
+                                        <option value="4hours">4 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="priority-task-group">
+                                <div class="task-icon">⚡</div>
+                                <div class="task-header">Priority 2 (Important)</div>
+                                <div class="task-input-row">
+                                    <input type="text" class="priority-task-input" placeholder="${prioritiesSection.placeholder_tasks[1]}">
+                                    <select class="priority-time-select">
+                                        <option value="15min">15 min</option>
+                                        <option value="30min" selected>30 min</option>
+                                        <option value="1hour">1 hour</option>
+                                        <option value="2hours">2 hours</option>
+                                        <option value="3hours">3 hours</option>
+                                        <option value="4hours">4 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="priority-task-group">
+                                <div class="task-icon">✅</div>
+                                <div class="task-header">Priority 3 (Manageable)</div>
+                                <div class="task-input-row">
+                                    <input type="text" class="priority-task-input" placeholder="${prioritiesSection.placeholder_tasks[2]}">
+                                    <select class="priority-time-select">
+                                        <option value="15min" selected>15 min</option>
+                                        <option value="30min">30 min</option>
+                                        <option value="1hour">1 hour</option>
+                                        <option value="2hours">2 hours</option>
+                                        <option value="3hours">3 hours</option>
+                                        <option value="4hours">4 hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    ` : ''}
+                    
+                    <div class="interview-actions">
+                        <button class="btn primary" onclick="alert('Demo mode - responses would be submitted to continue workflow')">Submit Responses</button>
+                        <button class="btn secondary" onclick="alert('Demo mode - would skip to schedule building')">Skip Interview</button>
+                    </div>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🔄 Start Over Flow Test</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container { 
+            max-width: 800px; 
+            margin: 0 auto; 
+            background: rgba(0,0,0,0.1); 
+            padding: 20px; 
+            border-radius: 12px; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .primary { background: #4CAF50; color: white; }
+        .danger { background: #f44336; color: white; }
+        h1, h2, h3 { color: white; text-align: center; }
+        .status { margin: 15px 0; padding: 15px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; }
+        .test-step { margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+        .test-step h4 { color: #4CAF50; margin-top: 0; }
+        .logs { 
+            background: #000; 
+            color: #00ff00; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔄 Start Over Flow Test</h1>
+        <p style="color: white; text-align: center;">Test the complete reset functionality for the orchestration workflow</p>
+        
+        <div class="test-step">
+            <h4>Step 1: Start an Interview (Simulate Active State)</h4>
+            <button class="btn primary" onclick="simulateActiveInterview()">🗣️ Simulate Active Interview</button>
+            <p style="color: white; font-size: 14px;">Creates an active interview state to test reset from</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 2: Test Reset Endpoint</h4>
+            <button class="btn danger" onclick="testResetEndpoint()">🔄 Test Backend Reset</button>
+            <p style="color: white; font-size: 14px;">Tests the server-side orchestration state reset</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 3: Test Complete Start Over Flow</h4>
+            <button class="btn danger" onclick="testCompleteReset()">❌ Test Complete Start Over</button>
+            <p style="color: white; font-size: 14px;">Tests the complete frontend and backend reset flow</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Debug Console</h4>
+            <div id="logs" class="logs">Waiting for test actions...</div>
+            <button class="btn danger" onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${timestamp}] ${message}\\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = 'Logs cleared...\\n';
+        }
+
+        async function simulateActiveInterview() {
+            log('🗣️ Simulating active interview state...');
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'interview',
+                        userInput: 'Test workflow for reset functionality'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ Interview simulated successfully');
+                    log('📋 Interview has scheduling section: ' + (data.interview.structured_sections?.scheduling ? 'YES' : 'NO'));
+                    showStatus('Active interview state created - ready to test reset', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to simulate interview');
+                }
+            } catch (error) {
+                log(`❌ Simulation error: ${error.message}`);
+                showStatus('Failed to simulate active state', 'error');
+            }
+        }
+
+        async function testResetEndpoint() {
+            log('🔄 Testing reset endpoint...');
+            
+            try {
+                const response = await fetch('/api/productivity/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    log('✅ Backend reset successful');
+                    log(`📅 Reset timestamp: ${data.timestamp}`);
+                    showStatus('Backend state reset successfully', 'success');
+                } else {
+                    throw new Error(data.message || 'Reset failed');
+                }
+            } catch (error) {
+                log(`❌ Reset endpoint error: ${error.message}`);
+                showStatus('Backend reset failed', 'error');
+            }
+        }
+
+        async function testCompleteReset() {
+            log('❌ Testing complete start over flow...');
+            
+            try {
+                // First simulate the frontend reset function behavior
+                log('🔧 Resetting frontend state...');
+                
+                // Reset backend state
+                const response = await fetch('/api/productivity/reset', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                if (!response.ok) {
+                    log('⚠️ Backend reset failed, continuing with frontend reset');
+                }
+                
+                // Simulate clearing stored data
+                log('📱 Clearing frontend stored data...');
+                window.currentSchedule = null;
+                window.currentInterview = null;
+                
+                // Test that we can start a fresh interview
+                log('🗣️ Testing fresh interview after reset...');
+                const interviewResponse = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'interview',
+                        userInput: 'Fresh start after reset'
+                    })
+                });
+                
+                const interviewData = await interviewResponse.json();
+                
+                if (interviewData.success) {
+                    log('✅ Complete reset flow PASSED!');
+                    log('🎯 Fresh interview started successfully');
+                    log('📅 Scheduling section available: ' + (interviewData.interview.structured_sections?.scheduling ? 'YES' : 'NO'));
+                    showStatus('🎉 Complete Start Over flow working perfectly!', 'success');
+                } else {
+                    throw new Error('Fresh interview failed after reset');
+                }
+                
+            } catch (error) {
+                log(`❌ Complete reset test error: ${error.message}`);
+                showStatus('Complete reset flow failed', 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `<p style="color: ${type === 'success' ? '#4CAF50' : '#f44336'};">${message}</p>`;
+        }
+
+        // Initialize
+        log('🔄 Start Over Flow Test Ready');
+        log('📋 Test sequence: Simulate → Reset Backend → Complete Flow Test');
+        log('🎯 Goal: Verify users can start fresh after using Start Over');
+    </script>
+</body>
+</html>

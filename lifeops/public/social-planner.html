@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Social Planner - LifeOps</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        .social-planner-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .interview-card {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .interview-question {
+            margin-bottom: 30px;
+            padding: 20px;
+            border-left: 4px solid #6366f1;
+            background: #f8fafc;
+        }
+        
+        .question-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #1e293b;
+        }
+        
+        .question-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .option-button {
+            padding: 12px 20px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        
+        .option-button:hover {
+            border-color: #6366f1;
+            background: #f1f5f9;
+        }
+        
+        .option-button.selected {
+            border-color: #6366f1;
+            background: #6366f1;
+            color: white;
+        }
+        
+        .scale-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .scale-options .option-button {
+            flex: 1;
+            min-width: 200px;
+            text-align: center;
+        }
+        
+        .checklist-options .option-button {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .checklist-options .option-button::before {
+            content: '☐';
+            font-size: 20px;
+        }
+        
+        .checklist-options .option-button.selected::before {
+            content: '☑';
+        }
+        
+        .generate-plan-btn {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 15px 40px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            width: 100%;
+            margin-top: 20px;
+        }
+        
+        .generate-plan-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .generate-plan-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading-spinner {
+            display: none;
+            text-align: center;
+            padding: 40px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #6366f1;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .planning-results {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .plan-categories {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .category {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .category h3 {
+            margin-bottom: 15px;
+            color: #1e293b;
+            font-size: 20px;
+        }
+        
+        .social-category {
+            border-left: 4px solid #10b981;
+        }
+        
+        .health-category {
+            border-left: 4px solid #f59e0b;
+        }
+        
+        .life-category {
+            border-left: 4px solid #8b5cf6;
+        }
+        
+        .activity-item {
+            padding: 12px;
+            margin-bottom: 10px;
+            background: #f8fafc;
+            border-radius: 8px;
+            border-left: 3px solid #e2e8f0;
+        }
+        
+        .activity-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+        
+        .activity-time {
+            font-size: 14px;
+            color: #64748b;
+        }
+        
+        .weekly-schedule {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .quick-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .quick-actions button {
+            flex: 1;
+            padding: 12px 24px;
+            border: 2px solid #6366f1;
+            border-radius: 8px;
+            background: white;
+            color: #6366f1;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-width: 150px;
+        }
+        
+        .quick-actions button:hover {
+            background: #6366f1;
+            color: white;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e2e8f0;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="social-planner-container">
+        <header>
+            <h1>🌟 Social Planner</h1>
+            <p>AI-powered personal time planning that balances your social life, health, and daily tasks</p>
+        </header>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar">
+            <div class="progress-fill" id="progress-fill" style="width: 0%"></div>
+        </div>
+
+        <!-- Interview Section -->
+        <div class="interview-card" id="interview-section">
+            <h2>Let's Plan Your Perfect Week</h2>
+            <p>Answer a few questions to help me create a personalized schedule that fits your lifestyle and goals.</p>
+            
+            <div id="interview-questions">
+                <!-- Questions will be loaded here -->
+            </div>
+            
+            <button class="generate-plan-btn" id="generate-plan-btn" onclick="generatePlan()" disabled>
+                Generate My Social Plan
+            </button>
+        </div>
+
+        <!-- Loading Section -->
+        <div class="loading-spinner" id="loading-section">
+            <div class="spinner"></div>
+            <h3>Creating Your Personalized Plan...</h3>
+            <p>Analyzing your health data, social connections, and schedule...</p>
+        </div>
+
+        <!-- Planning Results -->
+        <div class="planning-results" id="planning-results">
+            <h2>Your Personalized Weekly Plan</h2>
+            
+            <div class="plan-categories">
+                <div class="category social-category">
+                    <h3>👥 Social Activities</h3>
+                    <div id="social-activities">
+                        <!-- Social activities will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="category health-category">
+                    <h3>💪 Health & Fitness</h3>
+                    <div id="health-activities">
+                        <!-- Health activities will be populated here -->
+                    </div>
+                </div>
+                
+                <div class="category life-category">
+                    <h3>🏠 Life Tasks</h3>
+                    <div id="life-tasks">
+                        <!-- Life tasks will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="weekly-schedule">
+                <h3>📅 Weekly Schedule</h3>
+                <div id="weekly-calendar">
+                    <!-- Weekly calendar will be populated here -->
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <button onclick="regeneratePlan()">🔄 Regenerate Plan</button>
+                <button onclick="exportToCalendar()">📅 Export to Calendar</button>
+                <button onclick="adjustPreferences()">⚙️ Adjust Preferences</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Social Planner JavaScript
+        class SocialPlannerUI {
+            constructor() {
+                this.currentStep = 0;
+                this.totalSteps = 0;
+                this.interviewResponses = {};
+                this.questions = [];
+                this.init();
+            }
+
+            async init() {
+                await this.loadInterview();
+                this.renderQuestions();
+                this.updateProgress();
+            }
+
+            async loadInterview() {
+                try {
+                    const response = await fetch('/api/social/interview');
+                    const data = await response.json();
+                    this.questions = data.questions || [];
+                    this.totalSteps = this.questions.length;
+                } catch (error) {
+                    console.error('Error loading interview:', error);
+                    // Fallback questions if API fails
+                    this.questions = [
+                        {
+                            id: 'social_energy',
+                            question: 'How social are you feeling this week?',
+                            type: 'scale',
+                            options: [
+                                'Low energy - prefer quiet activities',
+                                'Moderate - mix of social and alone time', 
+                                'High energy - ready for lots of social interaction'
+                            ]
+                        },
+                        {
+                            id: 'exercise_preference',
+                            question: 'What type of exercise motivates you most?',
+                            type: 'multiple_choice',
+                            options: ['Solo workouts', 'Group fitness', 'Outdoor activities', 'Sports with friends']
+                        },
+                        {
+                            id: 'relationship_priorities',
+                            question: 'Which relationships need attention this week?',
+                            type: 'checklist',
+                            options: ['Close friends', 'Family', 'Professional network', 'Romantic partner']
+                        },
+                        {
+                            id: 'life_balance',
+                            question: 'What life areas need focus?',
+                            type: 'checklist',
+                            options: ['Health/fitness', 'Home organization', 'Personal projects', 'Social connections']
+                        }
+                    ];
+                    this.totalSteps = this.questions.length;
+                }
+            }
+
+            renderQuestions() {
+                const container = document.getElementById('interview-questions');
+                container.innerHTML = '';
+
+                this.questions.forEach((question, index) => {
+                    const questionDiv = document.createElement('div');
+                    questionDiv.className = 'interview-question';
+                    questionDiv.innerHTML = `
+                        <div class="question-title">${index + 1}. ${question.question}</div>
+                        <div class="question-options ${question.type}-options" id="options-${question.id}">
+                            ${this.renderOptions(question)}
+                        </div>
+                    `;
+                    container.appendChild(questionDiv);
+                });
+            }
+
+            renderOptions(question) {
+                const optionsHtml = question.options.map(option => `
+                    <button class="option-button" onclick="selectOption('${question.id}', '${option}', '${question.type}')">
+                        ${option}
+                    </button>
+                `).join('');
+
+                return optionsHtml;
+            }
+
+            updateProgress() {
+                const completed = Object.keys(this.interviewResponses).length;
+                const progress = (completed / this.totalSteps) * 100;
+                document.getElementById('progress-fill').style.width = progress + '%';
+                
+                const generateBtn = document.getElementById('generate-plan-btn');
+                generateBtn.disabled = completed < this.totalSteps;
+                
+                if (completed === this.totalSteps) {
+                    generateBtn.textContent = 'Generate My Social Plan ✨';
+                }
+            }
+
+            selectOption(questionId, option, type) {
+                if (type === 'checklist') {
+                    if (!this.interviewResponses[questionId]) {
+                        this.interviewResponses[questionId] = [];
+                    }
+                    
+                    const index = this.interviewResponses[questionId].indexOf(option);
+                    if (index > -1) {
+                        this.interviewResponses[questionId].splice(index, 1);
+                    } else {
+                        this.interviewResponses[questionId].push(option);
+                    }
+                } else {
+                    this.interviewResponses[questionId] = option;
+                }
+                
+                this.updateButtonStates(questionId, type);
+                this.updateProgress();
+            }
+
+            updateButtonStates(questionId, type) {
+                const buttons = document.querySelectorAll(`#options-${questionId} .option-button`);
+                
+                buttons.forEach(button => {
+                    const option = button.textContent.trim();
+                    
+                    if (type === 'checklist') {
+                        const isSelected = this.interviewResponses[questionId] && 
+                                         this.interviewResponses[questionId].includes(option);
+                        button.classList.toggle('selected', isSelected);
+                    } else {
+                        const isSelected = this.interviewResponses[questionId] === option;
+                        button.classList.toggle('selected', isSelected);
+                        if (isSelected) {
+                            buttons.forEach(b => {
+                                if (b !== button) b.classList.remove('selected');
+                            });
+                        }
+                    }
+                });
+            }
+
+            async generatePlan() {
+                document.getElementById('interview-section').style.display = 'none';
+                document.getElementById('loading-section').style.display = 'block';
+
+                try {
+                    const response = await fetch('/api/social-planner/generate', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ responses: this.interviewResponses })
+                    });
+
+                    const plan = await response.json();
+                    this.displayPlan(plan);
+                } catch (error) {
+                    console.error('Error generating plan:', error);
+                    alert('Sorry, there was an error generating your plan. Please try again.');
+                    document.getElementById('loading-section').style.display = 'none';
+                    document.getElementById('interview-section').style.display = 'block';
+                }
+            }
+
+            displayPlan(plan) {
+                document.getElementById('loading-section').style.display = 'none';
+                document.getElementById('planning-results').style.display = 'block';
+
+                // Populate social activities
+                const socialContainer = document.getElementById('social-activities');
+                socialContainer.innerHTML = plan.social ? plan.social.map(activity => `
+                    <div class="activity-item">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                `).join('') : '<p>No social activities planned</p>';
+
+                // Populate health activities
+                const healthContainer = document.getElementById('health-activities');
+                healthContainer.innerHTML = plan.health ? plan.health.map(activity => `
+                    <div class="activity-item">
+                        <div class="activity-title">${activity.title}</div>
+                        <div class="activity-time">${activity.time}</div>
+                    </div>
+                `).join('') : '<p>No health activities planned</p>';
+
+                // Populate life tasks
+                const lifeContainer = document.getElementById('life-tasks');
+                lifeContainer.innerHTML = plan.lifeTasks ? plan.lifeTasks.map(task => `
+                    <div class="activity-item">
+                        <div class="activity-title">${task.title}</div>
+                        <div class="activity-time">${task.time}</div>
+                    </div>
+                `).join('') : '<p>No life tasks planned</p>';
+
+                // Populate weekly schedule
+                const scheduleContainer = document.getElementById('weekly-calendar');
+                scheduleContainer.innerHTML = plan.schedule ? this.renderWeeklySchedule(plan.schedule) : '<p>Schedule not available</p>';
+            }
+
+            renderWeeklySchedule(schedule) {
+                // This would render a more detailed weekly calendar view
+                return '<p>Weekly schedule integration coming soon...</p>';
+            }
+        }
+
+        // Global functions
+        function selectOption(questionId, option, type) {
+            if (window.socialPlannerUI) {
+                window.socialPlannerUI.selectOption(questionId, option, type);
+            }
+        }
+
+        function generatePlan() {
+            if (window.socialPlannerUI) {
+                window.socialPlannerUI.generatePlan();
+            }
+        }
+
+        function regeneratePlan() {
+            document.getElementById('planning-results').style.display = 'none';
+            document.getElementById('interview-section').style.display = 'block';
+            document.getElementById('progress-fill').style.width = '0%';
+        }
+
+        function exportToCalendar() {
+            alert('Calendar export feature coming soon!');
+        }
+
+        function adjustPreferences() {
+            document.getElementById('planning-results').style.display = 'none';
+            document.getElementById('interview-section').style.display = 'block';
+        }
+
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', () => {
+            window.socialPlannerUI = new SocialPlannerUI();
+        });
+    </script>
+</body>
+</html>

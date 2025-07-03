@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🛠️ Schedule Editor Test</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container { 
+            max-width: 900px; 
+            margin: 0 auto; 
+            background: rgba(0,0,0,0.1); 
+            padding: 20px; 
+            border-radius: 12px; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .primary { background: #4CAF50; color: white; }
+        .secondary { background: #2196F3; color: white; }
+        .tertiary { background: #FF9800; color: white; }
+        h1, h2, h3 { color: white; text-align: center; }
+        .status { margin: 15px 0; padding: 15px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🛠️ Schedule Editor Test</h1>
+        <p style="color: white; text-align: center;">Test the improved schedule editing functionality with null checks and debugging</p>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn primary" onclick="loadTestSchedule()">📅 Load Test Schedule</button>
+            <button class="btn secondary" onclick="testEditor()">✏️ Test Editor</button>
+            <button class="btn tertiary" onclick="window.location.href='/dashboard.html'">🏠 Go to Dashboard</button>
+        </div>
+        
+        <div id="editor-area"></div>
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        // Test schedule data
+        const testSchedule = {
+            scheduleBlocks: [
+                {
+                    startTime: "09:00",
+                    endTime: "10:30",
+                    type: "pomodoro_work",
+                    task: "Test Task 1",
+                    description: "This is a test task description"
+                },
+                {
+                    startTime: "10:30",
+                    endTime: "10:35",
+                    type: "break",
+                    task: "Short Break",
+                    description: "5-minute break"
+                },
+                {
+                    startTime: "11:00",
+                    endTime: "12:00",
+                    type: "meeting",
+                    task: "Team Meeting",
+                    description: "Weekly team sync"
+                }
+            ]
+        };
+
+        function loadTestSchedule() {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<p>✅ Test schedule loaded successfully!</p>';
+            
+            window.currentSchedule = testSchedule;
+            showScheduleEditor(testSchedule);
+        }
+
+        function testEditor() {
+            if (!window.currentSchedule) {
+                alert('Please load test schedule first');
+                return;
+            }
+            
+            // Test the save function
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = '<p>🧪 Testing editor functions...</p>';
+            
+            setTimeout(() => {
+                testSaveFunction();
+            }, 1000);
+        }
+
+        function testSaveFunction() {
+            const statusDiv = document.getElementById('status');
+            try {
+                saveScheduleChanges();
+                statusDiv.innerHTML = '<p style="color: #4CAF50;">✅ Save function executed without errors!</p>';
+            } catch (error) {
+                statusDiv.innerHTML = `<p style="color: #f44336;">❌ Error: ${error.message}</p>`;
+                console.error('Save function error:', error);
+            }
+        }
+
+        // Include the schedule editor functions from dashboard
+        function showScheduleEditor(schedule) {
+            const editorHTML = \`
+                <div class="schedule-editor" id="schedule-editor">
+                    <h3>✏️ Edit Your Schedule</h3>
+                    <div class="editor-blocks" id="editor-blocks">
+                        \${renderEditableSchedule(schedule.scheduleBlocks)}
+                    </div>
+                    <div class="editor-actions">
+                        <button class="btn primary" onclick="saveScheduleChanges()">💾 Save Changes</button>
+                        <button class="btn secondary" onclick="addNewBlock()">➕ Add Time Block</button>
+                        <button class="btn tertiary" onclick="cancelEditing()">❌ Cancel</button>
+                    </div>
+                </div>
+            \`;
+            
+            const editorArea = document.getElementById('editor-area');
+            editorArea.innerHTML = editorHTML;
+        }
+
+        function renderEditableSchedule(blocks) {
+            return blocks.map((block, index) => \`
+                <div class="editable-block" data-index="\${index}">
+                    <div class="time-inputs">
+                        <input type="time" value="\${block.startTime}" id="start-\${index}" class="time-input">
+                        <span>to</span>
+                        <input type="time" value="\${block.endTime}" id="end-\${index}" class="time-input">
+                    </div>
+                    <div class="task-inputs">
+                        <input type="text" value="\${block.task || block.title || ''}" id="task-\${index}" class="task-input" placeholder="Task name">
+                        <textarea id="desc-\${index}" class="desc-input" placeholder="Description">\${block.description || ''}</textarea>
+                    </div>
+                    <div class="block-controls">
+                        <select id="type-\${index}" class="type-select">
+                            <option value="pomodoro_work" \${block.type === 'pomodoro_work' ? 'selected' : ''}>🎯 Focus Work</option>
+                            <option value="break" \${block.type === 'break' ? 'selected' : ''}>☕ Break</option>
+                            <option value="meeting" \${block.type === 'meeting' ? 'selected' : ''}>👥 Meeting</option>
+                            <option value="admin" \${block.type === 'admin' ? 'selected' : ''}>📋 Admin Tasks</option>
+                            <option value="email" \${block.type === 'email' ? 'selected' : ''}>📧 Email</option>
+                        </select>
+                        <button onclick="deleteBlock(\${index})" class="delete-btn">🗑️</button>
+                    </div>
+                </div>
+            \`).join('');
+        }
+
+        // Copy the improved functions from dashboard
+        function saveScheduleChanges() {
+            const blocks = [];
+            const editableBlocks = document.querySelectorAll('.editable-block');
+            
+            console.log('🔧 Found editable blocks:', editableBlocks.length);
+            
+            editableBlocks.forEach((blockEl, index) => {
+                const blockIndex = blockEl.getAttribute('data-index') || index;
+                console.log(\`🔧 Processing block \${blockIndex}\`);
+                
+                const startTimeEl = document.getElementById(\`start-\${blockIndex}\`);
+                const endTimeEl = document.getElementById(\`end-\${blockIndex}\`);
+                const taskEl = document.getElementById(\`task-\${blockIndex}\`);
+                const descEl = document.getElementById(\`desc-\${blockIndex}\`);
+                const typeEl = document.getElementById(\`type-\${blockIndex}\`);
+                
+                console.log('🔧 Elements found:', {
+                    startTime: !!startTimeEl,
+                    endTime: !!endTimeEl,
+                    task: !!taskEl,
+                    desc: !!descEl,
+                    type: !!typeEl
+                });
+                
+                if (!startTimeEl || !endTimeEl || !taskEl || !descEl || !typeEl) {
+                    console.error(\`❌ Missing elements for block \${blockIndex}\`);
+                    return;
+                }
+                
+                const startTime = startTimeEl.value;
+                const endTime = endTimeEl.value;
+                const task = taskEl.value;
+                const description = descEl.value;
+                const type = typeEl.value;
+                
+                if (startTime && endTime && task) {
+                    blocks.push({
+                        startTime,
+                        endTime,
+                        task,
+                        description,
+                        type
+                    });
+                } else {
+                    console.warn(\`⚠️ Incomplete block \${blockIndex}: startTime=\${startTime}, endTime=\${endTime}, task=\${task}\`);
+                }
+            });
+            
+            if (blocks.length === 0) {
+                alert('Please add at least one time block');
+                return;
+            }
+            
+            blocks.sort((a, b) => a.startTime.localeCompare(b.startTime));
+            
+            console.log('✅ Schedule changes saved:', blocks);
+            const statusDiv = document.getElementById('status');
+            statusDiv.innerHTML = \`<p style="color: #4CAF50;">✅ Successfully saved \${blocks.length} schedule blocks!</p>\`;
+            
+            window.currentSchedule = { ...window.currentSchedule, scheduleBlocks: blocks };
+        }
+
+        function addNewBlock() {
+            const container = document.getElementById('editor-blocks');
+            const existingBlocks = document.querySelectorAll('.editable-block');
+            const index = existingBlocks.length;
+            
+            console.log(\`➕ Adding new block with index \${index}\`);
+            
+            let startTime = "09:00";
+            let endTime = "10:00";
+            
+            if (existingBlocks.length > 0) {
+                const lastBlock = existingBlocks[existingBlocks.length - 1];
+                const lastEndTime = lastBlock.querySelector('[id^="end-"]')?.value;
+                if (lastEndTime) {
+                    startTime = lastEndTime;
+                    const [hours, minutes] = lastEndTime.split(':');
+                    const newHour = (parseInt(hours) + 1) % 24;
+                    endTime = \`\${newHour.toString().padStart(2, '0')}:\${minutes}\`;
+                }
+            }
+            
+            const newBlockHTML = \`
+                <div class="editable-block" data-index="\${index}">
+                    <div class="time-inputs">
+                        <input type="time" value="\${startTime}" id="start-\${index}" class="time-input">
+                        <span>to</span>
+                        <input type="time" value="\${endTime}" id="end-\${index}" class="time-input">
+                    </div>
+                    <div class="task-inputs">
+                        <input type="text" value="" id="task-\${index}" class="task-input" placeholder="Task name">
+                        <textarea id="desc-\${index}" class="desc-input" placeholder="Description"></textarea>
+                    </div>
+                    <div class="block-controls">
+                        <select id="type-\${index}" class="type-select">
+                            <option value="pomodoro_work">🎯 Focus Work</option>
+                            <option value="break">☕ Break</option>
+                            <option value="meeting">👥 Meeting</option>
+                            <option value="admin">📋 Admin Tasks</option>
+                            <option value="email">📧 Email</option>
+                        </select>
+                        <button onclick="deleteBlock(\${index})" class="delete-btn">🗑️</button>
+                    </div>
+                </div>
+            \`;
+            
+            container.insertAdjacentHTML('beforeend', newBlockHTML);
+            console.log(\`✅ New block \${index} added successfully\`);
+        }
+
+        function deleteBlock(index) {
+            console.log(\`🗑️ Deleting block \${index}\`);
+            const block = document.querySelector(\`[data-index="\${index}"]\`);
+            if (block) {
+                block.remove();
+                console.log(\`✅ Block \${index} deleted\`);
+                
+                // Re-index remaining blocks
+                const remainingBlocks = document.querySelectorAll('.editable-block');
+                remainingBlocks.forEach((blockEl, newIndex) => {
+                    const oldIndex = blockEl.getAttribute('data-index');
+                    blockEl.setAttribute('data-index', newIndex);
+                    
+                    const startInput = blockEl.querySelector(\`#start-\${oldIndex}\`);
+                    const endInput = blockEl.querySelector(\`#end-\${oldIndex}\`);
+                    const taskInput = blockEl.querySelector(\`#task-\${oldIndex}\`);
+                    const descInput = blockEl.querySelector(\`#desc-\${oldIndex}\`);
+                    const typeSelect = blockEl.querySelector(\`#type-\${oldIndex}\`);
+                    const deleteBtn = blockEl.querySelector(\`button[onclick*="\${oldIndex}"]\`);
+                    
+                    if (startInput) startInput.id = \`start-\${newIndex}\`;
+                    if (endInput) endInput.id = \`end-\${newIndex}\`;
+                    if (taskInput) taskInput.id = \`task-\${newIndex}\`;
+                    if (descInput) descInput.id = \`desc-\${newIndex}\`;
+                    if (typeSelect) typeSelect.id = \`type-\${newIndex}\`;
+                    if (deleteBtn) deleteBtn.setAttribute('onclick', \`deleteBlock(\${newIndex})\`);
+                });
+            } else {
+                console.error(\`❌ Block \${index} not found\`);
+            }
+        }
+
+        function cancelEditing() {
+            const editorArea = document.getElementById('editor-area');
+            editorArea.innerHTML = '<p style="color: white; text-align: center;">Editor cancelled. Load test schedule to try again.</p>';
+        }
+    </script>
+</body>
+</html>

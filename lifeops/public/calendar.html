@@ -595,6 +595,14 @@
             <span>📧</span>
             <span>Email Analysis</span>
         </div>
+        <div class="nav-item" onclick="window.location.href='/health.html'">
+            <span>🏃‍♂️</span>
+            <span>Health Analytics</span>
+        </div>
+        <div class="nav-item" onclick="showSection('email-relationships')">
+            <span>🧠</span>
+            <span>Relationship Intelligence</span>
+        </div>
         <div class="nav-item active" onclick="window.location.href='/calendar.html'">
             <span>📅</span>
             <span>Calendar View</span>
@@ -700,6 +708,12 @@
     <script>
         // Birthday toggle state
         let showBirthdays = false;
+        
+        // Infinite scroll state
+        let currentDays = 7; // Start with 7 days
+        let isLoading = false;
+        let hasMoreEvents = true;
+        let allUpcomingEvents = [];
 
         async function loadCalendarData() {
             const btn = document.querySelector('.refresh-btn');
@@ -716,20 +730,37 @@
             todayEvents.innerHTML = '';
             upcomingEvents.innerHTML = '';
 
+            // Reset infinite scroll state
+            currentDays = 7;
+            allUpcomingEvents = [];
+            hasMoreEvents = true;
+
             try {
                 // Always load calendar events
                 const [todayResponse, upcomingResponse] = await Promise.all([
                     fetch('/api/calendar/today'),
-                    fetch('/api/calendar/upcoming')
+                    fetch(`/api/calendar/upcoming?days=${currentDays}`)
                 ]);
 
                 const todayData = await todayResponse.json();
                 const upcomingData = await upcomingResponse.json();
 
                 let todayAllEvents = [...(todayData.events || [])];
-                let upcomingAllEvents = [...(upcomingData.events || [])];
+                allUpcomingEvents = [...(upcomingData.events || [])];
 
-                // Only load birthdays if toggle is enabled
+                // Filter out birthday events from Google Calendar if toggle is off
+                if (!showBirthdays) {
+                    todayAllEvents = todayAllEvents.filter(event => {
+                        const eventType = getEventType(event);
+                        return eventType !== 'birthday';
+                    });
+                    allUpcomingEvents = allUpcomingEvents.filter(event => {
+                        const eventType = getEventType(event);
+                        return eventType !== 'birthday';
+                    });
+                }
+
+                // Only load additional birthdays from birthday API if toggle is enabled
                 if (showBirthdays) {
                     const [birthdaysTodayResponse, birthdaysUpcomingResponse] = await Promise.all([
                         fetch('/api/birthdays/today'),
@@ -745,8 +776,8 @@
                         ...(birthdaysTodayData.events || [])
                     ];
 
-                    upcomingAllEvents = [
-                        ...upcomingAllEvents,
+                    allUpcomingEvents = [
+                        ...allUpcomingEvents,
                         ...(birthdaysUpcomingData.events || [])
                     ];
 
@@ -758,17 +789,17 @@
                 }
 
                 // Sort upcoming events by date
-                upcomingAllEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
+                allUpcomingEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
 
                 if (todayAllEvents.length > 0) {
                     displayEvents(todayAllEvents, 'today-events', true);
                 }
 
-                if (upcomingAllEvents.length > 0) {
-                    displayEvents(upcomingAllEvents, 'upcoming-events', false);
+                if (allUpcomingEvents.length > 0) {
+                    displayEvents(allUpcomingEvents, 'upcoming-events', false);
                 }
 
-                if (todayAllEvents.length === 0 && upcomingAllEvents.length === 0) {
+                if (todayAllEvents.length === 0 && allUpcomingEvents.length === 0) {
                     const message = showBirthdays ? 
                         '📅 No events or birthdays found. Your calendar is clear!' :
                         '📅 No events found. Your calendar is clear!';
@@ -893,6 +924,15 @@
             
             const title = event.summary || event.title || '';
             const lower = title.toLowerCase();
+            
+            // More comprehensive birthday detection
+            if (lower.includes('birthday') || lower.includes('bday') || 
+                lower.includes('🎂') || lower.includes('🎉') ||
+                lower.includes('born') || lower.includes('turns') ||
+                lower.match(/\b\d+\s*(st|nd|rd|th)\s*birthday/i)) {
+                return 'birthday';
+            }
+            
             if (lower.includes('meeting') || lower.includes('standup') || lower.includes('demo')) {
                 return 'meeting';
             }

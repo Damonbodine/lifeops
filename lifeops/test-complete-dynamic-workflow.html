@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>🧪 Complete Dynamic Scheduling Workflow Test</title>
+    <link rel="stylesheet" href="assets/styles.css">
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            margin: 0;
+        }
+        .test-container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            background: rgba(0,0,0,0.1); 
+            padding: 20px; 
+            border-radius: 12px; 
+        }
+        .btn { 
+            padding: 10px 20px; 
+            margin: 5px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        .primary { background: #4CAF50; color: white; }
+        .secondary { background: #2196F3; color: white; }
+        .tertiary { background: #FF9800; color: white; }
+        .danger { background: #f44336; color: white; }
+        h1, h2, h3 { color: white; text-align: center; }
+        .status { margin: 15px 0; padding: 15px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; }
+        .test-step { margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.05); border-radius: 8px; }
+        .test-step h4 { color: #4CAF50; margin-top: 0; }
+        .logs { 
+            background: #000; 
+            color: #00ff00; 
+            padding: 15px; 
+            border-radius: 8px; 
+            font-family: monospace; 
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 10px 0;
+        }
+        .interview-demo { 
+            background: rgba(255,255,255,0.1); 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin: 20px 0; 
+        }
+        .scheduling-demo { 
+            background: rgba(255,255,255,0.05); 
+            padding: 15px; 
+            border-radius: 8px; 
+            margin: 10px 0; 
+        }
+        .day-options, .time-block-options { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); 
+            gap: 10px; 
+            margin: 10px 0; 
+        }
+        .option-label { 
+            padding: 8px 12px; 
+            background: rgba(255,255,255,0.1); 
+            border-radius: 6px; 
+            cursor: pointer; 
+            transition: all 0.3s;
+            text-align: center;
+        }
+        .option-label:hover { background: rgba(255,255,255,0.2); }
+        input[type="radio"] { margin-right: 8px; }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🧪 Complete Dynamic Scheduling Workflow Test</h1>
+        <p style="color: white; text-align: center;">Test the full interview → analysis → schedule → approval workflow with dynamic scheduling</p>
+        
+        <div class="test-step">
+            <h4>Step 1: Start Interview with Dynamic Scheduling</h4>
+            <button class="btn primary" onclick="startInterviewTest()">🗣️ Start Interview</button>
+            <p style="color: white; font-size: 14px;">Tests the new interview with day and time block selection</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 2: Complete Interview with User Responses</h4>
+            <button class="btn secondary" onclick="completeInterviewTest()" disabled id="complete-btn">📝 Complete Interview</button>
+            <p style="color: white; font-size: 14px;">Submits mock answers including scheduling preferences</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 3: Build Dynamic Schedule</h4>
+            <button class="btn tertiary" onclick="buildScheduleTest()" disabled id="schedule-btn">🏗️ Build Schedule</button>
+            <p style="color: white; font-size: 14px;">Creates schedule based on dynamic day/time selections</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Step 4: Test Complete End-to-End Flow</h4>
+            <button class="btn danger" onclick="testFullFlow()" disabled id="full-flow-btn">🚀 Test Full Flow</button>
+            <p style="color: white; font-size: 14px;">Runs the complete workflow with dynamic parameters</p>
+        </div>
+
+        <div class="test-step">
+            <h4>Debug Console</h4>
+            <div id="logs" class="logs">Waiting for test actions...</div>
+            <button class="btn danger" onclick="clearLogs()">🗑️ Clear Logs</button>
+        </div>
+        
+        <div id="interview-demo" class="interview-demo" style="display: none;"></div>
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <script>
+        let testData = {
+            interview: null,
+            responses: null,
+            analysis: null,
+            schedule: null
+        };
+        
+        function log(message) {
+            const logs = document.getElementById('logs');
+            const timestamp = new Date().toLocaleTimeString();
+            logs.innerHTML += `[${timestamp}] ${message}\\n`;
+            logs.scrollTop = logs.scrollHeight;
+            console.log(message);
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = 'Logs cleared...\\n';
+        }
+
+        async function startInterviewTest() {
+            log('🗣️ Starting interview test with dynamic scheduling...');
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'interview',
+                        userInput: 'I want to test the dynamic scheduling workflow'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.interview) {
+                    testData.interview = data.interview;
+                    
+                    log(`✅ Interview generated successfully!`);
+                    log(`📋 Questions: ${data.interview.questions.length}`);
+                    log(`🔧 Structured sections: ${Object.keys(data.interview.structured_sections || {}).join(', ')}`);
+                    
+                    // Display interview
+                    displayInterviewDemo(data.interview);
+                    
+                    document.getElementById('complete-btn').disabled = false;
+                    showStatus('Interview ready! Check the sections below.', 'success');
+                } else {
+                    throw new Error(data.message || 'Failed to generate interview');
+                }
+            } catch (error) {
+                log(`❌ Interview error: ${error.message}`);
+                showStatus('Interview failed', 'error');
+            }
+        }
+
+        function displayInterviewDemo(interview) {
+            const schedulingSection = interview.structured_sections?.scheduling;
+            const prioritiesSection = interview.structured_sections?.priorities;
+            
+            const demoHTML = `
+                <h3 style="color: white;">📋 Interview Preview</h3>
+                <p style="color: #ddd;">${interview.greeting}</p>
+                
+                ${schedulingSection ? `
+                    <div class="scheduling-demo">
+                        <h4 style="color: #4CAF50;">📅 ${schedulingSection.title}</h4>
+                        <p style="color: #ddd;">${schedulingSection.description}</p>
+                        
+                        <div style="margin: 15px 0;">
+                            <strong style="color: white;">Day Options:</strong>
+                            <div class="day-options">
+                                ${schedulingSection.day_options.map(option => `
+                                    <label class="option-label" style="color: white;">
+                                        <input type="radio" name="demo_day" value="${option.value}" ${option.default ? 'checked' : ''}>
+                                        ${option.label}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                        
+                        <div style="margin: 15px 0;">
+                            <strong style="color: white;">Time Block Options:</strong>
+                            <div class="time-block-options">
+                                ${schedulingSection.time_block_options.map(option => `
+                                    <label class="option-label" style="color: white;">
+                                        <input type="radio" name="demo_time" value="${option.value}" ${option.default ? 'checked' : ''}>
+                                        ${option.label}
+                                    </label>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                ` : ''}
+                
+                ${prioritiesSection ? `
+                    <div class="scheduling-demo">
+                        <h4 style="color: #4CAF50;">🎯 ${prioritiesSection.title}</h4>
+                        <p style="color: #ddd;">${prioritiesSection.description}</p>
+                        <ul style="color: #ddd;">
+                            ${prioritiesSection.placeholder_tasks.map(task => `<li>${task}</li>`).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                <div style="margin: 15px 0;">
+                    <strong style="color: white;">Interview Questions:</strong>
+                    <ol style="color: #ddd;">
+                        ${interview.questions.map(q => `<li>${q}</li>`).join('')}
+                    </ol>
+                </div>
+            `;
+            
+            document.getElementById('interview-demo').innerHTML = demoHTML;
+            document.getElementById('interview-demo').style.display = 'block';
+        }
+
+        async function completeInterviewTest() {
+            if (!testData.interview) {
+                log('❌ No interview data available');
+                return;
+            }
+            
+            log('📝 Completing interview with mock responses...');
+            
+            // Create mock responses including scheduling preferences
+            testData.responses = {
+                questions: [
+                    "My energy is at 8/10 today, feeling great!",
+                    "I prefer deep focus work today with minimal distractions",
+                    "I have a team meeting at 2 PM that I need to work around",
+                    "I'm feeling relaxed and motivated, stress level is low"
+                ],
+                priorities: [
+                    { task: "Complete quarterly report", timeEstimate: "2hours" },
+                    { task: "Review team proposals", timeEstimate: "1hour" },
+                    { task: "Email follow-ups", timeEstimate: "30min" }
+                ],
+                scheduling: {
+                    targetDay: "today",
+                    timeBlock: "work_hours",
+                    customDate: null,
+                    customTimeRange: null
+                }
+            };
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'analysis',
+                        responses: testData.responses
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    testData.analysis = data.analysis;
+                    log(`✅ Analysis completed successfully!`);
+                    log(`🧠 Optimal deep work blocks: ${data.analysis.optimalScheduling?.deepWorkBlocks?.length || 0}`);
+                    
+                    document.getElementById('schedule-btn').disabled = false;
+                    showStatus('Analysis complete! Ready to build schedule.', 'success');
+                } else {
+                    throw new Error(data.message || 'Analysis failed');
+                }
+            } catch (error) {
+                log(`❌ Analysis error: ${error.message}`);
+                showStatus('Analysis failed', 'error');
+            }
+        }
+
+        async function buildScheduleTest() {
+            if (!testData.analysis || !testData.responses) {
+                log('❌ Missing analysis or responses data');
+                return;
+            }
+            
+            log('🏗️ Building schedule with dynamic constraints...');
+            log(`📅 Target day: ${testData.responses.scheduling.targetDay}`);
+            log(`⏰ Time block: ${testData.responses.scheduling.timeBlock}`);
+            
+            try {
+                const response = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'schedule',
+                        analysis: testData.analysis,
+                        userResponses: testData.responses
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success && data.schedule) {
+                    testData.schedule = data.schedule;
+                    
+                    log(`✅ Schedule built successfully!`);
+                    log(`📅 Schedule blocks: ${data.schedule.scheduleBlocks?.length || 0}`);
+                    log(`🎯 First task: "${data.schedule.scheduleBlocks?.[0]?.task || 'None'}"`);
+                    
+                    if (data.schedule.scheduleBlocks?.length > 0) {
+                        const firstBlock = data.schedule.scheduleBlocks[0];
+                        const lastBlock = data.schedule.scheduleBlocks[data.schedule.scheduleBlocks.length - 1];
+                        log(`⏰ Schedule span: ${firstBlock.startTime} - ${lastBlock.endTime}`);
+                    }
+                    
+                    document.getElementById('full-flow-btn').disabled = false;
+                    showStatus('Schedule ready! Test complete end-to-end flow.', 'success');
+                } else {
+                    throw new Error(data.message || 'Schedule building failed');
+                }
+            } catch (error) {
+                log(`❌ Schedule building error: ${error.message}`);
+                showStatus('Schedule building failed', 'error');
+            }
+        }
+
+        async function testFullFlow() {
+            log('🚀 Testing complete end-to-end workflow...');
+            
+            try {
+                // Test schedule approval
+                const approvalResponse = await fetch('/api/productivity/orchestrate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        phase: 'approve',
+                        schedule: testData.schedule
+                    })
+                });
+                
+                const approvalData = await approvalResponse.json();
+                
+                if (approvalData.success) {
+                    log('✅ Complete workflow test PASSED!');
+                    log('📊 Schedule approved and activated successfully');
+                    log(`🎯 Final schedule has ${approvalData.approval?.schedule?.scheduleBlocks?.length || 0} blocks`);
+                    
+                    showStatus('🎉 Complete dynamic scheduling workflow working perfectly!', 'success');
+                } else {
+                    throw new Error(approvalData.message || 'Approval failed');
+                }
+            } catch (error) {
+                log(`❌ Full flow test error: ${error.message}`);
+                showStatus('Full workflow test failed', 'error');
+            }
+        }
+
+        function showStatus(message, type) {
+            const statusDiv = document.getElementById('status');
+            statusDiv.style.display = 'block';
+            statusDiv.innerHTML = `<p style="color: ${type === 'success' ? '#4CAF50' : '#f44336'};">${message}</p>`;
+        }
+
+        // Initialize
+        log('🧪 Dynamic Scheduling Workflow Test Ready');
+        log('📋 Test sequence: Interview → Analysis → Schedule → Approval');
+        log('🎯 Focus: Day selection and time block constraints');
+    </script>
+</body>
+</html>

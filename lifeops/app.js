@@ -19,7 +19,6 @@ const app = express();
 const port = 3000;
 
 app.use(express.json());
-app.use(express.static('public'));
 
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
@@ -3063,8 +3062,38 @@ app.post('/api/smart-message', async (req, res) => {
   }
 });
 
+// Import and mount productivity orchestration routes
+try {
+  console.log('📦 Loading productivity routes...');
+  const productivityRoutes = require('./routes/productivity');
+  const pomodoroRoutes = require('./routes/pomodoro');
+  const notificationRoutes = require('./routes/notifications');
+
+  app.use('/api/productivity', productivityRoutes);
+  app.use('/api/pomodoro', pomodoroRoutes);
+  app.use('/api/notifications', notificationRoutes);
+  console.log('✅ Productivity routes mounted successfully');
+} catch (error) {
+  console.error('❌ Error loading productivity routes:', error.message);
+}
+
+// Import and mount social planner routes
+try {
+  console.log('📦 Loading social planner routes...');
+  const socialPlannerRoutes = require('./routes/socialplanner');
+  
+  app.use('/api/social', socialPlannerRoutes);
+  console.log('✅ Social planner routes mounted successfully at /api/social');
+} catch (error) {
+  console.error('❌ Error loading social planner routes:', error.message);
+}
+
+
+// Mount static middleware AFTER API routes to prevent conflicts
+app.use(express.static('public'));
+
 // EmailService loads its own tokens automatically
-console.log('🚀 LifeOps server initialized with enhanced email services');
+console.log('🚀 LifeOps server initialized with enhanced email services and productivity orchestration');
 
 // If running directly (not imported as module), start the server
 if (require.main === module) {
