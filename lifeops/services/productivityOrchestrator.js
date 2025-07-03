@@ -7,6 +7,15 @@ const { google } = require('googleapis');
 const cron = require('node-cron');
 const notifier = require('node-notifier');
 
+// Optional Pomodoro and Notification services (fail gracefully if not available)
+let PomodoroManager, NotificationManager;
+try {
+  PomodoroManager = require('./pomodoroManager');
+  NotificationManager = require('./notificationManager');
+} catch (error) {
+  console.warn('⚠️ Pomodoro/Notification services not available:', error.message);
+}
+
 /**
  * ProductivityOrchestrator - The main AI orchestrator for ultimate productivity
  * Coordinates all agents and manages the complete daily productivity workflow
@@ -44,6 +53,11 @@ class ProductivityOrchestrator {
     this.healthAnalytics = new HealthAnalytics(process.env.OPENAI_API_KEY);
     this.calendar = null;
     this.initializeCalendar();
+
+    // Optional Pomodoro and Notification integration (fail gracefully)
+    this.pomodoroManager = null;
+    this.notificationManager = null;
+    this.initializePomodoroIntegration();
 
     // Scheduled jobs
     this.scheduledJobs = new Map();
@@ -88,6 +102,30 @@ class ProductivityOrchestrator {
       }
     } catch (error) {
       console.error('❌ Calendar initialization error:', error);
+    }
+  }
+
+  /**
+   * Initialize Pomodoro and Notification integration (optional)
+   */
+  async initializePomodoroIntegration() {
+    try {
+      if (NotificationManager) {
+        this.notificationManager = new NotificationManager();
+        console.log('✅ NotificationManager ready');
+      }
+
+      if (PomodoroManager && this.notificationManager) {
+        this.pomodoroManager = new PomodoroManager(this.notificationManager);
+        console.log('✅ PomodoroManager ready');
+      } else if (PomodoroManager) {
+        this.pomodoroManager = new PomodoroManager();
+        console.log('✅ PomodoroManager ready (without notifications)');
+      }
+    } catch (error) {
+      console.warn('⚠️ Pomodoro integration initialization failed:', error.message);
+      this.pomodoroManager = null;
+      this.notificationManager = null;
     }
   }
 
@@ -571,7 +609,21 @@ Respond in JSON format:
       tomorrow.setDate(tomorrow.getDate() + 1);
       return tomorrow;
     } else if (targetDay === 'custom' && schedulingPrefs.customDate) {
-      return new Date(schedulingPrefs.customDate);
+      // Fix timezone issue: parse date in local timezone, not UTC
+      const customDateStr = schedulingPrefs.customDate;
+      let targetDate;
+      
+      if (customDateStr.includes('T') || customDateStr.includes('Z')) {
+        // Already has time info, use as-is
+        targetDate = new Date(customDateStr);
+      } else {
+        // Date-only string (YYYY-MM-DD), parse as local date
+        const [year, month, day] = customDateStr.split('-').map(Number);
+        targetDate = new Date(year, month - 1, day); // month is 0-indexed
+      }
+      
+      console.log(`📅 Parsing custom date: ${customDateStr} -> ${targetDate.toDateString()} (${targetDate.toISOString()})`);
+      return targetDate;
     } else {
       // Fallback to today
       console.warn('⚠️ Unknown target day, falling back to today:', targetDay);
@@ -705,18 +757,23 @@ Respond with a detailed JSON schedule:
 
     try {
       const response = await this.llm.invoke([
-        new SystemMessage('You are an expert at creating detailed, time-blocked productivity schedules with Pomodoro technique integration.'),
-        new HumanMessage(buildPrompt)
+        new SystemMessage('You are an expert at creating detailed, time-blocked productivity schedules with Pomodoro technique integration. You MUST respond ONLY with valid JSON. Do not include any explanatory text, markdown formatting, or other content - only the JSON object.'),
+        new HumanMessage(buildPrompt + '\n\nIMPORTANT: Respond with ONLY the JSON object. No text, no explanations, no markdown formatting. Just the raw JSON.')
       ]);
 
       let schedule;
       try {
         schedule = JSON.parse(this.cleanLLMResponse(response.content));
+        console.log('🤖 AI generated schedule:', JSON.stringify(schedule, null, 2));
+        
         // Validate schedule structure
         if (!this.validateScheduleStructure(schedule)) {
           console.warn('⚠️ Schedule validation failed, using fallback');
+          console.log('🔍 AI schedule structure that failed validation:', JSON.stringify(schedule, null, 2));
           schedule = this.getFallbackSchedule();
         } else {
+          console.log('✅ AI schedule passed validation, enforcing time constraints');
+          console.log('🔍 Time constraints to enforce:', constraints);
           // Enforce time constraints on AI-generated schedule
           schedule = this.enforceTimeConstraints(schedule, constraints);
         }
@@ -855,6 +912,9 @@ Respond in JSON format:
       // Set up automated notifications and Pomodoro timers
       await this.setupAutomatedExecution(finalSchedule);
 
+      // Optional: Set up Pomodoro and Notification execution (safe integration)
+      await this.setupPomodoroExecution(finalSchedule, targetDate);
+
       console.log('✅ Daily schedule approved and activated');
       
       return {
@@ -974,6 +1034,63 @@ Respond in JSON format:
       console.log(`✅ Scheduled ${this.scheduledJobs.size} automated notifications`);
     } catch (error) {
       console.error('❌ Automated execution setup error:', error);
+    }
+  }
+
+  /**
+   * Setup Pomodoro and enhanced notification execution (optional/safe)
+   */
+  async setupPomodoroExecution(schedule, targetDate) {
+    try {
+      // Only proceed if services are available
+      if (!this.pomodoroManager && !this.notificationManager) {
+        console.log('📝 Pomodoro services not available - using standard notifications');
+        return;
+      }
+
+      console.log('🍅 Setting up enhanced Pomodoro execution...');
+
+      // Set up schedule reminders if notification manager is available
+      if (this.notificationManager) {
+        await this.notificationManager.setupScheduleReminders(schedule.scheduleBlocks);
+      }
+
+      // Load schedule into pomodoro manager if available
+      if (this.pomodoroManager) {
+        await this.pomodoroManager.scheduleFromDailySchedule(schedule.scheduleBlocks);
+        
+        // Set up Pomodoro sessions for work blocks
+        const workBlocks = schedule.scheduleBlocks.filter(block => 
+          block.type === 'pomodoro_work' || block.type === 'deep_work'
+        );
+
+        if (workBlocks.length > 0) {
+          console.log(`🍅 Loaded ${workBlocks.length} work blocks into Pomodoro manager`);
+          
+          // Optional: Auto-start first session if it's starting soon
+          const firstBlock = workBlocks[0];
+          const now = new Date();
+          const startTime = new Date(targetDate);
+          const [hours, minutes] = firstBlock.startTime.split(':');
+          startTime.setHours(parseInt(hours), parseInt(minutes), 0, 0);
+          
+          const timeUntilStart = startTime.getTime() - now.getTime();
+          
+          // If starting within 30 minutes, set up auto-start
+          if (timeUntilStart > 0 && timeUntilStart <= 30 * 60 * 1000) {
+            setTimeout(() => {
+              console.log('🍅 Auto-starting first Pomodoro session...');
+              // Use the actual API from the existing PomodoroManager
+              this.pomodoroManager.startSession('classic', firstBlock.task, { autoStart: true });
+            }, timeUntilStart);
+          }
+        }
+      }
+
+      console.log('✅ Enhanced Pomodoro execution setup complete');
+    } catch (error) {
+      console.warn('⚠️ Pomodoro execution setup failed (continuing with standard flow):', error.message);
+      // Don't throw error - continue with normal operation
     }
   }
 
@@ -1232,18 +1349,24 @@ Respond in JSON format:
       }
       
       // Only add block if it still has meaningful duration (at least 15 minutes)
-      if (this.timeToMinutes(adjustedEndTime) - this.timeToMinutes(adjustedStartTime) >= 15) {
+      const blockDuration = this.timeToMinutes(adjustedEndTime) - this.timeToMinutes(adjustedStartTime);
+      if (blockDuration >= 15) {
         adjustedBlocks.push({
           ...block,
           startTime: adjustedStartTime,
           endTime: adjustedEndTime
         });
+        console.log(`✅ Added block: ${adjustedStartTime} - ${adjustedEndTime} (${blockDuration} min) - ${block.task}`);
+      } else {
+        console.log(`⚠️ Skipped block too short: ${adjustedStartTime} - ${adjustedEndTime} (${blockDuration} min) - ${block.task}`);
       }
     }
     
     // If no blocks remain, use fallback schedule
     if (adjustedBlocks.length === 0) {
       console.log('⚠️ No blocks fit within time constraints, using fallback schedule');
+      console.log('🔍 Original schedule had', schedule.scheduleBlocks.length, 'blocks');
+      console.log('🔍 Time constraints:', `${constraints.startTime} - ${constraints.endTime}`);
       return this.getFallbackSchedule();
     }
     
@@ -1267,7 +1390,7 @@ Respond in JSON format:
    * Get orchestrator status
    */
   getStatus() {
-    return {
+    const status = {
       active: this.state.executionMode,
       currentSession: this.state.currentSession,
       todaysPlan: this.state.todaysPlan,
@@ -1277,10 +1400,24 @@ Respond in JSON format:
         email: emailService.isAuth(),
         calendar: !!this.calendar,
         health: !!this.healthAnalytics,
-        openai: !!process.env.OPENAI_API_KEY
+        openai: !!process.env.OPENAI_API_KEY,
+        pomodoro: !!this.pomodoroManager,
+        notifications: !!this.notificationManager
       },
       lastUpdate: this.state.lastUpdate
     };
+
+    // Add Pomodoro status if available
+    if (this.pomodoroManager) {
+      status.pomodoro = this.pomodoroManager.getStatus();
+    }
+
+    // Add notification status if available
+    if (this.notificationManager) {
+      status.notifications = this.notificationManager.getStatus();
+    }
+
+    return status;
   }
 }
 

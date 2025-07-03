@@ -270,18 +270,26 @@ class UserGoalsInterview {
   validateResponses(responses) {
     const errors = [];
     
-    // Check that all required questions are answered
-    const requiredQuestions = this.interviewQuestions.filter(q => q.weight === 'high');
+    // Check that at least some core questions are answered
+    const coreQuestions = ['social_energy', 'exercise_preference'];
+    const answeredCore = coreQuestions.filter(q => responses[q]);
     
-    for (const question of requiredQuestions) {
-      if (!responses[question.id]) {
-        errors.push(`Please answer: ${question.question}`);
-      }
+    if (answeredCore.length === 0) {
+      errors.push('Please answer at least the social energy and exercise preference questions');
+    }
+
+    // Optional: warn about missing high-priority questions but don't block
+    const requiredQuestions = this.interviewQuestions.filter(q => q.weight === 'high');
+    const missingRequired = requiredQuestions.filter(q => !responses[q.id]);
+    
+    if (missingRequired.length > 0) {
+      console.log('⚠️ Missing some recommended questions:', missingRequired.map(q => q.id));
     }
 
     return {
       isValid: errors.length === 0,
-      errors
+      errors,
+      warnings: missingRequired.map(q => `Consider answering: ${q.question}`)
     };
   }
 

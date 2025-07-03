@@ -650,8 +650,7 @@ let tasks = { big: [], medium: [], small: [] };
 let dailyStats = {
   focusTime: 0,
   completedSessions: 0,
-  tasksCompleted: 0,
-  productivityScore: 85
+  tasksCompleted: 0
 };
 
 // Pomodoro session endpoints
@@ -752,63 +751,6 @@ app.delete('/api/tasks/:type/:id', (req, res) => {
   }
 });
 
-// AI Daily Score endpoint
-app.get('/api/ai-score', async (req, res) => {
-  try {
-    // Calculate dynamic productivity score based on actual data
-    const focusScore = Math.min(100, (dailyStats.focusTime / 120) * 100); // Target: 2 hours
-    const sessionScore = Math.min(100, (dailyStats.completedSessions / 4) * 100); // Target: 4 sessions
-    const taskScore = Math.min(100, (dailyStats.tasksCompleted / 9) * 100); // Target: 9 tasks (1+3+5)
-    
-    const overallScore = Math.round((focusScore + sessionScore + taskScore) / 3);
-    
-    // Generate AI insights using OpenAI
-    const prompt = `Based on this productivity data, provide insights:
-    - Focus time: ${dailyStats.focusTime} minutes
-    - Completed sessions: ${dailyStats.completedSessions}
-    - Tasks completed: ${dailyStats.tasksCompleted}
-    - Overall score: ${overallScore}%
-    
-    Provide:
-    1. 2-3 strengths (if any)
-    2. 2-3 improvement suggestions
-    3. One motivational insight
-    
-    Format as JSON:
-    {
-      "score": ${overallScore},
-      "strengths": ["...", "..."],
-      "improvements": ["...", "..."],
-      "motivation": "..."
-    }`;
-
-    const response = await openai.chat.completions.create({
-      model: 'gpt-3.5-turbo',
-      messages: [{ role: 'user', content: prompt }],
-      max_tokens: 300,
-      temperature: 0.7,
-    });
-
-    const insights = JSON.parse(response.choices[0].message.content);
-    
-    res.json({
-      score: overallScore,
-      stats: dailyStats,
-      insights
-    });
-  } catch (error) {
-    console.error('Error generating AI score:', error);
-    res.json({
-      score: overallScore || 85,
-      stats: dailyStats,
-      insights: {
-        strengths: ["You're building good productivity habits"],
-        improvements: ["Try longer focus sessions", "Break down big tasks"],
-        motivation: "Every small step forward is progress worth celebrating!"
-      }
-    });
-  }
-});
 
 // Comprehensive phone number normalization
 function normalizePhoneNumber(phoneNumber) {
@@ -1770,7 +1712,7 @@ app.get('/api/calendar/upcoming', async (req, res) => {
       timeMax: endDate.toISOString(),
       singleEvents: true,
       orderBy: 'startTime',
-      maxResults: 20
+      maxResults: Math.min(250, Math.max(20, parseInt(days) * 5)) // Scale with days, max 250
     });
 
     const events = response.data.items || [];
@@ -1876,6 +1818,225 @@ app.post('/api/calendar/create', async (req, res) => {
     res.status(500).json({ 
       error: 'Failed to create calendar event',
       details: error.message 
+    });
+  }
+});
+
+// Delete calendar event endpoint
+app.delete('/api/calendar/events/:eventId', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    console.log(`🗑️ Deleting calendar event: ${eventId}`);
+    
+    // Check if we have valid credentials
+    if (!oauth2Client.credentials || !oauth2Client.credentials.access_token) {
+      console.log('⚠️ No calendar credentials found');
+      return res.status(401).json({ 
+        success: false,
+        error: 'Calendar not authenticated',
+        message: 'Please authenticate with Google Calendar to delete events'
+      });
+    }
+
+    console.log('📊 Current credentials status:', {
+      hasAccessToken: !!oauth2Client.credentials.access_token,
+      tokenExpiry: oauth2Client.credentials.expiry_date
+    });
+
+    const deleteResult = await calendar.events.delete({
+      calendarId: 'primary',
+      eventId: eventId
+    });
+
+    console.log('✅ Event deleted successfully. Response:', deleteResult.status);
+    res.json({ 
+      success: true,
+      message: 'Event deleted successfully'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error deleting event:', {
+      message: error.message,
+      code: error.code,
+      status: error.status,
+      response: error.response?.data,
+      stack: error.stack
+    });
+    
+    if (error.code === 404 || error.status === 404) {
+      return res.status(404).json({
+        success: false,
+        error: 'Event not found',
+        message: 'The event you are trying to delete does not exist'
+      });
+    }
+    
+    if (error.code === 401 || error.status === 401 || error.message?.includes('invalid_grant')) {
+      return res.status(401).json({ 
+        success: false,
+        error: 'Calendar authentication expired',
+        message: 'Please re-authenticate with Google Calendar'
+      });
+    }
+
+    if (error.code === 403 || error.status === 403) {
+      return res.status(403).json({
+        success: false,
+        error: 'Permission denied',
+        message: 'You do not have permission to delete this event'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Failed to delete event',
+      message: error.message || 'An unexpected error occurred',
+      details: {
+        code: error.code,
+        status: error.status
+      }
+    });
+  }
+});
+
+// Update calendar event endpoint
+app.put('/api/calendar/events/:eventId', async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const { summary, start, end, location, description } = req.body;
+    
+    console.log(`📝 Updating calendar event: ${eventId}`);
+    
+    // Check if we have valid credentials
+    if (!oauth2Client.credentials || !oauth2Client.credentials.access_token) {
+      console.log('⚠️ No calendar credentials found');
+      return res.status(401).json({ 
+        success: false,
+        error: 'Calendar not authenticated',
+        message: 'Please authenticate with Google Calendar to update events'
+      });
+    }
+
+    // First, get the existing event
+    const existingEvent = await calendar.events.get({
+      calendarId: 'primary',
+      eventId: eventId
+    });
+
+    // Prepare the updated event data
+    const updatedEvent = {
+      summary: summary || existingEvent.data.summary,
+      location: location || existingEvent.data.location,
+      description: description || existingEvent.data.description,
+      start: start ? {
+        dateTime: start,
+        timeZone: 'America/New_York'
+      } : existingEvent.data.start,
+      end: end ? {
+        dateTime: end,
+        timeZone: 'America/New_York'
+      } : existingEvent.data.end
+    };
+
+    const response = await calendar.events.update({
+      calendarId: 'primary',
+      eventId: eventId,
+      resource: updatedEvent
+    });
+
+    console.log('✅ Event updated successfully');
+    res.json({ 
+      success: true,
+      event: {
+        id: response.data.id,
+        summary: response.data.summary,
+        start: response.data.start?.dateTime || response.data.start?.date,
+        end: response.data.end?.dateTime || response.data.end?.date,
+        location: response.data.location || '',
+        description: response.data.description || '',
+        htmlLink: response.data.htmlLink
+      },
+      message: 'Event updated successfully'
+    });
+    
+  } catch (error) {
+    console.error('❌ Error updating event:', error);
+    
+    if (error.code === 404) {
+      return res.status(404).json({
+        success: false,
+        error: 'Event not found',
+        message: 'The event you are trying to update does not exist'
+      });
+    }
+    
+    if (error.code === 401 || error.message?.includes('invalid_grant')) {
+      return res.status(401).json({ 
+        success: false,
+        error: 'Calendar authentication expired',
+        message: 'Please re-authenticate with Google Calendar'
+      });
+    }
+    
+    res.status(500).json({
+      success: false,
+      error: 'Failed to update event',
+      message: error.message || 'An unexpected error occurred'
+    });
+  }
+});
+
+// Test delete permissions
+app.get('/api/test-calendar-permissions', async (req, res) => {
+  try {
+    console.log('🔍 Testing Calendar permissions...');
+    
+    // Check if credentials are set
+    if (!oauth2Client.credentials || !oauth2Client.credentials.access_token) {
+      return res.json({ 
+        success: false,
+        error: 'No calendar credentials found'
+      });
+    }
+
+    // Try to list calendars to check permissions
+    const calendars = await calendar.calendarList.list();
+    console.log('📅 Available calendars:', calendars.data.items?.length);
+    
+    // Try to list recent events
+    const events = await calendar.events.list({
+      calendarId: 'primary',
+      maxResults: 5,
+      singleEvents: true,
+      orderBy: 'startTime'
+    });
+    
+    const eventsList = events.data.items || [];
+    console.log('📋 Recent events found:', eventsList.length);
+    
+    res.json({
+      success: true,
+      permissions: {
+        canListCalendars: true,
+        canListEvents: true,
+        calendarsCount: calendars.data.items?.length || 0,
+        eventsCount: eventsList.length,
+        sampleEvents: eventsList.slice(0, 2).map(e => ({
+          id: e.id,
+          summary: e.summary,
+          canEdit: e.creator?.email === e.organizer?.email,
+          creator: e.creator?.email,
+          organizer: e.organizer?.email
+        }))
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Calendar permission test failed:', error);
+    res.status(500).json({
+      success: false,
+      error: error.message,
+      code: error.code
     });
   }
 });

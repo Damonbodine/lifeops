@@ -1,12 +1,29 @@
 const OpenAI = require('openai');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
+const { ChatAnthropic } = require('@langchain/anthropic');
+const { HumanMessage, SystemMessage } = require('@langchain/core/messages');
 const SocialPlannerAggregator = require('./socialPlannerAggregator');
 const UserGoalsInterview = require('./userGoalsInterview');
 
 class SocialPlannerAgent {
-  constructor(openaiApiKey) {
-    this.openai = new OpenAI({ apiKey: openaiApiKey });
+  constructor(apiKeys = {}) {
+    // Initialize multiple LLM providers for different agents
+    this.openai = apiKeys.openai ? new OpenAI({ apiKey: apiKeys.openai }) : null;
+    this.google = apiKeys.google ? new GoogleGenerativeAI(apiKeys.google) : null;
+    this.anthropic = apiKeys.anthropic ? new ChatAnthropic({ 
+      apiKey: apiKeys.anthropic,
+      modelName: 'claude-3-haiku-20240307', // Fast model
+      temperature: 0.7
+    }) : null;
+    
     this.aggregator = new SocialPlannerAggregator();
     this.interview = new UserGoalsInterview();
+    
+    console.log('🤖 Multi-LLM Social Planner initialized:', {
+      openai: !!this.openai,
+      google: !!this.google, 
+      anthropic: !!this.anthropic
+    });
   }
 
   /**
@@ -74,274 +91,223 @@ class SocialPlannerAgent {
   }
 
   /**
-   * Social Activities Planning Agent
+   * Social Activities Planning Agent - Using Google Gemini for fast response
    * Focuses on friend check-ins, birthdays, and social opportunities
    */
   async planSocialActivities(context, userProfile) {
-    const prompt = `
-You are a social planning assistant. Create specific, actionable social activities for this week.
+    const prompt = `You are a social planning assistant. Create 3-5 specific social activities for this week using REAL contact names and relationships.
+
+CRITICAL RULES:
+- ONLY suggest activities for contacts with REAL NAMES (full names like "John Smith", not phone numbers)
+- NEVER suggest vague activities like "Text Contact 8155" or activities with phone numbers
+- Focus ONLY on people with clearly identifiable full names
+- Be specific about the type of interaction (text, call, in-person meetup, etc.)
+- If no real contacts are available, suggest general social activities instead
 
 USER PROFILE:
-- Social personality: ${userProfile.insights?.socialPersonality || 'balanced'}
 - Social energy: ${userProfile.preferences?.socialFrequency || 'moderate'}
 - Relationship priorities: ${JSON.stringify(userProfile.preferences?.relationshipFocus || [])}
-- Social style: ${JSON.stringify(userProfile.preferences?.socialStyle || [])}
 
-SOCIAL CONTEXT:
-- Pending friend check-ins: ${JSON.stringify(context.social?.pendingFriendCheckins || [])}
-- Email follow-ups needed: ${JSON.stringify(context.social?.emailFollowups || [])}
+SOCIAL CONTEXT (RESOLVED CONTACTS ONLY):
+- Friend check-ins needed: ${JSON.stringify(context.social?.pendingFriendCheckins || [])}
 - Upcoming birthdays: ${JSON.stringify(context.social?.upcomingBirthdays || [])}
 - Social opportunities: ${JSON.stringify(context.social?.socialOpportunities || [])}
-- Social battery status: ${context.social?.socialBattery || 'moderate'}
 
-SCHEDULE CONTEXT:
-- Free time blocks: ${JSON.stringify(context.schedule?.freeBlocks || [])}
-- Energy peaks: ${JSON.stringify(context.energy?.energyPeaks || [])}
+GOOD EXAMPLES:
+1. "Text John Smith to catch up" (Priority: medium, Time: Tuesday evening, Description: Ask about his new job and weekend plans)
+2. "Plan birthday celebration for Sarah Johnson" (Priority: high, Time: This Thursday, Description: Organize dinner with 3-4 mutual friends)
+3. "Call Mike Wilson about coffee meetup" (Priority: medium, Time: Wednesday afternoon, Description: Follow up on weekend plans discussion)
 
-TASK: Create 3-5 specific social activities for this week including:
-1. Friend check-ins that are overdue
-2. Birthday celebrations or acknowledgments
-3. Email responses that matter personally
-4. New social opportunities to pursue
-5. Relationship maintenance activities
+BAD EXAMPLES (DO NOT CREATE):
+❌ "Text Contact 8155" 
+❌ "Call +1234567890"
+❌ "Message (555) 123-4567"
 
-For each activity, provide:
-- Specific action (what to do)
-- Suggested timing (when to do it)
-- Priority level (high/medium/low)
-- Estimated time needed
+If you don't have enough real contact names, suggest general social activities like:
+- "Join a local meetup group"
+- "Reach out to an old college friend"
+- "Schedule a video call with family"
 
-Format as a JSON array of activity objects.
-    `;
+Return as JSON array with title, description, time, priority fields.`;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are a social planning assistant. Create realistic, personalized social activities based on user data. Return valid JSON only."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 800,
-        temperature: 0.7
-      });
+      if (!this.google) {
+        throw new Error('Google API not available');
+      }
 
-      const socialActivities = this.parsePlanningResponse(response.choices[0].message.content, 'social');
-      console.log('✅ Social activities planned:', socialActivities.length);
+      // Use Google Gemini for fast social planning
+      const model = this.google.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      
+      const startTime = Date.now();
+      const result = await Promise.race([
+        model.generateContent(prompt),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 10000)) // 10s timeout
+      ]);
+      
+      const response = await result.response;
+      const text = response.text();
+      const duration = Date.now() - startTime;
+      
+      console.log(`✅ Google Gemini social planning completed in ${duration}ms`);
+      
+      const socialActivities = this.parsePlanningResponse(text, 'social');
       return socialActivities;
+      
     } catch (error) {
-      console.error('Error planning social activities:', error);
+      console.error('Error with Google Gemini, using fallback:', error.message);
       return this.getDefaultSocialPlan(context, userProfile);
     }
   }
 
   /**
-   * Health Activities Planning Agent
+   * Health Activities Planning Agent - Using Anthropic Claude for health expertise
    * Focuses on exercise, wellness, and physical activities
    */
   async planHealthActivities(context, userProfile) {
-    const prompt = `
-You are a fitness and wellness planning assistant. Create a personalized health plan for this week.
+    const prompt = `Create 3-4 health and fitness activities for this week based on:
 
 USER PROFILE:
-- Exercise preference: ${userProfile.preferences?.exerciseType || 'flexible'}
-- Energy timing: ${userProfile.preferences?.energyTiming || 'flexible'}
-- Weekly goals: ${JSON.stringify(userProfile.preferences?.lifeFocus || [])}
+- Exercise preference: ${userProfile.preferences?.exerciseType || 'Solo workouts'}
+- Energy level: ${context.energy?.currentEnergyLevel || 'moderate'}
+- Fitness goal: ${context.energy?.weeklyFitnessGoal || '3-4 workouts'}
 
-HEALTH CONTEXT:
-- Current energy level: ${context.energy?.currentEnergyLevel || 'moderate'}
-- Optimal workout times: ${JSON.stringify(context.energy?.optimalWorkoutTimes || [])}
-- Rest needs: ${context.energy?.restNeeds || 'moderate'}
-- Weekly fitness goal: ${context.energy?.weeklyFitnessGoal || '3-4 workouts'}
+Create activities like:
+1. "Morning run" (Duration: 30 min, Intensity: medium, Time: Tuesday 7am)
+2. "Yoga session" (Duration: 45 min, Intensity: low, Time: Sunday evening)
 
-SCHEDULE CONTEXT:
-- Free time blocks: ${JSON.stringify(context.schedule?.freeBlocks || [])}
-- Energy peaks: ${JSON.stringify(context.energy?.energyPeaks || [])}
-
-TASK: Create 3-5 health and fitness activities for this week including:
-1. Workout sessions based on preferences
-2. Recovery and rest activities
-3. Wellness activities (meditation, stretching)
-4. Outdoor activities if preferred
-5. Social fitness activities if preferred
-
-For each activity, provide:
-- Specific activity type and details
-- Suggested timing and duration
-- Intensity level (high/medium/low)
-- Solo or social activity
-
-Format as a JSON array of activity objects.
-    `;
+Return as JSON array with title, duration, intensity, time fields.`;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are a fitness planning assistant. Create realistic, personalized workout schedules. Return valid JSON only."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 600,
-        temperature: 0.7
-      });
+      if (!this.anthropic) {
+        throw new Error('Anthropic API not available');
+      }
 
-      const healthActivities = this.parsePlanningResponse(response.choices[0].message.content, 'health');
-      console.log('✅ Health activities planned:', healthActivities.length);
+      const startTime = Date.now();
+      const messages = [
+        new SystemMessage("You are a fitness planning assistant. Create realistic workout schedules. Return only valid JSON."),
+        new HumanMessage(prompt)
+      ];
+      
+      const result = await Promise.race([
+        this.anthropic.invoke(messages),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 8000)) // 8s timeout
+      ]);
+      
+      const duration = Date.now() - startTime;
+      console.log(`✅ Anthropic Claude health planning completed in ${duration}ms`);
+      
+      const healthActivities = this.parsePlanningResponse(result.content, 'health');
       return healthActivities;
+      
     } catch (error) {
-      console.error('Error planning health activities:', error);
+      console.error('Error with Anthropic Claude, using fallback:', error.message);
       return this.getDefaultHealthPlan(context, userProfile);
     }
   }
 
   /**
-   * Life Tasks Planning Agent
+   * Life Tasks Planning Agent - Using OpenAI for detailed task planning
    * Focuses on essential life maintenance tasks
    */
   async planLifeTasks(context, userProfile) {
-    const prompt = `
-You are a life management assistant. Create a realistic weekly plan for essential life tasks.
+    const prompt = `Create 4-5 essential life tasks for this week:
 
 USER PROFILE:
-- Life focus areas: ${JSON.stringify(userProfile.preferences?.lifeFocus || [])}
-- Weekly goals: ${JSON.stringify(userProfile.raw?.weekly_goals || [])}
-- Energy timing: ${userProfile.preferences?.energyTiming || 'flexible'}
-
-TASK CONTEXT:
-- Essential tasks: ${JSON.stringify(context.tasks?.essentialTasks || [])}
-- Preferred task days: ${JSON.stringify(context.tasks?.preferredTaskDays || [])}
-- Time preference: ${context.tasks?.timePreference || 'flexible'}
-
-SCHEDULE CONTEXT:
-- Free time blocks: ${JSON.stringify(context.schedule?.freeBlocks || [])}
+- Life focus: ${JSON.stringify(userProfile.preferences?.lifeFocus || [])}
 - Energy level: ${context.energy?.currentEnergyLevel || 'moderate'}
 
-TASK: Create 4-6 life management tasks for this week including:
-1. Essential household tasks (cleaning, laundry)
-2. Personal admin (bills, appointments)
-3. Meal planning and preparation
-4. Personal projects or organization
-5. Self-care activities
+Create tasks like:
+1. "Grocery shopping" (Duration: 1 hour, Priority: high, Time: Saturday morning)
+2. "Laundry" (Duration: 30 min, Priority: medium, Time: Sunday)
 
-For each task, provide:
-- Specific task description
-- Suggested timing and duration
-- Priority level (high/medium/low)
-- Can be batched with other tasks
-
-Format as a JSON array of task objects.
-    `;
+Return as JSON array with title, duration, priority, time fields.`;
 
     try {
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are a life management assistant. Create practical, achievable task schedules. Return valid JSON only."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 600,
-        temperature: 0.7
-      });
+      if (!this.openai) {
+        throw new Error('OpenAI API not available');
+      }
 
+      const startTime = Date.now();
+      const response = await Promise.race([
+        this.openai.chat.completions.create({
+          model: "gpt-3.5-turbo", // Faster model
+          messages: [
+            {
+              role: "system",
+              content: "You are a life management assistant. Return only valid JSON."
+            },
+            {
+              role: "user",
+              content: prompt
+            }
+          ],
+          max_tokens: 400,
+          temperature: 0.5
+        }),
+        new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), 8000)) // 8s timeout
+      ]);
+
+      const duration = Date.now() - startTime;
+      console.log(`✅ OpenAI life tasks planning completed in ${duration}ms`);
+      
       const lifeTasks = this.parsePlanningResponse(response.choices[0].message.content, 'lifeTasks');
-      console.log('✅ Life tasks planned:', lifeTasks.length);
       return lifeTasks;
+      
     } catch (error) {
-      console.error('Error planning life tasks:', error);
+      console.error('Error with OpenAI, using fallback:', error.message);
       return this.getDefaultLifeTasksPlan(context, userProfile);
     }
   }
 
   /**
-   * Integration Agent
+   * Integration Agent - Simple combination without additional AI call
    * Combines all plans into a cohesive weekly schedule
    */
   async integratePlans(planningResults, context, userProfile) {
-    const prompt = `
-You are a master life planner. Integrate these separate plans into one cohesive, balanced weekly schedule.
-
-SOCIAL ACTIVITIES:
-${JSON.stringify(planningResults.social, null, 2)}
-
-HEALTH ACTIVITIES:
-${JSON.stringify(planningResults.health, null, 2)}
-
-LIFE TASKS:
-${JSON.stringify(planningResults.lifeTasks, null, 2)}
-
-USER PREFERENCES:
-- Energy timing: ${userProfile.preferences?.energyTiming || 'flexible'}
-- Social frequency: ${userProfile.preferences?.socialFrequency || 'moderate'}
-- Weekly goals: ${JSON.stringify(userProfile.raw?.weekly_goals || [])}
-
-CONSTRAINTS:
-- Free time blocks: ${JSON.stringify(context.schedule?.freeBlocks || [])}
-- Energy peaks: ${JSON.stringify(context.energy?.energyPeaks || [])}
-- Current energy level: ${context.energy?.currentEnergyLevel || 'moderate'}
-
-TASK: Create a balanced weekly plan that:
-1. Respects user's energy patterns and preferences
-2. Balances social, health, and life management activities
-3. Groups related activities when efficient
-4. Provides specific day and time recommendations
-5. Considers rest and recovery time
-
-Return a comprehensive weekly plan with:
-- Day-by-day schedule breakdown
-- Morning, afternoon, evening time blocks
-- Priority activities marked
-- Buffer time for spontaneity
-- Alternative options for flexibility
-
-Format as a structured JSON object with days of the week.
-    `;
-
     try {
-      const response = await this.openai.chat.completions.create({
-        model: "gpt-4",
-        messages: [
-          {
-            role: "system",
-            content: "You are a master life planner. Create balanced, realistic weekly schedules that integrate all life areas. Return valid JSON only."
-          },
-          {
-            role: "user",
-            content: prompt
-          }
-        ],
-        max_tokens: 1200,
-        temperature: 0.6
+      console.log('🔗 Integrating plans without additional AI call...');
+      
+      // Simple schedule organization by day
+      const weeklySchedule = {
+        monday: { morning: [], afternoon: [], evening: [] },
+        tuesday: { morning: [], afternoon: [], evening: [] },
+        wednesday: { morning: [], afternoon: [], evening: [] },
+        thursday: { morning: [], afternoon: [], evening: [] },
+        friday: { morning: [], afternoon: [], evening: [] },
+        saturday: { morning: [], afternoon: [], evening: [] },
+        sunday: { morning: [], afternoon: [], evening: [] }
+      };
+
+      // Distribute activities across the week
+      const allActivities = [
+        ...(planningResults.social || []).map(a => ({...a, type: 'social'})),
+        ...(planningResults.health || []).map(a => ({...a, type: 'health'})),
+        ...(planningResults.lifeTasks || []).map(a => ({...a, type: 'life'}))
+      ];
+
+      // Simple distribution logic
+      const days = Object.keys(weeklySchedule);
+      allActivities.forEach((activity, index) => {
+        const dayIndex = index % days.length;
+        const day = days[dayIndex];
+        const timeOfDay = activity.time?.includes('morning') ? 'morning' : 
+                         activity.time?.includes('evening') ? 'evening' : 'afternoon';
+        
+        weeklySchedule[day][timeOfDay].push(activity);
       });
 
-      const integratedPlan = this.parseIntegratedPlan(response.choices[0].message.content);
-      
       return {
         social: planningResults.social,
         health: planningResults.health,
         lifeTasks: planningResults.lifeTasks,
-        schedule: integratedPlan,
+        schedule: weeklySchedule,
         summary: this.generatePlanSummary(planningResults, userProfile),
         metadata: {
           createdAt: new Date().toISOString(),
           userProfile: userProfile.insights,
-          planningDuration: 'weekly'
+          planningDuration: 'weekly',
+          providers: ['google-gemini', 'anthropic-claude', 'openai'],
+          processingTime: 'fast'
         }
       };
     } catch (error) {

@@ -12,7 +12,8 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@langchain/anthropic": "^0.3.23",
+    "@google/generative-ai": "^0.24.1",
+    "@langchain/anthropic": "^0.3.24",
     "@langchain/core": "^0.3.61",
     "@langchain/google-genai": "^0.2.14",
     "@langchain/openai": "^0.5.16",

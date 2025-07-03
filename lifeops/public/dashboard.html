@@ -11,7 +11,7 @@
         <div class="logo">🧐 LifeOps</div>
         <div class="nav-item active" onclick="showSection('dashboard')">
             <span>📊</span>
-            <span>Dashboard</span>
+            <span>Schedule Builder</span>
         </div>
         <div class="nav-item" onclick="showSection('pomodoro')">
             <span>🍅</span>
@@ -19,31 +19,31 @@
         </div>
         <div class="nav-item" onclick="showSection('tasks')">
             <span>📋</span>
-            <span>1-3-5 Tasks</span>
+            <span>Task Builder</span>
         </div>
         <div class="nav-item" onclick="showSection('emails')">
             <span>📧</span>
-            <span>Email Analysis</span>
+            <span>Email Manager</span>
         </div>
         <div class="nav-item" onclick="window.location.href='/health.html'">
             <span>🏃‍♂️</span>
             <span>Health Analytics</span>
         </div>
+        <div class="nav-item" onclick="showSection('social-planner')">
+            <span>🌟</span>
+            <span>Social Planner</span>
+        </div>
         <div class="nav-item" onclick="showSection('email-relationships')">
             <span>🧠</span>
-            <span>Relationship Intelligence</span>
+            <span>Email Check in</span>
         </div>
         <div class="nav-item" onclick="window.location.href='/calendar.html'">
             <span>📅</span>
-            <span>Calendar View</span>
-        </div>
-        <div class="nav-item" onclick="showSection('ai-score')">
-            <span>🤖</span>
-            <span>AI Daily Score</span>
+            <span>Calendar</span>
         </div>
         <div class="nav-item" onclick="showSection('check-ins')">
             <span>💌</span>
-            <span>Check In</span>
+            <span>Text Check In</span>
         </div>
     </div>
 
@@ -55,41 +55,8 @@
                 <p>Your AI-powered productivity companion</p>
             </div>
 
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="focusTime">0</div>
-                    <div class="stat-label">Minutes Focused Today</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="completedSessions">0</div>
-                    <div class="stat-label">Pomodoro Sessions</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="tasksCompleted">0</div>
-                    <div class="stat-label">Tasks Completed</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="productivityScore">85</div>
-                    <div class="stat-label">AI Productivity Score</div>
-                </div>
-            </div>
 
             <div class="feature-grid">
-                <div class="feature-card">
-                    <h3>🔥 Today's Focus</h3>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 65%"></div>
-                    </div>
-                    <p>65% of daily focus goal achieved</p>
-                </div>
-                <div class="feature-card">
-                    <h3>⚡ Quick Actions</h3>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button class="btn btn-primary" onclick="showSection('pomodoro')">Start Focus Session</button>
-                        <button class="btn btn-success" onclick="showSection('tasks')">Add Task</button>
-                        <button class="btn" onclick="showSection('emails')" style="background: #9b59b6; color: white;">Check Emails</button>
-                    </div>
-                </div>
 
                 <div class="chat-widget" id="productivity-orchestrator">
                     <h3>🧠 AI Productivity Orchestrator</h3>
@@ -119,6 +86,16 @@
                                 <span class="status-icon">🏗️</span>
                                 <span class="status-label">Schedule</span>
                                 <span class="status-value" id="schedule-status">Ready</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-icon">🍅</span>
+                                <span class="status-label">Pomodoro</span>
+                                <span class="status-value" id="pomodoro-status">Idle</span>
+                            </div>
+                            <div class="status-item">
+                                <span class="status-icon">🔔</span>
+                                <span class="status-label">Notifications</span>
+                                <span class="status-value" id="notification-status">Ready</span>
                             </div>
                         </div>
                     </div>
@@ -341,45 +318,81 @@
             </div>
         </div>
 
-        <!-- AI Score Section -->
-        <div id="ai-score" class="section" style="display: none;">
-            <h2 class="section-title">🤖 AI Daily Score & Insights</h2>
+        <!-- Social Planner Section -->
+        <div id="social-planner" class="section" style="display: none;">
+            <h2 class="section-title">🌟 Social Planner</h2>
+            <p class="section-subtitle">AI-powered personal time planning that balances your social life, health, and daily tasks</p>
             
-            <div class="feature-grid">
-                <div class="feature-card" style="text-align: center;">
-                    <h3>Today's Productivity Score</h3>
-                    <div class="stat-number" style="font-size: 4rem; color: #27ae60;">85</div>
-                    <p style="color: #7f8c8d;">Based on focus time, task completion, and email management</p>
+            <!-- Progress Bar -->
+            <div class="progress-bar" style="margin-bottom: 20px;">
+                <div class="progress-fill" id="social-progress-fill" style="width: 0%"></div>
+            </div>
+
+            <!-- Interview Section -->
+            <div class="feature-card" id="social-interview-section">
+                <h3>Let's Plan Your Perfect Week</h3>
+                <p>Answer a few questions to help me create a personalized schedule that fits your lifestyle and goals.</p>
+                
+                <div id="social-interview-questions">
+                    <!-- Questions will be loaded here -->
+                </div>
+                
+                <button class="btn btn-primary" id="social-generate-plan-btn" onclick="generateSocialPlan()" disabled>
+                    Generate My Social Plan
+                </button>
+            </div>
+
+            <!-- Loading Section -->
+            <div class="feature-card" id="social-loading-section" style="display: none;">
+                <div style="text-align: center; padding: 40px;">
+                    <div style="border: 4px solid #f3f4f6; border-top: 4px solid #6366f1; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 0 auto 20px;"></div>
+                    <h3>Creating Your Personalized Plan...</h3>
+                    <p>Analyzing your health data, social connections, and schedule...</p>
+                </div>
+            </div>
+
+            <!-- Planning Results -->
+            <div id="social-planning-results" style="display: none;">
+                <h3>Your Personalized Weekly Plan</h3>
+                
+                <div class="feature-grid">
+                    <div class="feature-card" style="border-left: 4px solid #10b981;">
+                        <h4>👥 Social Activities</h4>
+                        <div id="social-activities-list">
+                            <!-- Social activities will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card" style="border-left: 4px solid #f59e0b;">
+                        <h4>💪 Health & Fitness</h4>
+                        <div id="social-health-list">
+                            <!-- Health activities will be populated here -->
+                        </div>
+                    </div>
+                    
+                    <div class="feature-card" style="border-left: 4px solid #8b5cf6;">
+                        <h4>🏠 Life Tasks</h4>
+                        <div id="social-life-tasks-list">
+                            <!-- Life tasks will be populated here -->
+                        </div>
+                    </div>
                 </div>
 
                 <div class="feature-card">
-                    <h3>🎯 AI Insights</h3>
-                    <div style="line-height: 1.6;">
-                        <p><strong>✅ Strengths Today:</strong></p>
-                        <ul style="margin: 10px 0 20px 20px;">
-                            <li>Excellent focus session completion rate</li>
-                            <li>Proactive email management</li>
-                            <li>Good task prioritization</li>
-                        </ul>
-                        
-                        <p><strong>💡 Improvement Opportunities:</strong></p>
-                        <ul style="margin: 10px 0 20px 20px;">
-                            <li>Consider longer focus blocks for deep work</li>
-                            <li>Schedule email processing at specific times</li>
-                            <li>Add more small wins to build momentum</li>
-                        </ul>
+                    <h4>📅 Weekly Schedule</h4>
+                    <div id="social-weekly-calendar">
+                        <!-- Weekly calendar will be populated here -->
                     </div>
                 </div>
-            </div>
 
-            <div class="feature-card" style="margin-top: 20px;">
-                <h3>📊 This Week's Trends</h3>
-                <div style="text-align: center; padding: 20px;">
-                    <p style="color: #7f8c8d;">Weekly analytics will appear here</p>
-                    <p style="color: #7f8c8d;">Track your productivity patterns and improvements over time</p>
+                <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary" onclick="regenerateSocialPlan()">🔄 Regenerate Plan</button>
+                    <button class="btn btn-secondary" onclick="exportSocialToCalendar()">📅 Export to Calendar</button>
+                    <button class="btn btn-secondary" onclick="adjustSocialPreferences()">⚙️ Adjust Preferences</button>
                 </div>
             </div>
         </div>
+
 
         <!-- Check-ins Section -->
         <div id="check-ins" class="section" style="display: none;">
@@ -2940,6 +2953,30 @@ ${suggestion.body}
                     updateOrchestrationStatus('data', status.dataCollection.availableSources.length > 0 ? '✅ Ready' : '⏳ Pending');
                     updateOrchestrationStatus('analysis', status.scheduleAnalysis.llmAvailable ? '✅ Ready' : '⏳ Pending');
                     updateOrchestrationStatus('schedule', status.scheduleBuilder.llmAvailable ? '✅ Ready' : '⏳ Pending');
+                    
+                    // Update Pomodoro status if available
+                    if (status.integrations && status.integrations.pomodoro) {
+                        if (status.pomodoro && status.pomodoro.currentSession) {
+                            const mode = status.pomodoro.currentSession.state;
+                            const sessionName = status.pomodoro.currentSession.task || 'Session';
+                            updateOrchestrationStatus('pomodoro', `🍅 ${mode === 'working' ? 'Working' : mode === 'break' ? 'Break' : mode.charAt(0).toUpperCase() + mode.slice(1)}`);
+                        } else {
+                            updateOrchestrationStatus('pomodoro', status.integrations.pomodoro ? '✅ Ready' : '❌ Disabled');
+                        }
+                    } else {
+                        updateOrchestrationStatus('pomodoro', '❌ Disabled');
+                    }
+                    
+                    // Update notification status if available
+                    if (status.integrations && status.integrations.notifications) {
+                        if (status.notifications && status.notifications.activeNotifications > 0) {
+                            updateOrchestrationStatus('notification', `🔔 ${status.notifications.activeNotifications} Active`);
+                        } else {
+                            updateOrchestrationStatus('notification', status.integrations.notifications ? '✅ Ready' : '❌ Disabled');
+                        }
+                    } else {
+                        updateOrchestrationStatus('notification', '❌ Disabled');
+                    }
                 }
             } catch (error) {
                 console.error('Failed to load orchestration status:', error);
@@ -2947,6 +2984,8 @@ ${suggestion.body}
                 updateOrchestrationStatus('data', '❓ Unknown');
                 updateOrchestrationStatus('analysis', '❓ Unknown');
                 updateOrchestrationStatus('schedule', '❓ Unknown');
+                updateOrchestrationStatus('pomodoro', '❓ Unknown');
+                updateOrchestrationStatus('notification', '❓ Unknown');
             }
         }
 
@@ -2988,6 +3027,209 @@ ${suggestion.body}
                 setTimeout(() => notification.remove(), 300);
             }, 5000);
         }
+
+        // ==========================================
+        // SOCIAL PLANNER FUNCTIONS
+        // ==========================================
+
+        let socialPlannerData = {
+            currentStep: 0,
+            totalSteps: 0,
+            interviewResponses: {},
+            questions: []
+        };
+
+        async function initializeSocialPlanner() {
+            try {
+                console.log('🌟 Initializing Social Planner...');
+                const response = await fetch('/api/social/interview');
+                const data = await response.json();
+                socialPlannerData.questions = data.questions || [];
+                socialPlannerData.totalSteps = socialPlannerData.questions.length;
+                renderSocialQuestions();
+                updateSocialProgress();
+            } catch (error) {
+                console.error('Error loading social planner:', error);
+                document.getElementById('social-interview-questions').innerHTML = '<p>Error loading questions. Please try again.</p>';
+            }
+        }
+
+        function renderSocialQuestions() {
+            const container = document.getElementById('social-interview-questions');
+            container.innerHTML = '';
+
+            socialPlannerData.questions.forEach((question, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.className = 'feature-card';
+                questionDiv.style.marginBottom = '20px';
+                questionDiv.innerHTML = `
+                    <h4>${index + 1}. ${question.question}</h4>
+                    <div class="question-options ${question.type}-options" id="social-options-${question.id}">
+                        ${renderSocialOptions(question)}
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function renderSocialOptions(question) {
+            return question.options.map(option => `
+                <button class="btn btn-outline" style="margin: 5px; text-align: left;" 
+                        onclick="selectSocialOption('${question.id}', '${option}', '${question.type}')">
+                    ${option}
+                </button>
+            `).join('');
+        }
+
+        function selectSocialOption(questionId, option, type) {
+            if (type === 'checklist') {
+                if (!socialPlannerData.interviewResponses[questionId]) {
+                    socialPlannerData.interviewResponses[questionId] = [];
+                }
+                
+                const index = socialPlannerData.interviewResponses[questionId].indexOf(option);
+                if (index > -1) {
+                    socialPlannerData.interviewResponses[questionId].splice(index, 1);
+                } else {
+                    socialPlannerData.interviewResponses[questionId].push(option);
+                }
+            } else {
+                socialPlannerData.interviewResponses[questionId] = option;
+            }
+            
+            updateSocialButtonStates(questionId, type);
+            updateSocialProgress();
+        }
+
+        function updateSocialButtonStates(questionId, type) {
+            const buttons = document.querySelectorAll(`#social-options-${questionId} .btn`);
+            
+            buttons.forEach(button => {
+                const option = button.textContent.trim();
+                
+                if (type === 'checklist') {
+                    const isSelected = socialPlannerData.interviewResponses[questionId] && 
+                                     socialPlannerData.interviewResponses[questionId].includes(option);
+                    button.classList.toggle('btn-primary', isSelected);
+                    button.classList.toggle('btn-outline', !isSelected);
+                } else {
+                    const isSelected = socialPlannerData.interviewResponses[questionId] === option;
+                    button.classList.toggle('btn-primary', isSelected);
+                    button.classList.toggle('btn-outline', !isSelected);
+                    if (isSelected) {
+                        buttons.forEach(b => {
+                            if (b !== button) {
+                                b.classList.remove('btn-primary');
+                                b.classList.add('btn-outline');
+                            }
+                        });
+                    }
+                }
+            });
+        }
+
+        function updateSocialProgress() {
+            const completed = Object.keys(socialPlannerData.interviewResponses).length;
+            const progress = (completed / socialPlannerData.totalSteps) * 100;
+            document.getElementById('social-progress-fill').style.width = progress + '%';
+            
+            const generateBtn = document.getElementById('social-generate-plan-btn');
+            generateBtn.disabled = completed < 2; // Require at least 2 answers
+            
+            if (completed >= 2) {
+                generateBtn.textContent = 'Generate My Social Plan ✨';
+            }
+        }
+
+        async function generateSocialPlan() {
+            document.getElementById('social-interview-section').style.display = 'none';
+            document.getElementById('social-loading-section').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/social/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ responses: socialPlannerData.interviewResponses })
+                });
+
+                const result = await response.json();
+                displaySocialPlan(result);
+            } catch (error) {
+                console.error('Error generating social plan:', error);
+                showNotification('Sorry, there was an error generating your plan. Please try again.', 'error');
+                document.getElementById('social-loading-section').style.display = 'none';
+                document.getElementById('social-interview-section').style.display = 'block';
+            }
+        }
+
+        function displaySocialPlan(response) {
+            document.getElementById('social-loading-section').style.display = 'none';
+            document.getElementById('social-planning-results').style.display = 'block';
+
+            const plan = response.plan || response;
+            console.log('Displaying social plan:', plan);
+
+            // Populate social activities
+            const socialContainer = document.getElementById('social-activities-list');
+            socialContainer.innerHTML = plan.social && plan.social.length > 0 ? plan.social.map(activity => `
+                <div style="padding: 12px; margin-bottom: 10px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #10b981;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">${activity.title}</div>
+                    <div style="font-size: 14px; color: #64748b;">${activity.time || 'Time flexible'}</div>
+                    ${activity.description ? `<div style="font-size: 13px; color: #6b7280; margin-top: 5px; font-style: italic;">${activity.description}</div>` : ''}
+                </div>
+            `).join('') : '<p>No social activities planned</p>';
+
+            // Populate health activities
+            const healthContainer = document.getElementById('social-health-list');
+            healthContainer.innerHTML = plan.health && plan.health.length > 0 ? plan.health.map(activity => `
+                <div style="padding: 12px; margin-bottom: 10px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #f59e0b;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">${activity.title}</div>
+                    <div style="font-size: 14px; color: #64748b;">${activity.time || (activity.duration ? `${activity.duration} min` : 'Time flexible')}</div>
+                    ${activity.intensity ? `<div style="font-size: 13px; color: #6b7280; margin-top: 5px; font-style: italic;">Intensity: ${activity.intensity}</div>` : ''}
+                </div>
+            `).join('') : '<p>No health activities planned</p>';
+
+            // Populate life tasks
+            const lifeContainer = document.getElementById('social-life-tasks-list');
+            lifeContainer.innerHTML = plan.lifeTasks && plan.lifeTasks.length > 0 ? plan.lifeTasks.map(task => `
+                <div style="padding: 12px; margin-bottom: 10px; background: #f8fafc; border-radius: 8px; border-left: 3px solid #8b5cf6;">
+                    <div style="font-weight: 600; margin-bottom: 5px;">${task.title}</div>
+                    <div style="font-size: 14px; color: #64748b;">${task.time || (task.duration ? `Duration: ${task.duration}` : 'Time flexible')}</div>
+                    ${task.priority ? `<div style="font-size: 13px; color: #6b7280; margin-top: 5px; font-style: italic;">Priority: ${task.priority}</div>` : ''}
+                </div>
+            `).join('') : '<p>No life tasks planned</p>';
+
+            // Populate weekly schedule
+            const scheduleContainer = document.getElementById('social-weekly-calendar');
+            scheduleContainer.innerHTML = '<p>Weekly schedule view coming soon...</p>';
+
+            showNotification('Your social plan has been generated successfully!', 'success');
+        }
+
+        function regenerateSocialPlan() {
+            document.getElementById('social-planning-results').style.display = 'none';
+            document.getElementById('social-interview-section').style.display = 'block';
+            document.getElementById('social-progress-fill').style.width = '0%';
+            socialPlannerData.interviewResponses = {};
+            updateSocialProgress();
+        }
+
+        function exportSocialToCalendar() {
+            showNotification('Calendar export feature coming soon!', 'info');
+        }
+
+        function adjustSocialPreferences() {
+            regenerateSocialPlan();
+        }
+
+        // Initialize Social Planner when the section is shown
+        const originalShowSection = showSection;
+        showSection = function(sectionName) {
+            originalShowSection(sectionName);
+            if (sectionName === 'social-planner' && socialPlannerData.questions.length === 0) {
+                initializeSocialPlanner();
+            }
+        };
 
     </script>
 

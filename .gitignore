@@ -142,3 +142,16 @@ personal_health/
 
 # Archived directories
 _archived-electron-boilerplate/
+
+# Migration scripts with tokens
+migrate-tokens.js
+**/migrate-tokens.js
+
+# Personal data files
+birthdays.db
+**/birthdays.db
+apple_health_export/
+**/apple_health_export/
+*.healthdata
+health_data/
+personal_health/

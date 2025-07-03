@@ -21,7 +21,6 @@ const navigationItems: NavItem[] = [
   { id: 'health', label: 'Health Analytics', icon: '🏃' },
   { id: 'relationships', label: 'Relationship Intelligence', icon: '🧠' },
   { id: 'calendar', label: 'Calendar View', icon: '📅' },
-  { id: 'daily-score', label: 'AI Daily Score', icon: '🤖' },
 ];
 
 const generalItems: NavItem[] = [

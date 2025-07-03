@@ -513,7 +513,10 @@ router.get('/status', (req, res) => {
   try {
     initializeAgents();
     
-    // Return simplified status for dashboard
+    // Get full orchestrator status including Pomodoro and Notifications
+    const orchestratorStatus = productivityOrchestrator ? productivityOrchestrator.getStatus() : {};
+    
+    // Return comprehensive status for dashboard
     const status = {
       interview: { 
         active: interviewAgent ? interviewAgent.getStatus().active : false 
@@ -527,6 +530,10 @@ router.get('/status', (req, res) => {
       scheduleBuilder: { 
         llmAvailable: scheduleBuilderAgent ? scheduleBuilderAgent.getStatus().llmAvailable : true 
       },
+      // Include Pomodoro and Notification status from orchestrator
+      integrations: orchestratorStatus.integrations || {},
+      pomodoro: orchestratorStatus.pomodoro || null,
+      notifications: orchestratorStatus.notifications || null,
       systemReady: !!(productivityOrchestrator && interviewAgent && dataCollectionAgent && scheduleAnalysisAgent && scheduleBuilderAgent),
       timestamp: new Date().toISOString()
     };

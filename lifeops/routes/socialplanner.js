@@ -12,14 +12,23 @@ let userGoalsInterview = null;
 // Initialize services function
 function initializeSocialPlannerServices() {
   try {
-    if (!process.env.OPENAI_API_KEY) {
-      console.log('⚠️ OpenAI API key not found - Social Planner will use fallback responses');
-    }
+    // Prepare API keys for multi-LLM setup
+    const apiKeys = {
+      openai: process.env.OPENAI_API_KEY,
+      google: process.env.GOOGLE_API_KEY,
+      anthropic: process.env.ANTHROPIC_API_KEY
+    };
     
-    socialPlannerAgent = new SocialPlannerAgent(process.env.OPENAI_API_KEY);
+    console.log('🔑 API Keys available:', {
+      openai: !!apiKeys.openai,
+      google: !!apiKeys.google,
+      anthropic: !!apiKeys.anthropic
+    });
+    
+    socialPlannerAgent = new SocialPlannerAgent(apiKeys);
     userGoalsInterview = new UserGoalsInterview();
     
-    console.log('✅ Social Planner services initialized successfully');
+    console.log('✅ Multi-LLM Social Planner services initialized successfully');
   } catch (error) {
     console.error('❌ Error initializing Social Planner services:', error);
   }

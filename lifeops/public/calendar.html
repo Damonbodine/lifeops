@@ -229,6 +229,39 @@
             margin-bottom: 15px;
             border-bottom: 2px solid #f0f0f0;
             padding-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            flex-wrap: wrap;
+        }
+
+        .event-actions {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+
+        .edit-btn, .delete-btn {
+            background: none;
+            border: none;
+            font-size: 1.1rem;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 4px;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+        }
+
+        .edit-btn:hover {
+            background: #e3f2fd;
+            opacity: 1;
+            transform: scale(1.1);
+        }
+
+        .delete-btn:hover {
+            background: #ffebee;
+            opacity: 1;
+            transform: scale(1.1);
         }
 
         .event-title {
@@ -236,6 +269,9 @@
             font-weight: 600;
             color: #2c3e50;
             margin-bottom: 8px;
+            flex: 1;
+            min-width: 0;
+            word-wrap: break-word;
         }
 
         .event-time {
@@ -307,6 +343,22 @@
         .error {
             background: rgba(231, 76, 60, 0.2);
             border: 2px solid rgba(231, 76, 60, 0.5);
+        }
+
+        .scroll-hint {
+            text-align: center;
+            padding: 20px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            color: white;
+            margin: 20px 0;
+            opacity: 0.8;
+            font-style: italic;
+        }
+
+        .scroll-hint p {
+            margin: 0;
+            font-size: 1rem;
         }
 
         /* AI Chat Styles */
@@ -581,7 +633,7 @@
         <div class="logo">🧐 LifeOps</div>
         <div class="nav-item" onclick="window.location.href='/dashboard.html'">
             <span>📊</span>
-            <span>Dashboard</span>
+            <span>Schedule Builder</span>
         </div>
         <div class="nav-item" onclick="showSection('pomodoro')">
             <span>🍅</span>
@@ -589,31 +641,31 @@
         </div>
         <div class="nav-item" onclick="showSection('tasks')">
             <span>📋</span>
-            <span>1-3-5 Tasks</span>
+            <span>Task Builder</span>
         </div>
         <div class="nav-item" onclick="showSection('emails')">
             <span>📧</span>
-            <span>Email Analysis</span>
+            <span>Email Manager</span>
         </div>
         <div class="nav-item" onclick="window.location.href='/health.html'">
             <span>🏃‍♂️</span>
             <span>Health Analytics</span>
         </div>
+        <div class="nav-item" onclick="window.location.href='/social-planner.html'">
+            <span>🌟</span>
+            <span>Social Planner</span>
+        </div>
         <div class="nav-item" onclick="showSection('email-relationships')">
             <span>🧠</span>
-            <span>Relationship Intelligence</span>
+            <span>Email Check in</span>
         </div>
         <div class="nav-item active" onclick="window.location.href='/calendar.html'">
             <span>📅</span>
-            <span>Calendar View</span>
-        </div>
-        <div class="nav-item" onclick="showSection('ai-score')">
-            <span>🤖</span>
-            <span>AI Daily Score</span>
+            <span>Calendar</span>
         </div>
         <div class="nav-item" onclick="showSection('check-ins')">
             <span>💌</span>
-            <span>Check In</span>
+            <span>Text Check In</span>
         </div>
     </div>
 
@@ -624,11 +676,6 @@
             <p>Your smart schedule overview</p>
         </div>
 
-        <div class="navigation">
-            <a href="/" class="nav-btn">📧 Email Analysis</a>
-            <a href="/dashboard.html" class="nav-btn">📊 Dashboard</a>
-            <a href="/calendar.html" class="nav-btn active">📅 Calendar</a>
-        </div>
 
         <div class="controls">
             <button class="refresh-btn" onclick="loadCalendarData()">
@@ -653,6 +700,9 @@
         <div id="upcoming-section">
             <h2 class="section-title">Upcoming Events</h2>
             <div id="upcoming-events" class="events-grid"></div>
+            <div id="scroll-hint" class="scroll-hint" style="display: none;">
+                <p>🔄 Scroll down to load more events from the coming weeks...</p>
+            </div>
         </div>
         </div>
     </div>
@@ -797,6 +847,8 @@
 
                 if (allUpcomingEvents.length > 0) {
                     displayEvents(allUpcomingEvents, 'upcoming-events', false);
+                    // Show scroll hint
+                    document.getElementById('scroll-hint').style.display = 'block';
                 }
 
                 if (todayAllEvents.length === 0 && allUpcomingEvents.length === 0) {
@@ -820,6 +872,86 @@
                 btn.disabled = false;
                 btn.textContent = '🔄 Refresh Calendar';
                 loading.style.display = 'none';
+            }
+        }
+
+        async function loadMoreEvents() {
+            if (isLoading || !hasMoreEvents) return;
+
+            isLoading = true;
+            const upcomingEvents = document.getElementById('upcoming-events');
+            
+            // Add loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.className = 'loading';
+            loadingIndicator.textContent = '📅 Loading more events...';
+            loadingIndicator.id = 'load-more-indicator';
+            upcomingEvents.appendChild(loadingIndicator);
+
+            try {
+                // Increase the days range
+                currentDays += 7; // Add 7 more days each time
+                
+                // Fetch more events
+                const upcomingResponse = await fetch(`/api/calendar/upcoming?days=${currentDays}`);
+                const upcomingData = await upcomingResponse.json();
+                
+                let newEvents = [...(upcomingData.events || [])];
+                
+                // Filter out birthday events if toggle is off
+                if (!showBirthdays) {
+                    newEvents = newEvents.filter(event => {
+                        const eventType = getEventType(event);
+                        return eventType !== 'birthday';
+                    });
+                }
+
+                // Add birthday events if toggle is on
+                if (showBirthdays) {
+                    const birthdaysUpcomingResponse = await fetch(`/api/birthdays/upcoming?days=${currentDays}`);
+                    const birthdaysUpcomingData = await birthdaysUpcomingResponse.json();
+                    
+                    newEvents = [
+                        ...newEvents,
+                        ...(birthdaysUpcomingData.events || [])
+                    ];
+                }
+
+                // Sort and remove duplicates
+                newEvents.sort((a, b) => new Date(a.start) - new Date(b.start));
+                
+                // Remove events we already have
+                const existingEventIds = new Set(allUpcomingEvents.map(e => e.id));
+                const uniqueNewEvents = newEvents.filter(event => !existingEventIds.has(event.id));
+                
+                // Check if we got any new events
+                if (uniqueNewEvents.length === 0) {
+                    hasMoreEvents = false;
+                    loadingIndicator.textContent = '📅 No more events to load';
+                    // Hide scroll hint since no more events
+                    document.getElementById('scroll-hint').style.display = 'none';
+                    setTimeout(() => {
+                        loadingIndicator.remove();
+                    }, 2000);
+                } else {
+                    // Update our events array
+                    allUpcomingEvents = [...allUpcomingEvents, ...uniqueNewEvents];
+                    
+                    // Remove loading indicator
+                    loadingIndicator.remove();
+                    
+                    // Display new events
+                    displayEvents(uniqueNewEvents, 'upcoming-events', false, true);
+                }
+
+            } catch (error) {
+                console.error('Error loading more events:', error);
+                loadingIndicator.textContent = '❌ Error loading more events';
+                setTimeout(() => {
+                    loadingIndicator.remove();
+                }, 2000);
+            } finally {
+                isLoading = false;
             }
         }
 
@@ -874,17 +1006,24 @@
             }
         }
 
-        function displayEvents(events, containerId, isToday) {
+        function displayEvents(events, containerId, isToday, append = false) {
             const container = document.getElementById(containerId);
             
+            // Clear container if not appending
+            if (!append) {
+                container.innerHTML = '';
+            }
+            
             if (!events || events.length === 0) {
-                const emptyState = document.createElement('div');
-                emptyState.className = 'empty-state';
-                emptyState.innerHTML = `
-                    <h3>🌟 ${isToday ? 'No events today' : 'No upcoming events'}</h3>
-                    <p>${isToday ? 'Perfect time for deep work!' : 'Your schedule is looking clear ahead.'}</p>
-                `;
-                container.appendChild(emptyState);
+                if (!append) {
+                    const emptyState = document.createElement('div');
+                    emptyState.className = 'empty-state';
+                    emptyState.innerHTML = `
+                        <h3>🌟 ${isToday ? 'No events today' : 'No upcoming events'}</h3>
+                        <p>${isToday ? 'Perfect time for deep work!' : 'Your schedule is looking clear ahead.'}</p>
+                    `;
+                    container.appendChild(emptyState);
+                }
                 return;
             }
 
@@ -892,16 +1031,32 @@
                 const card = document.createElement('div');
                 const eventType = getEventType(event);
                 card.className = `event-card ${eventType}`;
+                card.setAttribute('data-event-id', event.id);
                 
                 const startTime = new Date(event.start);
                 const endTime = new Date(event.end);
                 const timeStr = event.allDay ? 'All Day' : formatTime(startTime, endTime);
                 const dateStr = isToday ? 'Today' : formatDate(startTime);
                 
+                // Escape quotes for onclick handlers
+                const escapedSummary = (event.summary || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
+                const escapedLocation = (event.location || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
+                const escapedDescription = (event.description || '').replace(/'/g, "\\'").replace(/"/g, '\\"');
+                
                 card.innerHTML = `
                     <div class="event-header">
                         <div class="event-title">${event.summary}</div>
                         <div class="event-time">🕐 ${timeStr}</div>
+                        <div class="event-actions">
+                            ${event.type !== 'birthday' ? `
+                                <button class="edit-btn" onclick="editEvent('${event.id}', '${escapedSummary}', '${event.start}', '${event.end}', '${escapedLocation}', '${escapedDescription}')" title="Edit Event">
+                                    ✏️
+                                </button>
+                                <button class="delete-btn" onclick="deleteEvent('${event.id}', '${escapedSummary}')" title="Delete Event">
+                                    🗑️
+                                </button>
+                            ` : '<span style="opacity: 0.5; font-size: 0.8rem;">Birthday Event</span>'}
+                        </div>
                     </div>
                     
                     ${!isToday ? `<div class="event-date">${dateStr}</div>` : ''}
@@ -1120,6 +1275,131 @@
             pendingConfirmation = null;
         }
 
+        // Delete event function
+        async function deleteEvent(eventId, eventTitle) {
+            if (!confirm(`Are you sure you want to delete "${eventTitle}"?`)) {
+                return;
+            }
+
+            try {
+                console.log('Attempting to delete event:', eventId);
+                const response = await fetch(`/api/calendar/events/${eventId}`, {
+                    method: 'DELETE'
+                });
+
+                console.log('Delete response status:', response.status);
+                
+                if (!response.ok) {
+                    console.error('Delete request failed with status:', response.status);
+                    const errorText = await response.text();
+                    console.error('Error response:', errorText);
+                    alert(`Failed to delete event. Status: ${response.status}. Check console for details.`);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('Delete response data:', data);
+
+                if (data.success) {
+                    // Remove the event from the UI
+                    const eventCard = document.querySelector(`[data-event-id="${eventId}"]`);
+                    if (eventCard) {
+                        eventCard.remove();
+                    }
+                    
+                    // Show success message
+                    alert('Event deleted successfully!');
+                    
+                    // Refresh calendar data to ensure consistency
+                    loadCalendarData();
+                } else {
+                    console.error('Delete failed:', data);
+                    alert(`Failed to delete event: ${data.message || data.error || 'Unknown error'}`);
+                }
+            } catch (error) {
+                console.error('Error deleting event:', error);
+                alert(`Failed to delete event: ${error.message}. Check console for details.`);
+            }
+        }
+
+        // Edit event function
+        function editEvent(eventId, title, start, end, location, description) {
+            // Create a modal or prompt for editing
+            const newTitle = prompt('Event Title:', title) || title;
+            if (newTitle === null) return; // User cancelled
+            
+            const startDate = new Date(start);
+            const endDate = new Date(end);
+            
+            const newStartStr = prompt('Start Date/Time (YYYY-MM-DD HH:MM):', 
+                startDate.getFullYear() + '-' + 
+                String(startDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(startDate.getDate()).padStart(2, '0') + ' ' +
+                String(startDate.getHours()).padStart(2, '0') + ':' + 
+                String(startDate.getMinutes()).padStart(2, '0')
+            );
+            if (newStartStr === null) return; // User cancelled
+            
+            const newEndStr = prompt('End Date/Time (YYYY-MM-DD HH:MM):', 
+                endDate.getFullYear() + '-' + 
+                String(endDate.getMonth() + 1).padStart(2, '0') + '-' + 
+                String(endDate.getDate()).padStart(2, '0') + ' ' +
+                String(endDate.getHours()).padStart(2, '0') + ':' + 
+                String(endDate.getMinutes()).padStart(2, '0')
+            );
+            if (newEndStr === null) return; // User cancelled
+            
+            const newLocation = prompt('Location:', location) || location;
+            if (newLocation === null) return; // User cancelled
+            
+            const newDescription = prompt('Description:', description) || description;
+            if (newDescription === null) return; // User cancelled
+
+            // Parse the dates
+            let newStart, newEnd;
+            try {
+                newStart = new Date(newStartStr).toISOString();
+                newEnd = new Date(newEndStr).toISOString();
+            } catch (error) {
+                alert('Invalid date format. Please use YYYY-MM-DD HH:MM format.');
+                return;
+            }
+
+            updateEvent(eventId, newTitle, newStart, newEnd, newLocation, newDescription);
+        }
+
+        // Update event function
+        async function updateEvent(eventId, summary, start, end, location, description) {
+            try {
+                const response = await fetch(`/api/calendar/events/${eventId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        summary,
+                        start,
+                        end,
+                        location,
+                        description
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    alert('Event updated successfully!');
+                    // Refresh calendar data to show updated event
+                    loadCalendarData();
+                } else {
+                    alert(`Failed to update event: ${data.message || data.error}`);
+                }
+            } catch (error) {
+                console.error('Error updating event:', error);
+                alert('Failed to update event. Please try again.');
+            }
+        }
+
         // Auto-resize chat input
         document.addEventListener('DOMContentLoaded', () => {
             const chatInput = document.getElementById('chat-input');
@@ -1135,11 +1415,25 @@
             window.location.href = `/dashboard.html#${section}`;
         }
 
+        // Infinite scroll functionality
+        function setupInfiniteScroll() {
+            window.addEventListener('scroll', () => {
+                // Check if we're near the bottom of the page
+                const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+                const threshold = 100; // Load more when 100px from bottom
+                
+                if (scrollTop + clientHeight >= scrollHeight - threshold) {
+                    loadMoreEvents();
+                }
+            });
+        }
+
         // Auto-load calendar on page load
         window.addEventListener('DOMContentLoaded', () => {
             setTimeout(() => {
                 loadCalendarData();
                 loadBirthdayStats();
+                setupInfiniteScroll();
             }, 1000);
         });
     </script>

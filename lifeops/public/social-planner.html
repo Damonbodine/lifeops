@@ -189,6 +189,13 @@
             color: #64748b;
         }
         
+        .activity-description {
+            font-size: 13px;
+            color: #6b7280;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        
         .weekly-schedule {
             background: white;
             border-radius: 12px;
@@ -459,7 +466,7 @@
                 document.getElementById('loading-section').style.display = 'block';
 
                 try {
-                    const response = await fetch('/api/social-planner/generate', {
+                    const response = await fetch('/api/social/generate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ responses: this.interviewResponses })
@@ -475,34 +482,41 @@
                 }
             }
 
-            displayPlan(plan) {
+            displayPlan(response) {
                 document.getElementById('loading-section').style.display = 'none';
                 document.getElementById('planning-results').style.display = 'block';
 
+                // Extract plan from response
+                const plan = response.plan || response;
+                console.log('Displaying plan:', plan);
+
                 // Populate social activities
                 const socialContainer = document.getElementById('social-activities');
-                socialContainer.innerHTML = plan.social ? plan.social.map(activity => `
+                socialContainer.innerHTML = plan.social && plan.social.length > 0 ? plan.social.map(activity => `
                     <div class="activity-item">
                         <div class="activity-title">${activity.title}</div>
-                        <div class="activity-time">${activity.time}</div>
+                        <div class="activity-time">${activity.time || 'Time flexible'}</div>
+                        ${activity.description ? `<div class="activity-description">${activity.description}</div>` : ''}
                     </div>
                 `).join('') : '<p>No social activities planned</p>';
 
                 // Populate health activities
                 const healthContainer = document.getElementById('health-activities');
-                healthContainer.innerHTML = plan.health ? plan.health.map(activity => `
+                healthContainer.innerHTML = plan.health && plan.health.length > 0 ? plan.health.map(activity => `
                     <div class="activity-item">
                         <div class="activity-title">${activity.title}</div>
-                        <div class="activity-time">${activity.time}</div>
+                        <div class="activity-time">${activity.time || activity.duration ? `${activity.duration} min` : 'Time flexible'}</div>
+                        ${activity.intensity ? `<div class="activity-description">Intensity: ${activity.intensity}</div>` : ''}
                     </div>
                 `).join('') : '<p>No health activities planned</p>';
 
                 // Populate life tasks
                 const lifeContainer = document.getElementById('life-tasks');
-                lifeContainer.innerHTML = plan.lifeTasks ? plan.lifeTasks.map(task => `
+                lifeContainer.innerHTML = plan.lifeTasks && plan.lifeTasks.length > 0 ? plan.lifeTasks.map(task => `
                     <div class="activity-item">
                         <div class="activity-title">${task.title}</div>
-                        <div class="activity-time">${task.time}</div>
+                        <div class="activity-time">${task.time || (task.duration ? `Duration: ${task.duration}` : 'Time flexible')}</div>
+                        ${task.priority ? `<div class="activity-description">Priority: ${task.priority}</div>` : ''}
                     </div>
                 `).join('') : '<p>No life tasks planned</p>';
 
