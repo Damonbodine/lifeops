@@ -125,6 +125,20 @@ release/
 # Health Records (Personal Data)
 lifeops-simple/apple_health_export/
 **/apple_health_export/
+lifeops/apple_health_export/
 *.healthdata
 health_data/
 personal_health/
+
+# Authentication tokens (OAuth, API keys)
+**/token.json
+**/tokens.json
+**/.env*
+
+# Database files with personal data
+**/birthdays.db
+**/contacts.db
+**/chat.db
+
+# Archived directories
+_archived-electron-boilerplate/
