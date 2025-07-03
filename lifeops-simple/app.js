@@ -13,6 +13,7 @@ const emailService = require('./services/emailService');
 const emailSummarizer = require('./services/emailSummarizer');
 const emailRelationshipAnalyzer = require('./services/emailRelationshipAnalyzer');
 const { getTodaysBirthdays, getUpcomingBirthdays } = require('./ics-parser');
+const HealthAnalytics = require('./services/healthAnalytics');
 
 const app = express();
 const port = 3000;
@@ -32,6 +33,10 @@ const oauth2Client = new google.auth.OAuth2(
 );
 
 const calendar = google.calendar({ version: 'v3', auth: oauth2Client });
+
+// Initialize Health Analytics
+const healthAnalytics = new HealthAnalytics(process.env.OPENAI_API_KEY);
+const HEALTH_EXPORT_PATH = path.join(__dirname, 'apple_health_export');
 
 // Load legacy tokens for calendar (if needed)
 async function loadLegacyToken() {
@@ -520,54 +525,30 @@ app.get('/api/email-relationships/dormant', async (req, res) => {
   }
 });
 
-// Generate personalized outreach message
+// Generate AI-powered reconnection email
 app.post('/api/email-relationships/suggest-message', async (req, res) => {
   try {
-    const { email, name, context = {} } = req.body;
+    const { emailAddress } = req.body;
     
-    if (!email) {
+    if (!emailAddress) {
       return res.status(400).json({ error: 'Email address is required' });
     }
 
-    console.log(`🤖 Generating personalized outreach for ${name || email}`);
+    console.log(`🤖 Generating AI reconnection email for ${emailAddress}`);
     
-    // This would integrate with the existing personal voice profiler
-    // For now, provide a basic personalized message structure
-    const displayName = name || email.split('@')[0];
-    const firstName = displayName.split(' ')[0];
+    // Use our new AI-powered email generation
+    const suggestion = await emailRelationshipAnalyzer.generateReconnectionEmail(emailAddress);
     
-    // TODO: Integrate with PersonalVoiceProfiler when implemented
-    const personalizedMessage = {
-      suggestedMessage: `Hey ${firstName}! Hope you're doing well. It's been a while since we last connected. What's new with you?`,
-      alternativeMessages: [
-        `Hi ${firstName}! Just thinking about you. How have things been?`,
-        `Hey! Hope all is well with you. Would love to catch up soon.`,
-        `Hi ${firstName}! It's been too long. Hope you're crushing it!`
-      ],
-      context: {
-        relationshipType: context.relationship_type || 'professional',
-        daysSinceContact: context.daysSinceLastContact || 'unknown',
-        lastInteraction: context.lastSubject || 'unknown'
-      },
-      tone: 'friendly_professional',
-      personalizedElements: [
-        `Uses first name (${firstName})`,
-        'Acknowledges time gap naturally',
-        'Shows genuine interest in reconnecting'
-      ]
-    };
-
     res.json({
       success: true,
-      contact: { name: displayName, email: email },
-      message: personalizedMessage,
+      suggestion: suggestion,
       timestamp: new Date().toISOString()
     });
 
   } catch (error) {
-    console.error('❌ Error generating personalized message:', error);
+    console.error('❌ Error generating reconnection email:', error);
     res.status(500).json({
-      error: 'Failed to generate personalized message',
+      error: 'Failed to generate email suggestion',
       message: error.message
     });
   }
@@ -665,16 +646,23 @@ app.get('/api/tasks', (req, res) => {
 });
 
 app.post('/api/tasks', (req, res) => {
-  const { type, text } = req.body;
+  const { type, text, duration } = req.body;
   const limits = { big: 1, medium: 3, small: 5 };
   
   if (tasks[type].length >= limits[type]) {
     return res.status(400).json({ error: `Maximum ${limits[type]} ${type} tasks allowed` });
   }
   
+  // Validate duration
+  const taskDuration = duration ? parseInt(duration) : null;
+  if (taskDuration && (taskDuration < 5 || taskDuration > 480)) {
+    return res.status(400).json({ error: 'Duration must be between 5 and 480 minutes' });
+  }
+  
   const task = {
     id: Date.now(),
     text,
+    duration: taskDuration,
     completed: false,
     createdAt: new Date().toISOString()
   };
@@ -2083,21 +2071,31 @@ Working hours preference: ${preferences.workingHours || '9 AM - 6 PM'}
 Energy preference: ${preferences.energyPreference || 'High energy tasks in morning, lighter tasks in afternoon'}
 
 TASKS TO SCHEDULE:
-Big Tasks (1): ${tasks.big?.map(t => t.text).join(', ') || 'None'}
-Medium Tasks (3): ${tasks.medium?.map(t => t.text).join(', ') || 'None'}  
-Small Tasks (5): ${tasks.small?.map(t => t.text).join(', ') || 'None'}
+Big Tasks (1): ${tasks.big?.map(t => `${t.text} (${t.duration ? t.duration + ' min' : 'no duration specified'})`).join(', ') || 'None'}
+Medium Tasks (3): ${tasks.medium?.map(t => `${t.text} (${t.duration ? t.duration + ' min' : 'no duration specified'})`).join(', ') || 'None'}  
+Small Tasks (5): ${tasks.small?.map(t => `${t.text} (${t.duration ? t.duration + ' min' : 'no duration specified'})`).join(', ') || 'None'}
 
 EXISTING CALENDAR EVENTS (avoid conflicts):
 ${existingEventsContext}
 
 SCHEDULING RULES:
-- Big tasks: 2-4 hours, schedule during peak energy times
-- Medium tasks: 1-2 hours, flexible timing
-- Small tasks: 15-45 minutes, good for between meetings or low energy times
-- Add 15-minute buffers between tasks
-- Batch similar tasks together
-- Respect existing calendar events
-- Prefer weekdays for work tasks
+- Use the user-provided duration for each task (when specified)
+- Big tasks: Generally longer duration, schedule during peak energy times (9-11 AM, 2-4 PM)
+- Medium tasks: Moderate duration, flexible timing but avoid post-lunch dip (1-2 PM)
+- Small tasks: Shorter duration, perfect for low energy times or between meetings
+- Add 15-minute buffers between different task types
+- BATCHING OPTIMIZATION:
+  * Group tasks with similar durations together (e.g., three 30-min tasks in a row)
+  * Batch similar complexity tasks to maintain flow state
+  * Create "power hours" for small tasks (batch 3-4 small tasks together)
+  * Schedule big tasks when there's uninterrupted time available
+- ENERGY OPTIMIZATION:
+  * High energy times: Big tasks, complex work, creative tasks
+  * Medium energy times: Medium tasks, administrative work
+  * Low energy times: Small tasks, routine work, email/communication
+- Respect existing calendar events and avoid back-to-back scheduling when possible
+- Prefer weekdays for work tasks, but can use weekends for personal tasks
+- If no duration specified, estimate based on task complexity and type
 
 Respond with JSON:
 {
@@ -2112,11 +2110,20 @@ Respond with JSON:
       "end_date": "YYYY-MM-DD", 
       "end_time": "HH:MM",
       "duration_minutes": 120,
+      "user_specified_duration": true,
       "reasoning": "Why this time slot",
-      "energy_level": "high" | "medium" | "low"
+      "energy_level": "high" | "medium" | "low",
+      "batched_with": ["medium_2", "medium_3"],
+      "optimization_strategy": "batching" | "energy_matching" | "gap_filling"
     }
   ],
   "summary": "Overall scheduling strategy explanation",
+  "optimization_insights": {
+    "batched_sessions": 2,
+    "energy_aligned_tasks": 8,
+    "total_buffer_time": "45 minutes",
+    "peak_time_utilization": "85%"
+  },
   "tips": ["Productivity tip 1", "Productivity tip 2"],
   "total_scheduled_time": "X hours Y minutes"
 }`;
@@ -2647,6 +2654,85 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Health Analytics Routes
+app.get('/api/health/overview', async (req, res) => {
+  try {
+    await healthAnalytics.loadHealthData(HEALTH_EXPORT_PATH);
+    const overview = healthAnalytics.getHealthOverview();
+    res.json({ overview });
+  } catch (error) {
+    console.error('Error loading health overview:', error);
+    res.status(500).json({ error: 'Failed to load health data' });
+  }
+});
+
+app.get('/api/health/trends', async (req, res) => {
+  try {
+    await healthAnalytics.loadHealthData(HEALTH_EXPORT_PATH);
+    const timeframe = parseInt(req.query.days) || 90;
+    const analysis = await healthAnalytics.analyzeTrends('all', timeframe);
+    res.json(analysis);
+  } catch (error) {
+    console.error('Error analyzing health trends:', error);
+    res.status(500).json({ error: 'Failed to analyze trends' });
+  }
+});
+
+app.get('/api/health/workout-analysis', async (req, res) => {
+  try {
+    await healthAnalytics.loadHealthData(HEALTH_EXPORT_PATH);
+    const analysis = await healthAnalytics.analyzeWorkoutPerformance();
+    res.json({ analysis });
+  } catch (error) {
+    console.error('Error analyzing workouts:', error);
+    res.status(500).json({ error: 'Failed to analyze workouts' });
+  }
+});
+
+app.get('/api/health/sleep-analysis', async (req, res) => {
+  try {
+    await healthAnalytics.loadHealthData(HEALTH_EXPORT_PATH);
+    const analysis = await healthAnalytics.analyzeSleepQuality();
+    res.json({ analysis });
+  } catch (error) {
+    console.error('Error analyzing sleep:', error);
+    res.status(500).json({ error: 'Failed to analyze sleep' });
+  }
+});
+
+app.get('/api/health/daily-brief', async (req, res) => {
+  try {
+    await healthAnalytics.loadHealthData(HEALTH_EXPORT_PATH);
+    const brief = await healthAnalytics.generateHealthBrief();
+    res.json({ brief });
+  } catch (error) {
+    console.error('Error generating daily brief:', error);
+    res.status(500).json({ error: 'Failed to generate daily brief' });
+  }
+});
+
+app.get('/api/health/recommendations', async (req, res) => {
+  try {
+    await healthAnalytics.loadHealthData(HEALTH_EXPORT_PATH);
+    const { goals, mood } = req.query;
+    const recommendations = await healthAnalytics.generatePersonalizedRecommendations(goals, mood);
+    res.json({ recommendations });
+  } catch (error) {
+    console.error('Error generating recommendations:', error);
+    res.status(500).json({ error: 'Failed to generate recommendations' });
+  }
+});
+
+app.get('/api/health/hrv-analysis', async (req, res) => {
+  try {
+    const analysis = await healthAnalytics.analyzeHeartRateVariability();
+    res.json({ analysis });
+  } catch (error) {
+    console.error('Error analyzing HRV:', error);
+    res.status(500).json({ error: 'Failed to analyze HRV' });
+  }
+});
+
 // Load legacy tokens for calendar functionality
 loadLegacyToken();
 
@@ -2755,7 +2841,7 @@ async function getConversationHistory(phoneNumber, analysisType = 'recent', maxM
   });
 }
 
-async function analyzeConversationAndSuggestMessage(phoneNumber, contactName, daysBack = 30) {
+async function analyzeConversationAndSuggestMessage(phoneNumber, contactName, daysBack = 30, isBirthdayMessage = false) {
   try {
     console.log(`🧠 Analyzing conversation with ${contactName} (${phoneNumber})`);
     
@@ -2792,8 +2878,7 @@ async function analyzeConversationAndSuggestMessage(phoneNumber, contactName, da
     const lastMessage = messages[0]; // Most recent message (messages are ordered DESC)
     const daysSinceLastMessage = relationship.days_since_last;
     
-    // Check if this is a birthday message request (passed as parameter)
-    const isBirthdayMessage = false; // Will be fixed to accept as parameter
+    // Birthday message context is now passed as parameter
     
     // Create relationship-aware GPT prompt
     const isDormantRelationship = daysSinceLastMessage > 30;
@@ -2905,7 +2990,14 @@ app.post('/api/smart-message', async (req, res) => {
 
     console.log(`🤖 Generating smart message for ${contactName} (${phoneNumber})`);
     
-    const analysis = await analyzeConversationAndSuggestMessage(phoneNumber, contactName, daysBack);
+    // Detect if this is a birthday message request
+    const isBirthdayMessage = req.body.birthdayContact || req.body.specialOccasion === 'birthday';
+    
+    if (isBirthdayMessage) {
+      console.log(`🎂 Birthday message detected for ${contactName}!`);
+    }
+    
+    const analysis = await analyzeConversationAndSuggestMessage(phoneNumber, contactName, daysBack, isBirthdayMessage);
     
     res.json({
       success: true,

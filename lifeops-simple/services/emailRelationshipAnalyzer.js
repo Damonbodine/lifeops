@@ -6,7 +6,8 @@ const emailService = require('./emailService');
 const OpenAI = require('openai');
 
 /**
- * EmailRelationshipAnalyzer - Analyzes 5 years of email history to build relationship intelligence
+ * EmailRelationshipAnalyzer - Analyzes SENT emails to build relationship intelligence
+ * Focuses on people you actively communicate with for better reconnection insights
  * Uses tiered storage: full text (6mo), summaries (18mo), metadata only (5yr)
  */
 class EmailRelationshipAnalyzer {
@@ -38,38 +39,36 @@ class EmailRelationshipAnalyzer {
       this.db = new sqlite3.Database(this.dbPath);
 
       const schema = `
-        -- Core relationship table
+        -- Core relationship table (sent email recipients)
         CREATE TABLE IF NOT EXISTS relationships (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           email_address TEXT UNIQUE NOT NULL,
           display_name TEXT,
-          first_contact_date TEXT,
-          last_contact_date TEXT,
-          total_interactions INTEGER DEFAULT 0,
-          sent_by_user INTEGER DEFAULT 0,
-          received_by_user INTEGER DEFAULT 0,
+          first_sent_date TEXT,
+          last_sent_date TEXT,
+          total_emails_sent INTEGER DEFAULT 0,
           relationship_type TEXT DEFAULT 'unknown',
           communication_frequency REAL DEFAULT 0.0,
           health_score REAL DEFAULT 0.0,
-          avg_response_time_hours REAL,
+          days_since_last_contact INTEGER DEFAULT 0,
+          avg_emails_per_month REAL DEFAULT 0.0,
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           updated_at TEXT DEFAULT CURRENT_TIMESTAMP
         );
 
-        -- Email interactions with tiered storage
-        CREATE TABLE IF NOT EXISTS email_interactions (
+        -- Sent email interactions with tiered storage
+        CREATE TABLE IF NOT EXISTS sent_emails (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           relationship_id INTEGER,
           gmail_message_id TEXT UNIQUE,
           thread_id TEXT,
           subject TEXT,
           date_sent TEXT,
-          is_from_user BOOLEAN,
           storage_tier TEXT CHECK(storage_tier IN ('full_text', 'summary_only', 'metadata_only')),
           full_content TEXT,
           content_summary TEXT,
           word_count INTEGER,
-          response_time_hours REAL,
+          to_recipients TEXT, -- JSON array of all recipients
           created_at TEXT DEFAULT CURRENT_TIMESTAMP,
           FOREIGN KEY (relationship_id) REFERENCES relationships(id)
         );
@@ -102,10 +101,10 @@ class EmailRelationshipAnalyzer {
 
         -- Indexes for performance
         CREATE INDEX IF NOT EXISTS idx_relationships_email ON relationships(email_address);
-        CREATE INDEX IF NOT EXISTS idx_relationships_last_contact ON relationships(last_contact_date);
-        CREATE INDEX IF NOT EXISTS idx_interactions_relationship ON email_interactions(relationship_id);
-        CREATE INDEX IF NOT EXISTS idx_interactions_date ON email_interactions(date_sent);
-        CREATE INDEX IF NOT EXISTS idx_interactions_thread ON email_interactions(thread_id);
+        CREATE INDEX IF NOT EXISTS idx_relationships_last_sent ON relationships(last_sent_date);
+        CREATE INDEX IF NOT EXISTS idx_sent_emails_relationship ON sent_emails(relationship_id);
+        CREATE INDEX IF NOT EXISTS idx_sent_emails_date ON sent_emails(date_sent);
+        CREATE INDEX IF NOT EXISTS idx_sent_emails_thread ON sent_emails(thread_id);
       `;
 
       return new Promise((resolve, reject) => {
@@ -126,7 +125,8 @@ class EmailRelationshipAnalyzer {
   }
 
   /**
-   * Process 5 years of email history with batch processing and rate limiting
+   * Process sent emails only for relationship intelligence
+   * Much faster since sent emails are ~10-20% of total volume
    */
   async processEmailHistory(yearsBack = 5) {
     if (this.isProcessing) {
@@ -171,10 +171,10 @@ class EmailRelationshipAnalyzer {
             batchStartDate.setTime(startDate.getTime());
           }
 
-          console.log(`📅 Processing batch: ${batchStartDate.toDateString()} to ${batchEndDate.toDateString()}`);
+          console.log(`📅 Processing sent emails: ${batchStartDate.toDateString()} to ${batchEndDate.toDateString()}`);
 
-          // Fetch emails for this date range
-          const query = `after:${this.formatDateForGmail(batchStartDate)} before:${this.formatDateForGmail(batchEndDate)}`;
+          // Fetch ONLY sent emails for this date range
+          const query = `in:sent after:${this.formatDateForGmail(batchStartDate)} before:${this.formatDateForGmail(batchEndDate)}`;
           
           const emailResult = await emailService.getEmails({
             maxResults: batchSize,
@@ -258,64 +258,68 @@ class EmailRelationshipAnalyzer {
   }
 
   /**
-   * Process individual email and update relationship data
+   * Process individual SENT email and update relationship data
    */
   async processEmail(email, batchDate) {
     try {
-      // Extract email addresses from from/to fields
-      const fromEmail = this.extractEmailAddress(email.from);
+      // Since we're only processing sent emails, we know the user is the sender
       const toEmails = email.to ? email.to.split(',').map(e => this.extractEmailAddress(e.trim())) : [];
       
-      // Determine if this email was sent by the user
-      const userEmail = await this.getUserEmail();
-      const isFromUser = fromEmail === userEmail;
-      
-      // Get the relationship email (the other party)
-      const relationshipEmail = isFromUser ? toEmails[0] : fromEmail;
-      
-      if (!relationshipEmail || relationshipEmail === userEmail) {
-        return; // Skip self-emails or invalid emails
+      if (!toEmails || toEmails.length === 0) {
+        return; // Skip emails with no recipients
       }
 
-      // Get or create relationship record
-      const relationship = await this.getOrCreateRelationship(relationshipEmail, email);
+      // Process each recipient as a separate relationship
+      for (const recipientEmail of toEmails) {
+        if (!recipientEmail || recipientEmail === await this.getUserEmail()) {
+          continue; // Skip invalid emails or self-emails
+        }
 
-      // Determine storage tier based on email date
-      const storageTier = this.determineStorageTier(email.date);
+        // Get or create relationship record for this recipient
+        const relationship = await this.getOrCreateRelationship(recipientEmail, email);
 
-      // Process email content based on storage tier
-      let fullContent = null;
-      let contentSummary = null;
-      let wordCount = 0;
+        // Determine storage tier based on email date
+        const storageTier = this.determineStorageTier(email.date);
 
-      if (storageTier === 'full_text') {
-        fullContent = email.body;
-        wordCount = email.body ? email.body.split(' ').length : 0;
-      } else if (storageTier === 'summary_only') {
-        contentSummary = await this.summarizeEmail(email);
-        wordCount = contentSummary ? contentSummary.split(' ').length : 0;
+        // Process email content based on storage tier
+        let fullContent = null;
+        let contentSummary = null;
+        let wordCount = 0;
+
+        if (storageTier === 'full_text') {
+          fullContent = email.body;
+          wordCount = email.body ? email.body.split(' ').length : 0;
+        } else if (storageTier === 'summary_only') {
+          // Only summarize if email is substantial
+          if (email.body && email.body.length > 200) {
+            contentSummary = await this.summarizeEmail(email);
+          } else {
+            contentSummary = email.subject || 'Short email';
+          }
+          wordCount = contentSummary ? contentSummary.split(' ').length : 0;
+        }
+        // For metadata_only, we store neither full content nor summary
+
+        // Store sent email
+        await this.storeSentEmail({
+          relationshipId: relationship.id,
+          gmailMessageId: email.id,
+          threadId: email.threadId,
+          subject: email.subject,
+          dateSent: email.date.toISOString(),
+          storageTier: storageTier,
+          fullContent: fullContent,
+          contentSummary: contentSummary,
+          wordCount: wordCount,
+          toRecipients: JSON.stringify(toEmails)
+        });
+
+        // Update relationship statistics for sent email
+        await this.updateRelationshipStats(relationship.id, email.date);
       }
-      // For metadata_only, we store neither full content nor summary
-
-      // Store email interaction
-      await this.storeEmailInteraction({
-        relationshipId: relationship.id,
-        gmailMessageId: email.id,
-        threadId: email.threadId,
-        subject: email.subject,
-        dateSent: email.date.toISOString(),
-        isFromUser: isFromUser,
-        storageTier: storageTier,
-        fullContent: fullContent,
-        contentSummary: contentSummary,
-        wordCount: wordCount
-      });
-
-      // Update relationship statistics
-      await this.updateRelationshipStats(relationship.id, email.date, isFromUser);
 
     } catch (error) {
-      console.error('❌ Error processing individual email:', error);
+      console.error('❌ Error processing individual sent email:', error);
       throw error;
     }
   }
@@ -368,46 +372,58 @@ Summary:`;
   }
 
   /**
-   * Calculate relationship health scores based on communication patterns
+   * Calculate relationship health scores based on sent email patterns
    */
   async calculateRelationshipScores() {
     return new Promise((resolve, reject) => {
       const query = `
         UPDATE relationships 
         SET 
+          days_since_last_contact = julianday('now') - julianday(last_sent_date),
+          avg_emails_per_month = (
+            SELECT COUNT(*) * 30.0 / 
+            (CASE 
+              WHEN julianday('now') - julianday(first_sent_date) <= 30 THEN 30 
+              ELSE julianday('now') - julianday(first_sent_date) 
+            END)
+            FROM sent_emails 
+            WHERE relationship_id = relationships.id
+          ),
           communication_frequency = (
             SELECT COUNT(*) * 1.0 / 
             (CASE 
-              WHEN julianday('now') - julianday(first_contact_date) <= 0 THEN 1 
-              ELSE julianday('now') - julianday(first_contact_date) 
+              WHEN julianday('now') - julianday(first_sent_date) <= 0 THEN 1 
+              ELSE julianday('now') - julianday(first_sent_date) 
             END)
-            FROM email_interactions 
+            FROM sent_emails 
             WHERE relationship_id = relationships.id
           ),
           health_score = (
             SELECT 
-              -- Recency score (0-40 points): More recent = higher score
+              -- Recency score (0-50 points): More recent = higher score
               CASE 
-                WHEN julianday('now') - julianday(last_contact_date) <= 7 THEN 40
-                WHEN julianday('now') - julianday(last_contact_date) <= 30 THEN 30
-                WHEN julianday('now') - julianday(last_contact_date) <= 90 THEN 20
-                WHEN julianday('now') - julianday(last_contact_date) <= 365 THEN 10
+                WHEN julianday('now') - julianday(last_sent_date) <= 7 THEN 50
+                WHEN julianday('now') - julianday(last_sent_date) <= 30 THEN 35
+                WHEN julianday('now') - julianday(last_sent_date) <= 90 THEN 20
+                WHEN julianday('now') - julianday(last_sent_date) <= 180 THEN 10
                 ELSE 0
               END +
-              -- Frequency score (0-30 points): More frequent = higher score
+              -- Frequency score (0-30 points): More emails sent = stronger relationship
               CASE 
-                WHEN total_interactions >= 100 THEN 30
-                WHEN total_interactions >= 50 THEN 25
-                WHEN total_interactions >= 20 THEN 20
-                WHEN total_interactions >= 10 THEN 15
-                WHEN total_interactions >= 5 THEN 10
+                WHEN total_emails_sent >= 50 THEN 30
+                WHEN total_emails_sent >= 20 THEN 25
+                WHEN total_emails_sent >= 10 THEN 20
+                WHEN total_emails_sent >= 5 THEN 15
+                WHEN total_emails_sent >= 2 THEN 10
                 ELSE 5
               END +
-              -- Bidirectional score (0-30 points): Balanced conversation = higher score
+              -- Consistency score (0-20 points): Regular communication = higher score
               CASE 
-                WHEN sent_by_user > 0 AND received_by_user > 0 THEN
-                  30 - ABS(sent_by_user - received_by_user) * 1.0 / (sent_by_user + received_by_user) * 15
-                ELSE 10
+                WHEN avg_emails_per_month >= 4 THEN 20
+                WHEN avg_emails_per_month >= 2 THEN 15
+                WHEN avg_emails_per_month >= 1 THEN 10
+                WHEN avg_emails_per_month >= 0.5 THEN 5
+                ELSE 0
               END
           ),
           updated_at = CURRENT_TIMESTAMP
@@ -426,28 +442,39 @@ Summary:`;
   }
 
   /**
-   * Get dormant relationships that need attention
+   * Get dormant relationships - people you used to email but haven't lately
    */
-  async getDormantRelationships(daysThreshold = 30, minInteractions = 5) {
+  async getDormantRelationships(daysThreshold = 30, minEmailsSent = 3) {
     return new Promise((resolve, reject) => {
       const query = `
         SELECT 
           r.*,
-          julianday('now') - julianday(r.last_contact_date) as days_since_last_contact,
-          ei.subject as last_subject,
-          cp.common_topics
+          r.days_since_last_contact,
+          se.subject as last_subject,
+          cp.common_topics,
+          CASE 
+            WHEN r.avg_emails_per_month >= 2 THEN 'frequent'
+            WHEN r.avg_emails_per_month >= 0.5 THEN 'regular'
+            ELSE 'occasional'
+          END as relationship_strength
         FROM relationships r
-        LEFT JOIN email_interactions ei ON r.id = ei.relationship_id 
-          AND ei.date_sent = r.last_contact_date
+        LEFT JOIN sent_emails se ON r.id = se.relationship_id 
+          AND se.date_sent = r.last_sent_date
         LEFT JOIN communication_patterns cp ON r.id = cp.relationship_id
-        WHERE r.total_interactions >= ?
-          AND julianday('now') - julianday(r.last_contact_date) >= ?
-          AND r.health_score > 20
-        ORDER BY r.health_score DESC, days_since_last_contact DESC
+        WHERE r.total_emails_sent >= ?
+          AND r.days_since_last_contact >= ?
+          AND r.health_score > 15
+        ORDER BY 
+          CASE 
+            WHEN r.avg_emails_per_month >= 2 THEN 1
+            WHEN r.avg_emails_per_month >= 1 THEN 2
+            ELSE 3
+          END,
+          r.days_since_last_contact DESC
         LIMIT 20
       `;
 
-      this.db.all(query, [minInteractions, daysThreshold], (err, rows) => {
+      this.db.all(query, [minEmailsSent, daysThreshold], (err, rows) => {
         if (err) {
           console.error('❌ Error getting dormant relationships:', err);
           reject(err);
@@ -499,13 +526,13 @@ Summary:`;
           if (row) {
             resolve(row);
           } else {
-            // Create new relationship
-            const displayName = this.extractDisplayName(emailData.from);
+            // Create new relationship for sent email recipient
+            const displayName = this.extractDisplayName(emailData.to || email);
             this.db.run(
               `INSERT INTO relationships 
-               (email_address, display_name, first_contact_date, last_contact_date) 
-               VALUES (?, ?, ?, ?)`,
-              [email, displayName, emailData.date.toISOString(), emailData.date.toISOString()],
+               (email_address, display_name, first_sent_date, last_sent_date, total_emails_sent) 
+               VALUES (?, ?, ?, ?, ?)`,
+              [email, displayName, emailData.date.toISOString(), emailData.date.toISOString(), 1],
               function(err) {
                 if (err) {
                   reject(err);
@@ -526,17 +553,17 @@ Summary:`;
     return match ? match[1].trim().replace(/"/g, '') : null;
   }
 
-  async storeEmailInteraction(data) {
+  async storeSentEmail(data) {
     return new Promise((resolve, reject) => {
       this.db.run(
-        `INSERT OR IGNORE INTO email_interactions 
+        `INSERT OR IGNORE INTO sent_emails 
          (relationship_id, gmail_message_id, thread_id, subject, date_sent, 
-          is_from_user, storage_tier, full_content, content_summary, word_count) 
+          storage_tier, full_content, content_summary, word_count, to_recipients) 
          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         [
           data.relationshipId, data.gmailMessageId, data.threadId, data.subject,
-          data.dateSent, data.isFromUser, data.storageTier, data.fullContent,
-          data.contentSummary, data.wordCount
+          data.dateSent, data.storageTier, data.fullContent,
+          data.contentSummary, data.wordCount, data.toRecipients
         ],
         function(err) {
           if (err) {
@@ -549,25 +576,23 @@ Summary:`;
     });
   }
 
-  async updateRelationshipStats(relationshipId, emailDate, isFromUser) {
+  async updateRelationshipStats(relationshipId, emailDate) {
     return new Promise((resolve, reject) => {
       const updateQuery = `
         UPDATE relationships 
         SET 
-          last_contact_date = CASE 
-            WHEN ? > last_contact_date THEN ? 
-            ELSE last_contact_date 
+          last_sent_date = CASE 
+            WHEN ? > last_sent_date THEN ? 
+            ELSE last_sent_date 
           END,
-          total_interactions = total_interactions + 1,
-          sent_by_user = sent_by_user + CASE WHEN ? THEN 1 ELSE 0 END,
-          received_by_user = received_by_user + CASE WHEN ? THEN 0 ELSE 1 END,
+          total_emails_sent = total_emails_sent + 1,
           updated_at = CURRENT_TIMESTAMP
         WHERE id = ?
       `;
 
       this.db.run(
         updateQuery,
-        [emailDate.toISOString(), emailDate.toISOString(), isFromUser, isFromUser, relationshipId],
+        [emailDate.toISOString(), emailDate.toISOString(), relationshipId],
         (err) => {
           if (err) {
             reject(err);
@@ -677,6 +702,147 @@ Summary:`;
   /**
    * Get service status
    */
+  /**
+   * Get conversation history with a specific contact for AI analysis
+   * Optimized for speed - only fetches recent emails
+   */
+  async getConversationHistory(emailAddress, limit = 5) {
+    try {
+      // Search for emails TO or FROM this contact (recent only for speed)
+      const query = `from:${emailAddress} OR to:${emailAddress}`;
+      
+      const emails = await emailService.getEmails({
+        maxResults: limit, // Reduced from 10 to 5 for speed
+        query: query
+      });
+
+      // Sort by date (newest first)
+      return emails.sort((a, b) => new Date(b.date) - new Date(a.date));
+    } catch (error) {
+      console.error('❌ Error fetching conversation history:', error);
+      return [];
+    }
+  }
+
+  /**
+   * Generate AI-powered reconnection email suggestion
+   */
+  async generateReconnectionEmail(emailAddress) {
+    try {
+      // Get fuller conversation history for better context
+      const conversationHistory = await this.getConversationHistory(emailAddress, 8);
+      
+      // Get relationship context from database
+      const relationship = await this.getRelationshipByEmail(emailAddress);
+      
+      if (!relationship) {
+        throw new Error('Relationship not found in database');
+      }
+      
+      const userEmail = await this.getUserEmail();
+      const daysSinceLastContact = Math.round(relationship.days_since_last_contact || 0);
+      
+      // Build detailed conversation analysis
+      const conversationAnalysis = conversationHistory.map((email, i) => {
+        const isFromUser = email.from === userEmail;
+        const direction = isFromUser ? 'You wrote' : 'They wrote';
+        const snippet = email.body ? email.body.substring(0, 150).replace(/\n/g, ' ') : 'No content';
+        return `${direction}: "${email.subject}" (${new Date(email.date).toLocaleDateString()}) - ${snippet}...`;
+      }).join('\n');
+
+      const lastEmail = conversationHistory[0];
+      const relationshipContext = conversationHistory.length > 0 
+        ? `You had ${conversationHistory.length} email exchanges. Here's the conversation flow:\n${conversationAnalysis}`
+        : 'No recent email history found.';
+
+      const prompt = `You're helping me reconnect with ${relationship.display_name || emailAddress} after ${daysSinceLastContact} days of no contact.
+
+RELATIONSHIP CONTEXT:
+- Contact: ${relationship.display_name || emailAddress} (${emailAddress})
+- Historical emails sent: ${relationship.total_emails_sent || 0}
+- Days since last contact: ${daysSinceLastContact}
+
+CONVERSATION HISTORY:
+${relationshipContext}
+
+TASK: Write a personalized reconnection email that:
+1. References specific details from our past conversations (be specific!)
+2. Feels natural and authentic, not generic
+3. Acknowledges the time gap without being awkward
+4. Has a genuine reason for reaching out (based on past context)
+5. Suggests a concrete next step
+
+Make it feel like I actually know this person and am referencing our real relationship. Use details from the conversation history to make it personal.
+
+FORMAT:
+Subject: [write a specific, engaging subject line]
+
+[Write the email body - 2-3 short paragraphs, conversational tone]`;
+
+      const response = await this.openai.chat.completions.create({
+        model: 'gpt-4o-mini', // Much better quality than 3.5-turbo, still fast
+        messages: [{ role: 'user', content: prompt }],
+        max_tokens: 400, // Increased for better quality
+        temperature: 0.8, // Slightly more creative
+      });
+
+      const aiResponse = response.choices[0].message.content.trim();
+      
+      // Parse subject and body from AI response
+      const lines = aiResponse.split('\n');
+      const subjectIndex = lines.findIndex(line => line.toLowerCase().includes('subject'));
+      const bodyIndex = lines.findIndex(line => line.toLowerCase().includes('email body') || line.toLowerCase().includes('body'));
+      
+      let subject = 'Catching up';
+      let body = aiResponse;
+      
+      if (subjectIndex >= 0 && bodyIndex > subjectIndex) {
+        subject = lines[subjectIndex + 1]?.trim() || subject;
+        body = lines.slice(bodyIndex + 1).join('\n').trim() || body;
+      }
+
+      return {
+        emailAddress,
+        contactName: relationship.display_name || emailAddress,
+        subject: subject,
+        body: body,
+        context: {
+          daysSinceLastContact,
+          totalEmailsSent: relationship.total_emails_sent || 0,
+          lastSubject: lastEmail?.subject || 'No recent emails',
+          conversationSample: conversationHistory.slice(0, 2).map(e => ({
+            from: e.from === userEmail ? 'You' : e.from,
+            subject: e.subject,
+            date: new Date(e.date).toLocaleDateString()
+          }))
+        }
+      };
+
+    } catch (error) {
+      console.error('❌ Error generating reconnection email:', error);
+      throw error;
+    }
+  }
+
+  /**
+   * Get relationship record by email address
+   */
+  async getRelationshipByEmail(emailAddress) {
+    return new Promise((resolve, reject) => {
+      this.db.get(
+        'SELECT * FROM relationships WHERE email_address = ?',
+        [emailAddress],
+        (err, row) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve(row);
+          }
+        }
+      );
+    });
+  }
+
   getStatus() {
     return {
       isProcessing: this.isProcessing,

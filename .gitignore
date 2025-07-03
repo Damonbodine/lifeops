@@ -121,3 +121,10 @@ Temporary Items
 # Electron
 app/dist/
 release/
+
+# Health Records (Personal Data)
+lifeops-simple/apple_health_export/
+**/apple_health_export/
+*.healthdata
+health_data/
+personal_health/

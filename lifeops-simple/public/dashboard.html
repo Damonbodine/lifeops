@@ -221,6 +221,22 @@
             cursor: pointer;
         }
 
+        .duration-select {
+            padding: 10px;
+            border: 2px solid #ecf0f1;
+            border-radius: 6px;
+            background: white;
+            color: #2c3e50;
+            font-size: 14px;
+            min-width: 90px;
+            cursor: pointer;
+        }
+
+        .duration-select:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
         .task-list {
             list-style: none;
         }
@@ -942,6 +958,10 @@
             <span>📧</span>
             <span>Email Analysis</span>
         </div>
+        <div class="nav-item" onclick="window.location.href='/health.html'">
+            <span>🏃‍♂️</span>
+            <span>Health Analytics</span>
+        </div>
         <div class="nav-item" onclick="showSection('email-relationships')">
             <span>🧠</span>
             <span>Relationship Intelligence</span>
@@ -1080,6 +1100,14 @@
                         <h4>🔥 1 Big Task</h4>
                         <div class="task-input">
                             <input type="text" id="bigTaskInput" placeholder="Your most important task today">
+                            <select id="bigTaskDuration" class="duration-select">
+                                <option value="30">30 min</option>
+                                <option value="60" selected>1 hour</option>
+                                <option value="90">1.5 hours</option>
+                                <option value="120">2 hours</option>
+                                <option value="180">3 hours</option>
+                                <option value="240">4 hours</option>
+                            </select>
                             <button onclick="addTask('big')">Add</button>
                         </div>
                         <ul class="task-list" id="bigTasks"></ul>
@@ -1089,6 +1117,13 @@
                         <h4>⚡ 3 Medium Tasks</h4>
                         <div class="task-input">
                             <input type="text" id="mediumTaskInput" placeholder="Important but manageable task">
+                            <select id="mediumTaskDuration" class="duration-select">
+                                <option value="15">15 min</option>
+                                <option value="30" selected>30 min</option>
+                                <option value="45">45 min</option>
+                                <option value="60">1 hour</option>
+                                <option value="90">1.5 hours</option>
+                            </select>
                             <button onclick="addTask('medium')">Add</button>
                         </div>
                         <ul class="task-list" id="mediumTasks"></ul>
@@ -1098,6 +1133,12 @@
                         <h4>✅ 5 Small Tasks</h4>
                         <div class="task-input">
                             <input type="text" id="smallTaskInput" placeholder="Quick win or small task">
+                            <select id="smallTaskDuration" class="duration-select">
+                                <option value="5">5 min</option>
+                                <option value="10">10 min</option>
+                                <option value="15" selected>15 min</option>
+                                <option value="30">30 min</option>
+                            </select>
                             <button onclick="addTask('small')">Add</button>
                         </div>
                         <ul class="task-list" id="smallTasks"></ul>
@@ -1168,34 +1209,38 @@
             
             <div class="feature-card" style="margin-bottom: 20px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3>📊 Analysis Status</h3>
+                    <h3>📤 Sent Email Analysis</h3>
                     <button class="btn btn-primary" onclick="startRelationshipAnalysis()" id="analysisBtn">
-                        🚀 Start 5-Year Analysis
+                        🚀 Analyze Sent Emails (5 Years)
                     </button>
                 </div>
                 
-                <div id="relationship-status" style="padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; color: white; margin: 15px 0;">
-                    <div id="status-content">Loading relationship analysis status...</div>
+                <div style="background: rgba(255,255,255,0.05); padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem; color: #2c3e50;">
+                    <strong>🎯 Focus:</strong> Analyzes only emails you've sent to identify people you used to communicate with regularly but haven't contacted recently.
+                </div>
+                
+                <div id="relationship-status" style="padding: 15px; background: rgba(255,255,255,0.1); border-radius: 8px; color: #2c3e50; margin: 15px 0;">
+                    <div id="status-content">Loading sent email analysis status...</div>
                 </div>
             </div>
 
             <div class="feature-grid">
                 <div class="feature-card">
-                    <h3>💤 Dormant Relationships</h3>
+                    <h3>💤 People to Reconnect With</h3>
                     <div id="dormant-relationships" style="min-height: 200px;">
                         <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                            <div style="font-size: 2rem; margin-bottom: 10px;">🔍</div>
-                            <p>Run analysis to discover relationships that need attention</p>
+                            <div style="font-size: 2rem; margin-bottom: 10px;">👥</div>
+                            <p>Discover people you used to email regularly<br>but haven't contacted lately</p>
                         </div>
                     </div>
                 </div>
 
                 <div class="feature-card">
-                    <h3>📈 Relationship Insights</h3>
+                    <h3>📊 Communication Insights</h3>
                     <div id="relationship-insights" style="min-height: 200px;">
                         <div style="text-align: center; padding: 40px; color: #7f8c8d;">
-                            <div style="font-size: 2rem; margin-bottom: 10px;">📊</div>
-                            <p>Analysis will provide insights into your communication patterns</p>
+                            <div style="font-size: 2rem; margin-bottom: 10px;">📈</div>
+                            <p>Insights into your outbound communication patterns and relationship strength</p>
                         </div>
                     </div>
                 </div>
@@ -1704,7 +1749,9 @@
         // Task Management Functions
         function addTask(type) {
             const input = document.getElementById(`${type}TaskInput`);
+            const durationSelect = document.getElementById(`${type}TaskDuration`);
             const text = input.value.trim();
+            const duration = parseInt(durationSelect.value);
             
             if (!text) return;
 
@@ -1718,7 +1765,9 @@
             const task = {
                 id: Date.now(),
                 text: text,
-                completed: false
+                duration: duration,
+                completed: false,
+                createdAt: new Date().toISOString()
             };
 
             tasks[type].push(task);
@@ -1751,10 +1800,23 @@
                 tasks[type].forEach(task => {
                     const li = document.createElement('li');
                     li.className = `task-item ${type}`;
+                    
+                    // Format duration display
+                    const duration = task.duration || 0;
+                    let durationText = '';
+                    if (duration >= 60) {
+                        const hours = Math.floor(duration / 60);
+                        const mins = duration % 60;
+                        durationText = mins > 0 ? `${hours}h ${mins}m` : `${hours}h`;
+                    } else {
+                        durationText = `${duration}m`;
+                    }
+                    
                     li.innerHTML = `
                         <input type="checkbox" ${task.completed ? 'checked' : ''} 
                                onchange="toggleTask('${type}', ${task.id})" style="margin-right: 10px;">
                         <span class="task-text" style="${task.completed ? 'text-decoration: line-through; opacity: 0.6;' : ''}">${task.text}</span>
+                        <span class="task-duration" style="color: #7f8c8d; font-size: 0.85em; margin-left: 10px;">${durationText}</span>
                         <button class="task-delete" onclick="deleteTask('${type}', ${task.id})">×</button>
                     `;
                     container.appendChild(li);
@@ -2841,12 +2903,17 @@
                                 <div>
                                     <strong>Analysis in Progress</strong><br>
                                     📧 Processed: ${proc.emails_processed || 0} emails<br>
-                                    ⏱️ Started: ${new Date(proc.start_date).toLocaleString()}
+                                    ⏱️ Started: ${new Date(proc.start_date).toLocaleString()}<br>
+                                    <span style="color: #27ae60; font-size: 0.9rem;">💡 Showing partial results below while processing continues</span>
                                 </div>
                             </div>
                         `;
                         analysisBtn.disabled = true;
                         analysisBtn.textContent = '⏳ Processing...';
+                        
+                        // Load partial results immediately, even while processing
+                        loadDormantRelationships();
+                        loadRelationshipInsights();
                     } else if (proc.status === 'completed') {
                         statusContent.innerHTML = `
                             <div>
@@ -2855,10 +2922,10 @@
                                 🏁 Completed: ${new Date(proc.end_date).toLocaleString()}
                             </div>
                         `;
-                        analysisBtn.textContent = '🔄 Re-analyze';
+                        analysisBtn.textContent = '🔄 Re-analyze Sent Emails';
                         analysisBtn.disabled = false;
                         
-                        // Load dormant relationships
+                        // Load final results
                         loadDormantRelationships();
                         loadRelationshipInsights();
                     }
@@ -2866,7 +2933,7 @@
                     statusContent.innerHTML = `
                         <div>
                             <strong>🚀 Ready to Start</strong><br>
-                            Click "Start 5-Year Analysis" to begin processing your email history and discover relationship insights.
+                            Click "Analyze Sent Emails" to process your outbound email history and discover people to reconnect with.
                         </div>
                     `;
                     analysisBtn.disabled = false;
@@ -2892,7 +2959,7 @@
                 statusContent.innerHTML = `
                     <div style="display: flex; align-items: center; gap: 10px;">
                         <div style="width: 20px; height: 20px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
-                        <div>Starting analysis of your email history...</div>
+                        <div>Starting analysis of your sent emails...</div>
                     </div>
                 `;
                 
@@ -2910,7 +2977,7 @@
                     statusContent.innerHTML = `
                         <div>
                             <strong>✅ Analysis Started!</strong><br>
-                            Processing ${result.yearsBack} years of email history. This may take several minutes.
+                            Processing ${result.yearsBack} years of sent emails. This should be much faster!
                         </div>
                     `;
                     
@@ -2929,22 +2996,73 @@
                     </div>
                 `;
                 btn.disabled = false;
-                btn.textContent = '🚀 Start 5-Year Analysis';
+                btn.textContent = '🚀 Analyze Sent Emails (5 Years)';
             }
+        }
+
+        function pollRelationshipStatus() {
+            const pollInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/email-relationships/status');
+                    const status = await response.json();
+                    
+                    if (status.processing && status.processing.status === 'completed') {
+                        clearInterval(pollInterval);
+                        loadRelationshipStatus();
+                    } else if (status.processing && status.processing.status === 'running') {
+                        const statusContent = document.getElementById('status-content');
+                        const proc = status.processing;
+                        statusContent.innerHTML = `
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <div style="width: 20px; height: 20px; border: 2px solid #fff; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                                <div>
+                                    <strong>Analysis in Progress</strong><br>
+                                    📧 Processed: ${proc.emails_processed || 0} emails<br>
+                                    ⏱️ Running for: ${Math.round((new Date() - new Date(proc.start_date)) / 60000)} minutes<br>
+                                    <span style="color: #27ae60; font-size: 0.9rem;">💡 Results updating in real-time below</span>
+                                </div>
+                            </div>
+                        `;
+                        
+                        // Update results every few polling cycles (every 15 seconds)
+                        if (Math.random() < 0.3) { // 30% chance each poll = ~every 15 seconds
+                            loadDormantRelationships();
+                            loadRelationshipInsights();
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error polling status:', error);
+                    clearInterval(pollInterval);
+                }
+            }, 5000); // Poll every 5 seconds
         }
 
         async function loadDormantRelationships() {
             try {
-                const response = await fetch('/api/email-relationships/dormant?days=30&minInteractions=5');
-                const relationships = await response.json();
+                const response = await fetch('/api/email-relationships/dormant?days=30&minEmailsSent=3');
+                const data = await response.json();
                 
                 const container = document.getElementById('dormant-relationships');
+                
+                // Check if we got an error response
+                if (data.error) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #ff6b6b;">
+                            ❌ ${data.error}<br>
+                            <small>${data.message || ''}</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // Handle the API response format {success: true, suggestions: [...]}
+                const relationships = data.suggestions || data || [];
                 
                 if (relationships.length === 0) {
                     container.innerHTML = `
                         <div style="text-align: center; padding: 40px; color: #7f8c8d;">
                             <div style="font-size: 2rem; margin-bottom: 10px;">✅</div>
-                            <p>Great! No dormant relationships found.<br>You're staying connected well.</p>
+                            <p>Great! You're staying in touch well.<br>No neglected connections found.</p>
                         </div>
                     `;
                     return;
@@ -2954,16 +3072,18 @@
                     <div style="background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #e74c3c;">
                         <div style="display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <strong>${rel.display_name || rel.email_address}</strong><br>
-                                <small style="color: #7f8c8d;">${rel.email_address}</small>
+                                <strong>${rel.name || rel.email}</strong><br>
+                                <small style="color: #7f8c8d;">${rel.email}</small>
+                                ${rel.lastSubject ? `<br><small style="color: #95a5a6; font-style: italic;">"${rel.lastSubject}"</small>` : ''}
                             </div>
                             <div style="text-align: right; font-size: 0.9rem; color: #7f8c8d;">
-                                ${Math.round(rel.days_since_last_contact)} days ago<br>
-                                ${rel.total_interactions} interactions
+                                ${rel.daysSinceLastContact} days ago<br>
+                                Health: ${rel.healthScore}/100<br>
+                                <span style="color: #3498db; font-weight: bold;">${rel.suggestion_reason}</span>
                             </div>
                         </div>
                         <div style="margin-top: 10px;">
-                            <button onclick="suggestMessage('${rel.email_address}')" style="background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
+                            <button onclick="suggestMessage('${rel.email}')" style="background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 0.85rem;">
                                 💡 Suggest Message
                             </button>
                         </div>
@@ -2983,18 +3103,38 @@
         async function loadRelationshipInsights() {
             try {
                 const response = await fetch('/api/email-relationships/insights');
-                const insights = await response.json();
+                const data = await response.json();
                 
                 const container = document.getElementById('relationship-insights');
+                
+                // Check if we got an error response
+                if (data.error) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: #ff6b6b;">
+                            ❌ ${data.error}<br>
+                            <small>${data.message || ''}</small>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                const insights = data.insights || {};
                 
                 container.innerHTML = `
                     <div style="padding: 20px;">
                         <div style="margin-bottom: 20px;">
                             <h4 style="margin: 0 0 10px 0; color: #2c3e50;">📊 Communication Overview</h4>
                             <div style="font-size: 0.9rem; line-height: 1.5;">
-                                • <strong>${insights.totalRelationships || 0}</strong> relationships tracked<br>
-                                • <strong>${insights.totalEmails || 0}</strong> emails analyzed<br>
-                                • <strong>${insights.avgHealthScore || 0}</strong> average relationship health
+                                • <strong>${insights.overview?.totalRelationships || 0}</strong> relationships tracked<br>
+                                • <strong>${insights.dormantRelationships?.count || 0}</strong> need attention<br>
+                                • Database: <strong>${insights.overview?.databaseSize || 'Unknown'}</strong>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-bottom: 20px;">
+                            <h4 style="margin: 0 0 10px 0; color: #2c3e50;">💡 AI Recommendations</h4>
+                            <div style="font-size: 0.85rem; line-height: 1.4;">
+                                ${insights.recommendations?.map(rec => `• ${rec}`).join('<br>') || 'No recommendations available'}
                             </div>
                         </div>
                         
@@ -3002,7 +3142,7 @@
                             <h4 style="margin: 0 0 10px 0; color: #2c3e50;">🎯 Quick Actions</h4>
                             <div style="display: flex; gap: 10px; flex-wrap: wrap;">
                                 <button onclick="loadDormantRelationships()" style="background: #e74c3c; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
-                                    🔍 Find Dormant
+                                    🔍 View ${insights.dormantRelationships?.count || 0} Dormant
                                 </button>
                                 <button onclick="loadRelationshipStatus()" style="background: #27ae60; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 0.8rem;">
                                     🔄 Refresh
@@ -3024,6 +3164,43 @@
 
         async function suggestMessage(emailAddress) {
             try {
+                // Find the relationship card for this email
+                const relationshipCards = document.querySelectorAll('[id^="relationship-card-"]');
+                let targetCard = null;
+                
+                relationshipCards.forEach(card => {
+                    if (card.innerHTML.includes(emailAddress)) {
+                        targetCard = card;
+                    }
+                });
+                
+                if (!targetCard) {
+                    // Fallback: find by email in any element
+                    const allCards = document.querySelectorAll('.dormant-relationships > div');
+                    allCards.forEach(card => {
+                        if (card.innerHTML.includes(emailAddress)) {
+                            targetCard = card;
+                        }
+                    });
+                }
+                
+                // Show loading state inline
+                const suggestBtn = event.target;
+                const originalText = suggestBtn.textContent;
+                suggestBtn.disabled = true;
+                suggestBtn.innerHTML = '⏳ Generating...';
+                
+                // Add loading container after the button
+                const loadingDiv = document.createElement('div');
+                loadingDiv.style.cssText = 'margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 8px; border-left: 4px solid #3498db;';
+                loadingDiv.innerHTML = `
+                    <div style="display: flex; align-items: center; gap: 10px; color: #2c3e50;">
+                        <div style="width: 16px; height: 16px; border: 2px solid #3498db; border-top: 2px solid transparent; border-radius: 50%; animation: spin 1s linear infinite;"></div>
+                        <span>🤖 Analyzing conversation history and generating personalized message...</span>
+                    </div>
+                `;
+                suggestBtn.parentNode.appendChild(loadingDiv);
+                
                 const response = await fetch('/api/email-relationships/suggest-message', {
                     method: 'POST',
                     headers: {
@@ -3034,15 +3211,96 @@
                 
                 const result = await response.json();
                 
-                if (result.suggestion) {
-                    alert(`Suggested message for ${emailAddress}:\n\n"${result.suggestion}"\n\nWould you like to compose this email?`);
+                // Remove loading div
+                loadingDiv.remove();
+                
+                if (result.success && result.suggestion) {
+                    const suggestion = result.suggestion;
+                    
+                    // Create inline suggestion display
+                    const suggestionDiv = document.createElement('div');
+                    suggestionDiv.style.cssText = 'margin-top: 15px; padding: 20px; background: #e8f5e8; border-radius: 8px; border-left: 4px solid #27ae60;';
+                    suggestionDiv.innerHTML = `
+                        <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 15px;">
+                            <h4 style="margin: 0; color: #27ae60;">🤖 AI-Generated Reconnection Email</h4>
+                            <button onclick="this.parentNode.parentNode.remove()" style="background: none; border: none; font-size: 18px; cursor: pointer; color: #7f8c8d;">×</button>
+                        </div>
+                        
+                        <div style="margin-bottom: 15px;">
+                            <strong>Subject:</strong> ${suggestion.subject}<br>
+                            <small style="color: #7f8c8d;">Context: ${suggestion.context.daysSinceLastContact} days since last contact • ${suggestion.context.totalEmailsSent} emails sent historically</small>
+                        </div>
+                        
+                        <div style="background: white; padding: 15px; border-radius: 6px; white-space: pre-line; line-height: 1.5; margin-bottom: 15px;">
+${suggestion.body}
+                        </div>
+                        
+                        <div style="display: flex; gap: 10px;">
+                            <button onclick="copyToClipboard(\`${suggestion.subject}\`, \`${suggestion.body.replace(/`/g, '\\`')}\`)" style="background: #3498db; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                                📋 Copy Email
+                            </button>
+                            <button onclick="openEmailClient('${emailAddress}', \`${suggestion.subject}\`, \`${suggestion.body.replace(/`/g, '\\`')}\`)" style="background: #27ae60; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer; font-size: 0.9rem;">
+                                📧 Open in Email Client
+                            </button>
+                        </div>
+                    `;
+                    
+                    suggestBtn.parentNode.appendChild(suggestionDiv);
+                    
+                    // Reset button
+                    suggestBtn.disabled = false;
+                    suggestBtn.innerHTML = '✅ Generated';
+                    suggestBtn.style.background = '#27ae60';
+                    
+                    // Scroll suggestion into view
+                    suggestionDiv.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    
                 } else {
-                    alert('Unable to generate message suggestion at this time.');
+                    // Reset button and show error
+                    suggestBtn.disabled = false;
+                    suggestBtn.textContent = originalText;
+                    
+                    const errorDiv = document.createElement('div');
+                    errorDiv.style.cssText = 'margin-top: 15px; padding: 15px; background: #ffe6e6; border-radius: 8px; border-left: 4px solid #e74c3c; color: #c0392b;';
+                    errorDiv.innerHTML = `❌ ${result.error || 'Unable to generate message suggestion'}`;
+                    suggestBtn.parentNode.appendChild(errorDiv);
+                    
+                    // Auto-remove error after 5 seconds
+                    setTimeout(() => errorDiv.remove(), 5000);
                 }
+                
             } catch (error) {
                 console.error('Error getting message suggestion:', error);
-                alert('Error generating message suggestion. Please try again.');
+                
+                // Reset button and show error
+                const suggestBtn = event.target;
+                suggestBtn.disabled = false;
+                suggestBtn.textContent = '💡 Suggest Message';
+                
+                const errorDiv = document.createElement('div');
+                errorDiv.style.cssText = 'margin-top: 15px; padding: 15px; background: #ffe6e6; border-radius: 8px; border-left: 4px solid #e74c3c; color: #c0392b;';
+                errorDiv.innerHTML = `❌ Error generating suggestion. Please try again.`;
+                suggestBtn.parentNode.appendChild(errorDiv);
+                
+                // Auto-remove error after 5 seconds
+                setTimeout(() => errorDiv.remove(), 5000);
             }
+        }
+
+        function copyToClipboard(subject, body) {
+            const emailText = `Subject: ${subject}\n\n${body}`;
+            navigator.clipboard.writeText(emailText).then(() => {
+                // Show success feedback
+                event.target.innerHTML = '✅ Copied!';
+                setTimeout(() => {
+                    event.target.innerHTML = '📋 Copy Email';
+                }, 2000);
+            });
+        }
+
+        function openEmailClient(email, subject, body) {
+            const mailtoLink = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+            window.open(mailtoLink);
         }
 
         // Initialize

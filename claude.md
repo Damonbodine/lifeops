@@ -18,9 +18,9 @@ It combines app usage tracking, AI scheduling, voice input, mood analysis, and p
 
 * Tracks:
 
-  * App usage (via `active-win`)
+  * 
   * Browser activity (via AppleScript)
-  * Gmail, Slack, and Google Calendar
+  * Gmail, Health, and Google Calendar
   * iMessages (from local `chat.db`)
   * Aqua voice input
 * Classifies behavior: Deep Work, Admin, Distraction, Social, Errands
