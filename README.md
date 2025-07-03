@@ -6,9 +6,9 @@
 
 ## 🌟 Overview
 
-LifeOps is your all-in-one command center — a self-optimizing daily assistant that listens to how you feel, watches how you spend your time, learns what matters to you, and helps you balance deep work, meaningful relationships, health, and self-care.
+LifeOps is your all-in-one command center — a self-optimizing daily assistant that listens to how you feel, learns what matters to you, and helps you balance deep work, meaningful relationships, health, and self-care.
 
-It combines app usage tracking, AI scheduling, voice input, mood analysis, and proactive life suggestions — built for people who want to live with focus, integrity, and intention.
+It combines app usage tracking, AI scheduling, mood analysis, and proactive life suggestions — built for people who want to live with focus, integrity, and intention.
 
 ---
 
@@ -21,7 +21,7 @@ It combines app usage tracking, AI scheduling, voice input, mood analysis, and p
 - **Real-time Adaptability**: Adjusts plans based on current context and performance
 
 ### 📊 Health & Wellness Integration
-- **Apple Health Analytics**: Comprehensive analysis of 2+ years of health data
+- **Apple Health Analytics**: Comprehensive analysis of health data
 - **Activity Tracking**: Exercise patterns, heart rate variability, and sleep analysis
 - **Trend Analysis**: AI-powered insights into health patterns and correlations
 - **Actionable Recommendations**: Specific, measurable health improvement suggestions
